@@ -1777,6 +1777,29 @@ export function getSituationComment(game) {
 
     const label = actionLabels[bestKey];
     rec.bestAction = `${label}${sizingText} (GTO ${bestPct}%)`;
+
+    // Override reasoning when GTO action disagrees with recommendation to avoid contradictions
+    // e.g. GTO says Fold but old reasoning says "Call ist korrekt"
+    const recActionType = rec.reasoning?.includes('Call') && !rec.reasoning?.includes('nicht call')
+      ? 'call' : rec.reasoning?.includes('Fold') ? 'fold' : rec.reasoning?.includes('Raise') ? 'raise' : 'check';
+    if (bestKey !== recActionType && equity !== null) {
+      const eqStr = `${equity.toFixed(0)}%`;
+      const potOddsData = getPotOdds(game);
+      const potOddsPct = potOddsData ? parseFloat(potOddsData.potOdds) : 0;
+      if (bestKey === 'fold') {
+        rec.reasoning = toCall > 0
+          ? `${eqStr} vs Random, aber gegen Gegner-Range deutlich weniger. Fold spart Chips fuer bessere Spots.`
+          : `Schwache Hand — Check wuerde auch gehen, aber GTO bevorzugt Fold.`;
+      } else if (bestKey === 'call') {
+        rec.reasoning = `${eqStr} Equity > ${potOddsPct.toFixed(0)}% Pot Odds — mathematisch profitabler Call.`;
+      } else if (bestKey === 'raise') {
+        rec.reasoning = toCall > 0
+          ? `Starke Hand/Position. Raise baut den Pot und setzt Gegner unter Druck.`
+          : `${eqStr} Equity — Bet fuer Value oder als Bluff mit Fold-Equity.`;
+      } else if (bestKey === 'check') {
+        rec.reasoning = `Pot-Kontrolle mit ${eqStr} Equity. Keine Notwendigkeit den Pot aufzublaehen.`;
+      }
+    }
   }
 
   // Board, blocker, SPR, GTO analysis for context

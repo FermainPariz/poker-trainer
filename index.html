@@ -402,6 +402,19 @@
     var fromH = Math.max(0, availH) * ratio;
     var w = Math.max(80, Math.min(availW, fromH));
     table.style.width = w + 'px';
+
+    // Cap coach bubble height so it never overlaps the action bar
+    if (coach) {
+      var actionEl = (action && action.style.display !== 'none') ? action : cont;
+      if (actionEl && actionEl.style.display !== 'none') {
+        var barTop = actionEl.getBoundingClientRect().top;
+        var coachTop = coach.getBoundingClientRect().top;
+        var maxH = Math.max(60, barTop - coachTop - 8);
+        coach.style.maxHeight = maxH + 'px';
+      } else {
+        coach.style.maxHeight = '';
+      }
+    }
   }
 
   function requestFit() {

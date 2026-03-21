@@ -27,7 +27,7 @@
 /* Wide viewport: 2-column grid with sidebar for HUD/Coach */
 .is-wide .table-container {
   grid-template-columns: 1fr clamp(140px, 20vw, 300px);
-  grid-template-rows: 1fr auto auto;
+  grid-template-rows: minmax(0, 1fr) minmax(80px, auto) auto;
   align-content: stretch;
   padding: 1vh clamp(12px, 2vw, 36px) 0 clamp(16px, 3vw, 50px);
   gap: 0 clamp(10px, 2vw, 40px);

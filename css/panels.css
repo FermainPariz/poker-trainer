@@ -616,7 +616,6 @@
   pointer-events: none;
   transition: opacity 0.3s ease;
   min-height: 28px;
-  max-height: 35vh;
   overflow-y: auto;
 }
 
@@ -643,13 +642,12 @@
   color: var(--text2);
 }
 
-/* Wide viewport: coach bubble in sidebar */
+/* Wide viewport: coach bubble in sidebar — JS fitLayout() caps max-height dynamically */
 .is-wide .coach-bubble {
   grid-column: 2;
   grid-row: 2;
   align-self: start;
   max-width: none;
-  max-height: 45vh;
   margin: clamp(8px, 1vw, 14px) 0 0;
   padding: clamp(6px, 0.8vw, 12px) clamp(10px, 1.2vw, 18px);
 }
