@@ -12,8 +12,8 @@ import { renderLeakFinder } from './leakfinder.js';
 import { initBankroll, startSession, updateSession, endSession, getCurrentSession, checkSessionLimits, renderBankrollPanel } from './bankroll.js';
 import { loadRanges, renderRangeVisualizer } from './ranges.js';
 import { initQuiz, renderQuizPanel } from './quiz.js';
-import { initProfiler, processHandForProfiles, getOpponentBadgeHTML, getOpponentAdvice } from './profiler.js';
-import { scoreDecision, formatScoreResult, getSessionScoring, recordHandPlayed, resetScoring } from './scoring.js';
+import { initProfiler, processHandForProfiles, getOpponentBadgeHTML, getOpponentAdvice, getExploitTip } from './profiler.js';
+import { scoreDecision, formatScoreResult, getSessionScoring, recordHandPlayed, resetScoring, markTurnStart, getFatigueWarning } from './scoring.js';
 import { initMatrix, renderMatrix, toggleMatrix, isMatrixVisible } from './matrix.js';
 import * as UI from './ui.js';
 
@@ -247,6 +247,7 @@ async function gameLoop() {
       // Human player's turn
       isPlayerTurn = true;
       actionLock = false;
+      markTurnStart(); // Track decision timing for fatigue analysis
       UI.showActionBar(true);
       UI.updateActionButtons(game);
       UI.renderAllSeats(game);
@@ -264,6 +265,9 @@ async function gameLoop() {
       }
       const sitComment = getSituationComment(game);
       if (sitComment) showCoachComment(sitComment);
+
+      // Exploit recommendations for opponents still in the hand
+      showExploitTips(game);
 
       // Re-run coach once equity calculation completes (async from web worker)
       onEquityUpdate(() => {
@@ -601,6 +605,9 @@ async function handleHandEnd(result) {
   const limitCheck = checkSessionLimits();
   if (limitCheck) showCoachComment({ type: 'warning', text: limitCheck.message });
 
+  // Decision fatigue check
+  checkFatigue();
+
   await delay(800);
   UI.showContinueBar(true, resultText, resultClass);
   document.getElementById('btnDeal').textContent = 'Naechste Hand';
@@ -912,6 +919,40 @@ function showCoachComment(comment) {
   bubble.style.animation = 'none';
   bubble.offsetHeight; // reflow
   bubble.style.animation = '';
+}
+
+// === Exploit Recommendations ===
+function showExploitTips(game) {
+  const activePlayers = game.players
+    .map((p, i) => ({ seat: i, folded: p.folded }))
+    .filter(p => p.seat !== game.humanSeat && !p.folded)
+    .map(p => p.seat);
+
+  const tips = getExploitTip(activePlayers, game.phase, game.pot + game.getCurrentBetsTotal());
+  if (!tips || tips.length === 0) return;
+
+  // Show top exploit tip in coach bubble (append to existing)
+  const text = document.getElementById('coachText');
+  if (text && tips[0]) {
+    const existing = text.textContent;
+    const exploitLine = `${tips[0].icon} EXPLOIT vs ${tips[0].name}: ${tips[0].tip}`;
+    if (!existing.includes('EXPLOIT')) {
+      text.textContent = existing + ' | ' + exploitLine;
+    }
+  }
+}
+
+// === Fatigue Check (called after each hand) ===
+function checkFatigue() {
+  const warning = getFatigueWarning();
+  if (!warning) return;
+
+  if (warning.level === 'warning') {
+    showCoachComment({
+      type: 'warning',
+      text: `FATIGUE: ${warning.message}`,
+    });
+  }
 }
 
 function hideCoachBubble() {

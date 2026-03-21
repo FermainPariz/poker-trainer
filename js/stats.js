@@ -1,4 +1,5 @@
 // === Stats & Bankroll Tracking ===
+import { getFatigueAnalysis, getFatigueWarning } from './scoring.js';
 
 // === Session P&L Tracking ===
 const session = {
@@ -68,6 +69,7 @@ export function renderStatsOverlay(containerEl, sessionStats, pnl) {
       </div>
     ` : ''}
     ${renderPnLChart(session.history)}
+    ${renderFatigueSection()}
   `;
 }
 
@@ -75,6 +77,73 @@ function getTiltColor(score) {
   if (score >= 70) return 'var(--accent)';
   if (score >= 40) return 'var(--gold)';
   return 'var(--green)';
+}
+
+// === Decision Fatigue Section ===
+function renderFatigueSection() {
+  const analysis = getFatigueAnalysis();
+  if (!analysis) return '';
+
+  const warning = getFatigueWarning();
+  const windows = analysis.windows;
+
+  // Build quality-over-time chart
+  const scores = windows.map(w => w.avgScore);
+  const min = Math.min(...scores, 0);
+  const max = Math.max(...scores, 100);
+  const range = max - min || 1;
+
+  const points = scores.map((v, i) => {
+    const x = (i / Math.max(1, scores.length - 1)) * 100;
+    const y = 100 - ((v - min) / range) * 100;
+    return `${x},${y}`;
+  }).join(' ');
+
+  const lastScore = scores[scores.length - 1];
+  const lineColor = lastScore >= 60 ? 'var(--green)' : lastScore >= 30 ? 'var(--gold)' : 'var(--accent)';
+
+  let warningHTML = '';
+  if (warning) {
+    const bgColor = warning.level === 'warning' ? 'rgba(233,69,96,.15)' : 'rgba(255,215,0,.1)';
+    const borderColor = warning.level === 'warning' ? 'rgba(233,69,96,.3)' : 'rgba(255,215,0,.2)';
+    const textColor = warning.level === 'warning' ? 'var(--accent)' : 'var(--gold)';
+    warningHTML = `
+      <div style="padding:6px 10px; margin-top:8px; border-radius:6px; background:${bgColor}; border:1px solid ${borderColor};">
+        <span style="font-size:0.7em; color:${textColor}; font-weight:600;">
+          ${warning.level === 'warning' ? 'FATIGUE WARNUNG' : 'HINWEIS'}: ${warning.message}
+        </span>
+      </div>`;
+  }
+
+  const optimalHTML = analysis.optimalMinutes
+    ? `<div class="stat-card"><span class="stat-label">Optimale Dauer</span><span class="stat-value" style="color:var(--gold)">${analysis.optimalMinutes} Min</span></div>`
+    : '';
+
+  return `
+    <div style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,.06);">
+      <span class="stat-label" style="display:block; margin-bottom:6px; font-size:0.75em;">Decision Fatigue</span>
+      <div class="stats-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+        <div class="stat-card">
+          <span class="stat-label">Session</span>
+          <span class="stat-value">${analysis.sessionMinutes} Min</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Score-Drop</span>
+          <span class="stat-value" style="color:${analysis.scoreDrop > 15 ? 'var(--accent)' : analysis.scoreDrop > 5 ? 'var(--gold)' : 'var(--green)'}">
+            ${analysis.scoreDrop > 0 ? '-' : '+'}${Math.abs(analysis.scoreDrop)}
+          </span>
+        </div>
+        ${optimalHTML}
+      </div>
+      <div class="pnl-chart" style="margin-top:6px;">
+        <span class="stat-label">Qualitaet ueber Zeit</span>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="pnl-svg">
+          <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+          <polyline points="${points}" fill="none" stroke="${lineColor}" stroke-width="2" vector-effect="non-scaling-stroke"/>
+        </svg>
+      </div>
+      ${warningHTML}
+    </div>`;
 }
 
 // === P&L Chart (CSS-based sparkline) ===

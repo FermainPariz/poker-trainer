@@ -393,6 +393,153 @@ export function processHandForProfiles(game, winners = []) {
   }
 }
 
+// === Exploit Recommendations Engine ===
+// Returns specific, actionable exploits based on opponent stats + current context
+export function getExploitRecommendations(seatIndex, context = {}) {
+  const stats = getOpponentStats(seatIndex);
+  if (!stats || !stats.reliable) return null;
+
+  const classification = classifyOpponent(seatIndex);
+  const exploits = [];
+
+  // === Preflop Exploits ===
+  if (context.phase === 'preflop' || !context.phase) {
+    // Over-folding preflop (fold >65%)
+    if (stats.vpip < 20) {
+      exploits.push({
+        type: 'steal',
+        priority: 'high',
+        action: 'Steal seine Blinds mit jeder 2 Karten!',
+        reason: `VPIP nur ${stats.vpip}% — foldet ${100 - stats.vpip}% preflop.`,
+        sizing: 'Standard 2.5x Open.',
+      });
+    }
+
+    // Never 3-bets (3bet < 3%)
+    if (stats.threeBet < 3 && stats.hands > 20) {
+      exploits.push({
+        type: 'no-3bet',
+        priority: 'medium',
+        action: 'Open breiter wenn er in den Blinds sitzt.',
+        reason: `3-Bet nur ${stats.threeBet}% — gibt kaum Widerstand.`,
+      });
+    }
+
+    // Over-limping
+    if (stats.limpPct > 25) {
+      exploits.push({
+        type: 'iso-raise',
+        priority: 'high',
+        action: 'Iso-Raise auf 4x wenn er limpt!',
+        reason: `Limpt ${stats.limpPct}% — schwache Range, kein Plan postflop.`,
+        sizing: '4x + 1x pro Limper.',
+      });
+    }
+  }
+
+  // === Postflop Exploits ===
+  if (context.phase !== 'preflop') {
+    // Folds too much to bets
+    if (stats.foldToBet > 60) {
+      exploits.push({
+        type: 'bluff',
+        priority: 'high',
+        action: 'Bluff-Bet! Er foldet zu oft.',
+        reason: `Fold-to-Bet: ${stats.foldToBet}% (>60% = profitabler Bluff).`,
+        sizing: context.pot ? `${Math.round(context.pot * 0.6)}–${Math.round(context.pot * 0.75)} (60-75% Pot)` : '60-75% Pot.',
+      });
+    }
+
+    // Never folds to bets (calling station)
+    if (stats.foldToBet < 25) {
+      exploits.push({
+        type: 'value',
+        priority: 'high',
+        action: 'NIE bluffen! Nur Value betten.',
+        reason: `Fold-to-Bet nur ${stats.foldToBet}% — callt fast alles.`,
+        sizing: context.pot ? `${Math.round(context.pot * 0.8)}–${context.pot} (80-100% Pot fuer max Value)` : 'Grosse Bets fuer Value.',
+      });
+    }
+
+    // High C-bet frequency
+    if (stats.cbet > 75) {
+      exploits.push({
+        type: 'float',
+        priority: 'medium',
+        action: 'Float seine C-Bets und Take-Away am Turn!',
+        reason: `C-Bet ${stats.cbet}% — bettet den Flop oft mit Luft.`,
+      });
+    }
+
+    // Low aggression factor — never raises
+    if (stats.af < 1.0 && stats.vpip > 25) {
+      exploits.push({
+        type: 'thin-value',
+        priority: 'medium',
+        action: 'Duenne Value Bets! Er check-raist fast nie.',
+        reason: `AF nur ${stats.af} — passiv postflop, gibt keinen Widerstand.`,
+      });
+    }
+
+    // High aggression — might be bluffing a lot
+    if (stats.af > 4 && stats.wsd < 45) {
+      exploits.push({
+        type: 'call-down',
+        priority: 'high',
+        action: 'Call ihn leichter runter! Viele Bluffs.',
+        reason: `AF ${stats.af}, aber WSD nur ${stats.wsd}% — bettet viel, zeigt selten die beste Hand.`,
+      });
+    }
+  }
+
+  // === Showdown-basierte Exploits ===
+  if (stats.wtsd > 35 && stats.wsd < 40) {
+    exploits.push({
+      type: 'showdown-weak',
+      priority: 'medium',
+      action: 'Value bette breit am River — er callt zu viel und verliert.',
+      reason: `Geht ${stats.wtsd}% zum Showdown, gewinnt nur ${stats.wsd}%.`,
+    });
+  }
+
+  // Sort by priority
+  const priorityOrder = { high: 0, medium: 1, low: 2 };
+  exploits.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
+  return {
+    playerType: classification?.label || 'Unknown',
+    playerIcon: classification?.icon || '?',
+    exploits,
+    topExploit: exploits[0] || null,
+  };
+}
+
+// === Get concise exploit tip for coach bubble ===
+export function getExploitTip(activePlayers, phase, pot) {
+  if (!activePlayers || activePlayers.length === 0) return null;
+
+  const tips = [];
+  for (const seatIndex of activePlayers) {
+    const rec = getExploitRecommendations(seatIndex, { phase, pot });
+    if (rec && rec.topExploit) {
+      const stats = getOpponentStats(seatIndex);
+      const classification = classifyOpponent(seatIndex);
+      if (classification && stats?.reliable) {
+        tips.push({
+          seat: seatIndex,
+          name: classification.label,
+          icon: classification.icon,
+          tip: rec.topExploit.action,
+          reason: rec.topExploit.reason,
+          sizing: rec.topExploit.sizing || null,
+        });
+      }
+    }
+  }
+
+  return tips.length > 0 ? tips : null;
+}
+
 // === Reset all profiles ===
 export function resetProfiles() {
   profiles = {};

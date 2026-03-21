@@ -5,7 +5,7 @@ import { ACTIONS, PHASES } from './engine.js';
 
 // === Session State ===
 let sessionData = {
-  decisions: [],       // { score, evLoss, classification, phase }
+  decisions: [],       // { score, evLoss, classification, phase, timestamp, sessionElapsedMs, decisionTimeMs }
   totalEVLoss: 0,      // in big blinds
   handsPlayed: 0,
   bestMoves: 0,
@@ -13,13 +13,21 @@ let sessionData = {
   inaccuracies: 0,
   mistakes: 0,
   blunders: 0,
+  sessionStartTime: Date.now(),
+  lastActionTime: null, // for measuring per-decision time
 };
 
 export function resetScoring() {
   sessionData = {
     decisions: [], totalEVLoss: 0, handsPlayed: 0,
     bestMoves: 0, correctMoves: 0, inaccuracies: 0, mistakes: 0, blunders: 0,
+    sessionStartTime: Date.now(), lastActionTime: null,
   };
+}
+
+// Call when player's turn starts (to measure think time)
+export function markTurnStart() {
+  sessionData.lastActionTime = Date.now();
 }
 
 export function recordHandPlayed() {
@@ -99,8 +107,15 @@ export function scoreDecision(gtoFreqs, playerAction, pot, bigBlind) {
     sessionData.blunders++;
   }
 
+  const now = Date.now();
+  const decisionTimeMs = sessionData.lastActionTime ? (now - sessionData.lastActionTime) : null;
+  const sessionElapsedMs = now - sessionData.sessionStartTime;
+
   sessionData.totalEVLoss += evLossBB;
-  sessionData.decisions.push({ score, evLossBB, classification, actionKey, phase: null });
+  sessionData.decisions.push({
+    score, evLossBB, classification, actionKey, phase: null,
+    timestamp: now, sessionElapsedMs, decisionTimeMs,
+  });
 
   return {
     score,             // -100 to +100
@@ -147,4 +162,95 @@ export function formatScoreResult(result) {
     classification: result.classification,
     evLossBB: result.evLossBB,
   };
+}
+
+// === Decision Fatigue Analysis ===
+// Analyzes quality degradation over session duration
+export function getFatigueAnalysis() {
+  const decisions = sessionData.decisions;
+  if (decisions.length < 8) return null;
+
+  // Split decisions into time windows (every ~10 decisions)
+  const windowSize = Math.max(5, Math.floor(decisions.length / 4));
+  const windows = [];
+
+  for (let i = 0; i < decisions.length; i += windowSize) {
+    const slice = decisions.slice(i, i + windowSize);
+    if (slice.length < 3) break;
+
+    const avgScore = slice.reduce((s, d) => s + d.score, 0) / slice.length;
+    const avgEVLoss = slice.reduce((s, d) => s + d.evLossBB, 0) / slice.length;
+    const mistakes = slice.filter(d => d.classification === 'mistake' || d.classification === 'blunder').length;
+    const avgDecisionTime = slice.filter(d => d.decisionTimeMs).length > 0
+      ? slice.filter(d => d.decisionTimeMs).reduce((s, d) => s + d.decisionTimeMs, 0) / slice.filter(d => d.decisionTimeMs).length
+      : null;
+    const elapsedMin = slice[0].sessionElapsedMs ? Math.round(slice[0].sessionElapsedMs / 60000) : 0;
+
+    windows.push({
+      startDecision: i,
+      endDecision: i + slice.length,
+      elapsedMin,
+      avgScore: Math.round(avgScore),
+      avgEVLoss: Math.round(avgEVLoss * 100) / 100,
+      mistakeRate: Math.round(mistakes / slice.length * 100),
+      avgDecisionTimeMs: avgDecisionTime ? Math.round(avgDecisionTime) : null,
+    });
+  }
+
+  if (windows.length < 2) return null;
+
+  // Compare first window vs last window
+  const first = windows[0];
+  const last = windows[windows.length - 1];
+  const scoreDrop = first.avgScore - last.avgScore;
+  const evLossIncrease = last.avgEVLoss - first.avgEVLoss;
+  const mistakeRateIncrease = last.mistakeRate - first.mistakeRate;
+
+  // Calculate optimal session length (where quality starts dropping)
+  let optimalMinutes = null;
+  for (let i = 1; i < windows.length; i++) {
+    if (windows[i].avgScore < windows[0].avgScore - 15 && windows[i].mistakeRate > windows[0].mistakeRate + 10) {
+      optimalMinutes = windows[i].elapsedMin || (i * 10);
+      break;
+    }
+  }
+
+  return {
+    windows,
+    scoreDrop,           // positive = quality dropped
+    evLossIncrease,      // positive = more EV loss per decision
+    mistakeRateIncrease, // positive = more mistakes over time
+    isFatigued: scoreDrop > 15 || mistakeRateIncrease > 15,
+    optimalMinutes,
+    sessionMinutes: Math.round((Date.now() - sessionData.sessionStartTime) / 60000),
+  };
+}
+
+// === Fatigue Warning (for real-time display) ===
+export function getFatigueWarning() {
+  const analysis = getFatigueAnalysis();
+  if (!analysis) return null;
+
+  const mins = analysis.sessionMinutes;
+
+  if (analysis.isFatigued) {
+    return {
+      level: 'warning',
+      message: `Deine Entscheidungsqualitaet sinkt! Score: ${analysis.windows[0].avgScore} → ${analysis.windows[analysis.windows.length - 1].avgScore}. ` +
+        (analysis.optimalMinutes ? `Optimale Session-Laenge: ~${analysis.optimalMinutes} Min.` : `Session laeuft seit ${mins} Min.`),
+      scoreDrop: analysis.scoreDrop,
+      sessionMinutes: mins,
+    };
+  }
+
+  if (mins > 60 && analysis.scoreDrop > 8) {
+    return {
+      level: 'mild',
+      message: `Session laeuft seit ${mins} Min. Leichter Qualitaetsrueckgang erkennbar. Pause empfohlen.`,
+      scoreDrop: analysis.scoreDrop,
+      sessionMinutes: mins,
+    };
+  }
+
+  return null;
 }
