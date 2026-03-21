@@ -85,7 +85,7 @@ export class Game {
 
   reset() {
     this.players = [];
-    const aiNames = ['Viktor', 'Luna', 'Nemo', 'Blaze', 'Shark'];
+    const aiNames = ['Viktor', 'Luna', 'Nemo', 'Blaze', 'Shark', 'Alex', 'Rio', 'Mika'];
     for (let i = 0; i < this.numPlayers; i++) {
       this.players.push({
         id: i,
@@ -145,7 +145,9 @@ export class Game {
     if (remaining === 1) return 'UTG';
     if (remaining === 2) return posFromBB === 0 ? 'UTG' : 'CO';
     if (remaining === 3) return ['UTG', 'MP', 'CO'][posFromBB] || '';
-    return ['UTG', 'UTG+1', 'MP', 'HJ', 'CO'][posFromBB] || '';
+    if (remaining === 4) return ['UTG', 'MP', 'HJ', 'CO'][posFromBB] || '';
+    if (remaining === 5) return ['UTG', 'UTG+1', 'MP', 'HJ', 'CO'][posFromBB] || '';
+    return ['UTG', 'UTG+1', 'MP', 'MP+1', 'HJ', 'CO'][posFromBB] || '';
   }
 
   _nextActive(from) {

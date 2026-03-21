@@ -9,12 +9,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/main.css?v=12">
-<link rel="stylesheet" href="css/table.css?v=12">
-<link rel="stylesheet" href="css/cards.css?v=12">
-<link rel="stylesheet" href="css/hud.css?v=12">
-<link rel="stylesheet" href="css/panels.css?v=12">
-<link rel="stylesheet" href="css/auth.css?v=12">
+<link rel="stylesheet" href="css/main.css?v=13">
+<link rel="stylesheet" href="css/table.css?v=13">
+<link rel="stylesheet" href="css/cards.css?v=13">
+<link rel="stylesheet" href="css/hud.css?v=13">
+<link rel="stylesheet" href="css/panels.css?v=13">
+<link rel="stylesheet" href="css/auth.css?v=13">
 <style>
   /* CSS fallback before JS runs — JS will override via inline style */
   .poker-table { width: min(88vw, calc((100dvh - 280px) * 5 / 3)); }
@@ -103,6 +103,12 @@
     <button class="mobile-menu-item" data-toggle="leaderboard"><span class="mm-icon">🏆</span> Ranking</button>
   </nav>
 
+  <!-- Game Mode Selector -->
+  <div class="mode-selector" id="modeSelector"></div>
+
+  <!-- Tournament HUD -->
+  <div id="tournamentHUD" style="display:none;"></div>
+
   <!-- Main Table View -->
   <main class="table-container">
     <div class="poker-table" id="pokerTable">
@@ -118,13 +124,16 @@
         </div>
       </div>
 
-      <!-- 6 Seats -->
+      <!-- Seats (up to 9) -->
       <div class="seat seat-0" id="seat0"></div>
       <div class="seat seat-1" id="seat1"></div>
       <div class="seat seat-2" id="seat2"></div>
       <div class="seat seat-3" id="seat3"></div>
       <div class="seat seat-4" id="seat4"></div>
       <div class="seat seat-5" id="seat5"></div>
+      <div class="seat seat-6" id="seat6"></div>
+      <div class="seat seat-7" id="seat7"></div>
+      <div class="seat seat-8" id="seat8"></div>
     </div>
 
     <!-- HUD — live stats strip below table -->
@@ -405,6 +414,6 @@
   window.fitLayout = fitLayout;
 })();
 </script>
-<script type="module" src="js/app.js?v=12"></script>
+<script type="module" src="js/app.js?v=13"></script>
 </body>
 </html>

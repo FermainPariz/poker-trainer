@@ -180,12 +180,27 @@
   z-index: 3;
 }
 
+/* 6-max default positions */
 .seat-0 { bottom: -10%; left: 50%; transform: translateX(-50%); flex-direction: column; }
 .seat-1 { bottom: 5%; left: -4%; transform: translateX(-50%); flex-direction: column-reverse; }
 .seat-2 { top: 5%; left: -4%; transform: translateX(-50%); flex-direction: column; }
 .seat-3 { top: -10%; left: 50%; transform: translateX(-50%); flex-direction: column; }
 .seat-4 { top: 5%; right: -4%; transform: translateX(50%); flex-direction: column; }
 .seat-5 { bottom: 5%; right: -4%; transform: translateX(50%); flex-direction: column-reverse; }
+/* Extra seats hidden by default */
+.seat-6, .seat-7, .seat-8 { display: none; }
+
+/* 9-max layout: seats spread around oval */
+.table-9max .seat-0 { bottom: -10%; left: 50%; transform: translateX(-50%); flex-direction: column; }
+.table-9max .seat-1 { bottom: -2%; left: 5%; transform: translateX(-50%); flex-direction: column-reverse; }
+.table-9max .seat-2 { top: 35%; left: -5%; transform: translateX(-50%); flex-direction: column; }
+.table-9max .seat-3 { top: 2%; left: 10%; transform: translateX(-50%); flex-direction: column; }
+.table-9max .seat-4 { top: -10%; left: 50%; transform: translateX(-50%); flex-direction: column; }
+.table-9max .seat-5 { top: 2%; right: 10%; transform: translateX(50%); flex-direction: column; }
+.table-9max .seat-6 { top: 35%; right: -5%; transform: translateX(50%); flex-direction: column; }
+.table-9max .seat-7 { bottom: -2%; right: 5%; transform: translateX(50%); flex-direction: column-reverse; }
+.table-9max .seat-8 { bottom: -10%; left: 28%; transform: translateX(-50%); flex-direction: column; }
+.table-9max .seat-6, .table-9max .seat-7, .table-9max .seat-8 { display: flex; }
 
 /* Narrow phones: portrait oval like GGPoker + tighter seats */
 .is-narrow .poker-table {
@@ -198,6 +213,15 @@
 .is-narrow .seat-3 { top: -10%; }
 .is-narrow .seat-4 { right: 0%; transform: translateX(15%); }
 .is-narrow .seat-5 { right: 0%; transform: translateX(15%); }
+
+/* 9-max narrow adjustments */
+.is-narrow.table-9max .seat-1 { bottom: -4%; left: 2%; }
+.is-narrow.table-9max .seat-2 { top: 35%; left: -2%; }
+.is-narrow.table-9max .seat-3 { top: 0%; left: 15%; }
+.is-narrow.table-9max .seat-5 { top: 0%; right: 15%; }
+.is-narrow.table-9max .seat-6 { top: 35%; right: -2%; }
+.is-narrow.table-9max .seat-7 { bottom: -4%; right: 2%; }
+.is-narrow.table-9max .seat-8 { bottom: -10%; left: 26%; }
 
 /* === Player Info Box === */
 .player-info {
@@ -274,6 +298,9 @@
 .seat-3 .player-bet { bottom: -22px; }
 .seat-4 .player-bet { bottom: -12px; left: -22px; }
 .seat-5 .player-bet { top: -12px; left: -22px; }
+.seat-6 .player-bet { top: 50%; left: -22px; transform: translateY(-50%); }
+.seat-7 .player-bet { top: -12px; left: -22px; }
+.seat-8 .player-bet { top: -18px; right: -22px; }
 
 /* === Action Labels === */
 .player-action-label {
@@ -298,6 +325,9 @@
 .seat-3 .player-action-label { bottom: -36px; }
 .seat-4 .player-action-label { bottom: -26px; left: 0; }
 .seat-5 .player-action-label { top: -26px; left: 0; }
+.seat-6 .player-action-label { bottom: -26px; left: 0; }
+.seat-7 .player-action-label { top: -26px; left: 0; }
+.seat-8 .player-action-label { top: -30px; right: 0; }
 
 .player-action-label:empty { display: none; }
 
@@ -331,4 +361,7 @@
 .seat-3 .dealer-chip { bottom: -8px; left: -28px; }
 .seat-4 .dealer-chip { bottom: -8px; left: -8px; }
 .seat-5 .dealer-chip { top: -8px; left: -8px; }
+.seat-6 .dealer-chip { bottom: -8px; left: -8px; }
+.seat-7 .dealer-chip { top: -8px; left: -8px; }
+.seat-8 .dealer-chip { top: -8px; right: -28px; }
 

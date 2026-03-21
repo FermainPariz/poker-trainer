@@ -180,3 +180,86 @@
   content: 'Tipp: ';
   font-weight: 700;
 }
+
+/* === Tournament HUD === */
+.tourney-hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  justify-content: center;
+  padding: clamp(2px, 0.3vmin, 4px) 0;
+}
+
+.tourney-hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: clamp(2px, 0.3vmin, 4px) clamp(6px, 0.8vmin, 12px);
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: clamp(4px, 0.5vmin, 6px);
+  border: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.tourney-label {
+  font-size: clamp(0.35em, 0.55vmin, 0.6em);
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tourney-value {
+  font-size: clamp(0.55em, 0.9vmin, 1em);
+  font-weight: 800;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.tourney-next {
+  color: var(--text2);
+  font-weight: 600;
+}
+
+.tourney-prize {
+  color: var(--green);
+}
+
+/* === Game Mode Selector === */
+.mode-selector {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  padding: 8px;
+}
+
+.mode-btn {
+  padding: clamp(6px, 0.8vmin, 10px) clamp(12px, 1.5vmin, 20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text2);
+  font-size: clamp(0.6em, 0.9vmin, 0.85em);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.mode-btn.active {
+  background: rgba(255, 215, 0, 0.15);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.mode-btn .mode-sub {
+  display: block;
+  font-size: 0.75em;
+  font-weight: 400;
+  color: var(--text2);
+  margin-top: 2px;
+}

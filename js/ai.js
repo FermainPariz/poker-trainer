@@ -52,7 +52,7 @@ const PROFILES = {
   },
 };
 
-export const AI_ASSIGNMENTS = ['tag', 'nit', 'fish', 'lag', 'maniac'];
+export const AI_ASSIGNMENTS = ['tag', 'nit', 'fish', 'lag', 'maniac', 'tag', 'fish', 'lag'];
 
 export class AIPlayer {
   constructor(profileKey) {

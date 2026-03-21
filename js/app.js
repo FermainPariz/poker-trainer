@@ -19,20 +19,29 @@ import { initAuth, onAuthReady, getCurrentUser, isGuestMode, isLoggedIn, getDisp
 import { cloudSaveSession, cloudSaveHand, cloudUpdateStats, cloudLoadUserData, cloudGetLeaderboard } from './db.js';
 import { initUserProfile, updateUserProfile, getPersonalizedTip, getTopLeaks } from './user-profile.js';
 import { escapeHtml, safeNum } from './utils.js';
+import { startTournament, onTournamentHandComplete, isTournament, isTournamentFinished, getTournamentInfo, renderTournamentHUD, postAntes, endTournament, getPayoutTable, getCurrentBlinds } from './tournament.js';
+import { playCardDeal, playCardFlip, playChipBet, playChipPot, playCheck, playFold, playAllIn, playWinPot, playLosePot, playYourTurn, ensureResumed, setSoundEnabled, isSoundEnabled } from './sound.js';
 import * as UI from './ui.js';
 
+// === Game Modes ===
+const MODES = { CASH_6: 'cash6', CASH_9: 'cash9', SNG_6: 'sng6', SNG_9: 'sng9' };
+let currentMode = MODES.CASH_6;
+
 // === State ===
-const game = new Game({ numPlayers: 6, smallBlind: 5, bigBlind: 10, startingStack: 1000, humanSeat: 0 });
-const aiPlayers = {}; // seatIndex -> AIPlayer
+let game = new Game({ numPlayers: 6, smallBlind: 5, bigBlind: 10, startingStack: 1000, humanSeat: 0 });
+let aiPlayers = {}; // seatIndex -> AIPlayer
 let streetSnapshots = {}; // captured at each phase transition
 
-// Create AI players for all non-human seats
-for (let i = 0; i < game.numPlayers; i++) {
-  if (i !== game.humanSeat) {
-    const profileIdx = i > game.humanSeat ? i - 1 : i;
-    aiPlayers[i] = new AIPlayer(AI_ASSIGNMENTS[profileIdx] || 'fish');
+function createAIPlayers() {
+  aiPlayers = {};
+  for (let i = 0; i < game.numPlayers; i++) {
+    if (i !== game.humanSeat) {
+      const profileIdx = i > game.humanSeat ? i - 1 : i;
+      aiPlayers[i] = new AIPlayer(AI_ASSIGNMENTS[profileIdx] || 'fish');
+    }
   }
 }
+createAIPlayers();
 
 let isPlayerTurn = false;
 let gameInProgress = false;
@@ -61,6 +70,7 @@ function init() {
   UI.showActionBar(false);
   UI.showContinueBar(true, '6-Max Texas Hold\'em Trainer — Druecke Start!', '');
   document.getElementById('btnDeal').textContent = 'Spiel starten';
+  setupModeSelector();
 
   // Save session on page unload
   window.addEventListener('beforeunload', () => {
@@ -190,16 +200,42 @@ function setSliderValue(val) {
 
 // === Start New Hand ===
 async function startNewHand() {
-  // Auto-rebuy busted players
-  for (let i = 0; i < game.numPlayers; i++) {
-    if (game.players[i].stack <= 0) {
-      // Human bust = end bankroll session, start new one
-      if (i === game.humanSeat && getCurrentSession()) {
-        const record = endSession();
-        syncSessionToCloud(record);
-        startSession(game.bigBlind);
+  ensureResumed(); // Unlock Web Audio on first user click
+
+  // If tournament just ended, restart in same mode
+  const isSNG = currentMode.startsWith('sng');
+  if (isSNG && !isTournament()) {
+    switchMode(currentMode); // re-creates game + starts tournament
+  }
+
+  if (isTournament()) {
+    // Tournament: check if finished
+    if (isTournamentFinished()) {
+      showTournamentSummary();
+      return;
+    }
+    // Tournament: eliminate busted players (no rebuy)
+    for (const p of game.players) {
+      if (p.stack <= 0 && !p.sittingOut) {
+        p.sittingOut = true;
       }
-      game.rebuyPlayer(i);
+    }
+    // Check if human is busted
+    if (game.humanPlayer.sittingOut) {
+      showTournamentSummary();
+      return;
+    }
+  } else {
+    // Cash game: auto-rebuy busted players
+    for (let i = 0; i < game.numPlayers; i++) {
+      if (game.players[i].stack <= 0) {
+        if (i === game.humanSeat && getCurrentSession()) {
+          const record = endSession();
+          syncSessionToCloud(record);
+          startSession(game.bigBlind);
+        }
+        game.rebuyPlayer(i);
+      }
     }
   }
 
@@ -216,6 +252,14 @@ async function startNewHand() {
 
   gameInProgress = true;
   recordHandPlayed();
+
+  // Tournament: post antes
+  if (isTournament()) {
+    const anteTotal = postAntes(game);
+    if (anteTotal > 0) updatePotDisplay();
+    updateTournamentDisplay();
+  }
+
   streetSnapshots.preflop = captureSnapshot(game);
 
   UI.renderAllSeats(game);
@@ -226,6 +270,7 @@ async function startNewHand() {
   if (isMatrixVisible()) renderMatrix(game);
   UI.showContinueBar(false);
 
+  playCardDeal();
   UI.showMessage(`Hand #${game.handNumber}`, 700);
   updateOpponentBadges();
   await delay(800);
@@ -266,6 +311,7 @@ async function gameLoop() {
       isPlayerTurn = true;
       actionLock = false;
       markTurnStart(); // Track decision timing for fatigue analysis
+      playYourTurn();
       UI.showActionBar(true);
       UI.updateActionButtons(game);
       UI.renderAllSeats(game);
@@ -326,7 +372,11 @@ async function aiTurn(seatIndex) {
   const allInAmount = game.players[seatIndex].stack;
   const result = game.performAction(decision.action, decision.amount || 0);
 
-
+  // Sound effects for AI actions
+  if (decision.action === ACTIONS.FOLD) playFold();
+  else if (decision.action === ACTIONS.CHECK) playCheck();
+  else if (decision.action === ACTIONS.ALLIN) playAllIn();
+  else if (decision.action === ACTIONS.CALL || decision.action === ACTIONS.RAISE || decision.action === ACTIONS.BET) playChipBet();
 
   let labelAmount = decision.action === ACTIONS.CALL ? callAmount : (decision.amount || 0);
   if (decision.action === ACTIONS.ALLIN) labelAmount = allInAmount;
@@ -369,6 +419,12 @@ async function playerAction(action, amount = 0) {
   }
 
   const result = game.performAction(action, amount);
+
+  // Sound effects for player actions
+  if (action === ACTIONS.FOLD) playFold();
+  else if (action === ACTIONS.CHECK) playCheck();
+  else if (action === ACTIONS.ALLIN) playAllIn();
+  else if (action === ACTIONS.CALL || action === ACTIONS.RAISE || action === ACTIONS.BET) playChipBet();
 
   let labelAmount = action === ACTIONS.CALL ? callAmount : amount;
   if (action === ACTIONS.ALLIN) labelAmount = allInAmount;
@@ -505,6 +561,23 @@ async function handleHumanFold(engineResult) {
   // Update personalized coaching profile
   updateUserProfile();
 
+  // Tournament events after fold
+  if (isTournament()) {
+    const events = onTournamentHandComplete(game);
+    if (events) {
+      for (const ev of events) {
+        if (ev.type === 'blinds_up') {
+          UI.showMessage(`Blinds erhoehen: ${ev.sb}/${ev.bb}`, 2000);
+        } else if (ev.type === 'human_eliminated' || ev.type === 'tournament_end') {
+          await delay(400);
+          showTournamentSummary();
+          return;
+        }
+      }
+    }
+    updateTournamentDisplay();
+  }
+
   await delay(400);
   UI.showContinueBar(true, resultText, resultClass);
   document.getElementById('btnDeal').textContent = 'Naechste Hand';
@@ -513,6 +586,8 @@ async function handleHumanFold(engineResult) {
 // === Phase Transition ===
 async function handlePhaseTransition(result) {
   await delay(400);
+  playCardFlip();
+  playChipPot();
   UI.renderCommunityCards(game.communityCards);
   updatePotDisplay();
 
@@ -566,12 +641,14 @@ async function handleHandEnd(result) {
     } else if (humanWon) {
       resultText = `Du gewinnst $${potWon}!`;
       resultClass = 'win';
+      playWinPot();
       UI.highlightWinnerCards(game.humanSeat);
       UI.showMessage(`Gewonnen! +$${potWon}`, 1500);
     } else {
       const winnerNames = result.winners.map(w => w.player.name).join(', ');
       resultText = `${winnerNames} gewinnt $${potWon}`;
       resultClass = 'lose';
+      playLosePot();
       result.winners.forEach(w => UI.highlightWinnerCards(w.player.id));
       UI.showMessage(`${winnerNames} gewinnt!`, 1500);
     }
@@ -634,6 +711,25 @@ async function handleHandEnd(result) {
 
   // Update personalized coaching profile with new data
   updateUserProfile();
+
+  // Tournament: check for eliminations, blind increases
+  if (isTournament()) {
+    const events = onTournamentHandComplete(game);
+    if (events) {
+      for (const ev of events) {
+        if (ev.type === 'elimination') {
+          resultText += ` | ${ev.player.name} eliminated (#${ev.position})`;
+        } else if (ev.type === 'blinds_up') {
+          UI.showMessage(`Blinds erhoehen: ${ev.sb}/${ev.bb}`, 2000);
+        } else if (ev.type === 'human_eliminated' || ev.type === 'tournament_end') {
+          await delay(800);
+          showTournamentSummary();
+          return;
+        }
+      }
+    }
+    updateTournamentDisplay();
+  }
 
   await delay(800);
   UI.showContinueBar(true, resultText, resultClass);
@@ -1149,6 +1245,143 @@ async function syncSessionToCloud(sessionRecord) {
   } catch (e) {
     console.warn('Cloud sync failed:', e);
   }
+}
+
+// === Game Mode Selector ===
+function setupModeSelector() {
+  const container = document.getElementById('modeSelector');
+  if (!container) return;
+
+  container.innerHTML = `
+    <button class="mode-btn active" data-mode="cash6">Cash<span class="mode-sub">6-Max</span></button>
+    <button class="mode-btn" data-mode="cash9">Cash<span class="mode-sub">9-Max</span></button>
+    <button class="mode-btn" data-mode="sng6">SNG<span class="mode-sub">6-Max</span></button>
+    <button class="mode-btn" data-mode="sng9">SNG<span class="mode-sub">9-Max</span></button>
+  `;
+
+  container.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (gameInProgress) return; // can't switch mid-hand
+      container.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      switchMode(btn.dataset.mode);
+    });
+  });
+}
+
+function switchMode(mode) {
+  currentMode = mode;
+  const isSNG = mode.startsWith('sng');
+  const is9Max = mode.endsWith('9');
+  const numPlayers = is9Max ? 9 : 6;
+
+  // End any existing tournament
+  if (isTournament()) endTournament();
+
+  // Recreate game with new player count
+  game = new Game({
+    numPlayers,
+    smallBlind: isSNG ? 10 : 5,
+    bigBlind: isSNG ? 20 : 10,
+    startingStack: isSNG ? 1500 : 1000,
+    humanSeat: 0,
+  });
+  createAIPlayers();
+
+  // Toggle 9-max CSS class on table
+  const table = document.querySelector('.poker-table');
+  if (table) table.classList.toggle('table-9max', is9Max);
+
+  // Hide unused seats
+  for (let i = 0; i < 9; i++) {
+    const seat = document.getElementById(`seat${i}`);
+    if (seat) seat.style.display = i < numPlayers ? '' : 'none';
+  }
+
+  // Start tournament if SNG
+  if (isSNG) {
+    startTournament({ numPlayers, speed: 'normal', buyIn: 1500 });
+    updateTournamentDisplay();
+  }
+
+  // Re-init subsystems
+  initBankroll();
+  startSession(game.bigBlind);
+  initSession(game.startingStack);
+
+  // Re-render
+  UI.renderAllSeats(game);
+  UI.updateTopBar(game);
+  UI.updateBlindsInfo(game.smallBlind, game.bigBlind);
+
+  const modeLabel = isSNG
+    ? `SNG ${numPlayers}-Max — $${game.startingStack} Buy-in`
+    : `Cash ${numPlayers}-Max — $${game.smallBlind}/$${game.bigBlind}`;
+  UI.showContinueBar(true, `${modeLabel} — Druecke Start!`, '');
+  document.getElementById('btnDeal').textContent = 'Spiel starten';
+
+  // Toggle tournament HUD
+  const tourneyHUD = document.getElementById('tournamentHUD');
+  if (tourneyHUD) tourneyHUD.style.display = isSNG ? '' : 'none';
+}
+
+function updateTournamentDisplay() {
+  const container = document.getElementById('tournamentHUD');
+  if (container && isTournament()) {
+    renderTournamentHUD(container);
+    // Also update blind info in top bar
+    const info = getTournamentInfo();
+    if (info) UI.updateBlindsInfo(info.sb, info.bb);
+  }
+}
+
+function showTournamentSummary() {
+  gameInProgress = false;
+  isPlayerTurn = false;
+
+  const info = getTournamentInfo();
+  if (!info) return;
+
+  const pos = info.humanFinishPosition || (info.playersRemaining <= 1 ? 1 : info.totalPlayers);
+  const payouts = getPayoutTable();
+  const myPayout = payouts.find(p => p.position === pos);
+  const payout = myPayout ? myPayout.amount : 0;
+  const profit = payout - 1500; // buy-in
+  const profitColor = profit >= 0 ? 'var(--green)' : 'var(--accent)';
+  const duration = Math.round(info.duration / 60000);
+
+  let payoutHTML = payouts.map(p =>
+    `<div style="display:flex; justify-content:space-between; padding:4px 0; font-size:0.65em; color:${p.position === pos ? 'var(--gold)' : 'var(--text2)'}; font-weight:${p.position === pos ? '700' : '400'};">
+      <span>#${p.position} (${p.percentage}%)</span><span>$${p.amount}</span>
+    </div>`
+  ).join('');
+
+  const body = document.getElementById('analysisBody');
+  if (body) {
+    body.innerHTML = `
+      <div style="text-align:center; padding:12px;">
+        <div style="font-size:1em; font-weight:800; color:var(--gold); margin-bottom:4px;">TURNIER BEENDET</div>
+        <div style="font-size:1.4em; font-weight:800; color:${pos <= 2 ? 'var(--green)' : 'var(--text)'};">Platz #${pos}</div>
+        <div style="font-size:0.8em; color:${profitColor}; font-weight:700; margin:8px 0;">${profit >= 0 ? '+' : ''}$${profit} Profit</div>
+        <div style="font-size:0.6em; color:var(--text2);">${info.totalHandsPlayed} Haende | ${duration} Min</div>
+      </div>
+      <div style="padding:8px; margin:8px 0; background:rgba(255,255,255,.03); border-radius:8px;">
+        <div style="font-size:0.6em; font-weight:700; color:var(--text); margin-bottom:4px;">Auszahlung:</div>
+        ${payoutHTML}
+      </div>
+    `;
+    const panel = document.getElementById('analysisPanel');
+    if (panel && !panel.classList.contains('visible')) {
+      panel.classList.add('visible');
+      showPanelBackdrop();
+    }
+  }
+
+  UI.showContinueBar(true, `Turnier beendet — Platz #${pos} | ${payout > 0 ? '+' : ''}$${profit}`, pos <= 2 ? 'win' : 'lose');
+  document.getElementById('btnDeal').textContent = 'Neues Turnier';
+
+  // End tournament state — next "start" will re-create
+  endTournament();
 }
 
 // === Utility ===
