@@ -616,7 +616,15 @@
   pointer-events: none;
   transition: opacity 0.3s ease;
   min-height: 28px;
+  max-height: 35vh;
+  overflow-y: auto;
 }
+
+/* Subtle scrollbar for coach bubble */
+.coach-bubble::-webkit-scrollbar { width: 4px; }
+.coach-bubble::-webkit-scrollbar-track { background: transparent; }
+.coach-bubble::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
+.coach-bubble::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.25); }
 
 .coach-bubble.visible {
   opacity: 1;
@@ -633,15 +641,7 @@
   font-size: clamp(0.6em, 0.8vmin, 0.88em);
   line-height: 1.5;
   color: var(--text2);
-  overflow-y: auto;
-  max-height: 30vh;
 }
-
-/* Subtle scrollbar for coach text */
-.coach-text::-webkit-scrollbar { width: 4px; }
-.coach-text::-webkit-scrollbar-track { background: transparent; }
-.coach-text::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
-.coach-text::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.25); }
 
 /* Wide viewport: coach bubble in sidebar */
 .is-wide .coach-bubble {
@@ -649,12 +649,13 @@
   grid-row: 2;
   align-self: start;
   max-width: none;
+  max-height: 45vh;
   margin: clamp(8px, 1vw, 14px) 0 0;
   padding: clamp(6px, 0.8vw, 12px) clamp(10px, 1.2vw, 18px);
 }
 
 .is-wide .coach-icon { font-size: clamp(0.9em, 1vw, 1.2em); }
-.is-wide .coach-text { font-size: clamp(0.68em, 0.78vw, 0.88em); max-height: 40vh; }
+.is-wide .coach-text { font-size: clamp(0.68em, 0.78vw, 0.88em); }
 
 /* Coach feedback button */
 .coach-feedback-btn {
