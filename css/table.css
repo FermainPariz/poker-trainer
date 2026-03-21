@@ -15,6 +15,15 @@
   padding: clamp(4px, 1vh, 16px) clamp(2px, 1vw, 12px) 0;
 }
 
+/* Mobile: table gets remaining space, controls pinned to bottom */
+.is-mobile .table-container {
+  grid-template-rows: 1fr auto auto auto;
+}
+
+.is-mobile .poker-table {
+  align-self: center;
+}
+
 /* Wide viewport: 2-column grid with sidebar for HUD/Coach */
 .is-wide .table-container {
   grid-template-columns: 1fr clamp(140px, 20vw, 300px);
@@ -178,9 +187,9 @@
 .seat-4 { top: 5%; right: -4%; transform: translateX(50%); flex-direction: column; }
 .seat-5 { bottom: 5%; right: -4%; transform: translateX(50%); flex-direction: column-reverse; }
 
-/* Narrow phones: squarer table + tighter seats */
+/* Narrow phones: portrait oval like GGPoker + tighter seats */
 .is-narrow .poker-table {
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 5 / 4;
 }
 
 .is-narrow .seat-0 { bottom: -10%; }

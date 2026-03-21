@@ -310,8 +310,8 @@
     var cont = document.getElementById('continueBar');
     var chromeH = 0, availW, margins;
 
-    // Aspect ratio: phones get a squarer table to use vertical space better
-    var ratio = isNarrow ? 3 / 2 : 5 / 3;
+    // Aspect ratio: phones get a portrait oval (like GGPoker) to use vertical space
+    var ratio = isNarrow ? 5 / 4 : 5 / 3;
 
     if (isWide) {
       // Wide: HUD+coach in sidebar column, only action bar eats table height
