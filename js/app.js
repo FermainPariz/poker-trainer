@@ -17,6 +17,7 @@ import { scoreDecision, formatScoreResult, getSessionScoring, recordHandPlayed, 
 import { initMatrix, renderMatrix, toggleMatrix, isMatrixVisible } from './matrix.js';
 import { initAuth, onAuthReady, getCurrentUser, isGuestMode, isLoggedIn, getDisplayName, signOut } from './auth.js';
 import { cloudSaveSession, cloudSaveHand, cloudUpdateStats, cloudLoadUserData, cloudGetLeaderboard } from './db.js';
+import { initUserProfile, updateUserProfile, getPersonalizedTip, getTopLeaks } from './user-profile.js';
 import * as UI from './ui.js';
 
 // === State ===
@@ -48,6 +49,7 @@ function init() {
   initQuiz();
   initProfiler();
   initMatrix();
+  initUserProfile();
   startSession(game.bigBlind);
   initSession(game.startingStack);
   loadRanges(); // preload range data
@@ -284,6 +286,9 @@ async function gameLoop() {
       // Exploit recommendations for opponents still in the hand
       showExploitTips(game);
 
+      // Personalized coaching: warn about player's specific leaks
+      showPersonalizedCoaching(game);
+
       // Re-run coach once equity calculation completes (async from web worker)
       onEquityUpdate(() => {
         if (!isPlayerTurn) return; // player already acted
@@ -496,6 +501,9 @@ async function handleHumanFold(engineResult) {
   // Bankroll tracking
   updateSession(game.humanPlayer.stack);
 
+  // Update personalized coaching profile
+  updateUserProfile();
+
   await delay(400);
   UI.showContinueBar(true, resultText, resultClass);
   document.getElementById('btnDeal').textContent = 'Naechste Hand';
@@ -622,6 +630,9 @@ async function handleHandEnd(result) {
 
   // Decision fatigue check
   checkFatigue();
+
+  // Update personalized coaching profile with new data
+  updateUserProfile();
 
   await delay(800);
   UI.showContinueBar(true, resultText, resultClass);
@@ -955,6 +966,51 @@ function showExploitTips(game) {
     if (!existing.includes('EXPLOIT')) {
       text.textContent = existing + ' | ' + exploitLine;
     }
+  }
+}
+
+// === Personalized Coaching (based on user's historical leaks) ===
+function showPersonalizedCoaching(game) {
+  const human = game.humanPlayer;
+  const phase = game.phase;
+  const position = game.getPosition(game.humanSeat);
+
+  // Determine hand strength category (0=trash, 1=weak, 2=marginal, 3=strong, 4=premium)
+  let handStrength = 0;
+  try {
+    const { getPreflopStrength } = window.__evaluatorCache || {};
+    // Simple strength mapping from hand cards
+    const h = human.hand;
+    if (h.length >= 2) {
+      const ranks = 'AKQJT98765432';
+      const r1 = ranks.indexOf(h[0].rank), r2 = ranks.indexOf(h[1].rank);
+      const isPair = h[0].rank === h[1].rank;
+      const suited = h[0].suit === h[1].suit;
+      if (isPair && r1 <= 2) handStrength = 4; // AA, KK, QQ
+      else if (isPair || (r1 <= 3 && r2 <= 3)) handStrength = 3; // pairs, AK, AQ, etc
+      else if (r1 <= 4 || r2 <= 4 || suited) handStrength = 2; // broadway, suited
+      else if (r1 <= 7 || r2 <= 7) handStrength = 1; // medium
+      else handStrength = 0; // weak
+    }
+  } catch (e) { /* ignore */ }
+
+  // Check if there's a bet/raise we're facing
+  const preflopActions = game.handHistory.filter(a => a.phase === phase);
+  const facingBet = preflopActions.some(a =>
+    a.player !== game.humanSeat && (a.action === 'raise' || a.action === 'bet' || a.action === 'allin')
+  );
+
+  // Were we the preflop aggressor?
+  const isAggressor = game.handHistory.some(a =>
+    a.player === game.humanSeat && a.phase === 'preflop' &&
+    (a.action === 'raise' || a.action === 'bet')
+  );
+
+  const ctx = { phase, position, facingBet, isAggressor, handStrength };
+  const tip = getPersonalizedTip(ctx);
+
+  if (tip) {
+    showCoachComment(tip);
   }
 }
 

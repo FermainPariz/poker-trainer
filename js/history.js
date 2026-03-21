@@ -4,17 +4,35 @@
 
 import { getPreflopStrength } from './evaluator.js';
 import { PHASES } from './engine.js';
+import { getCurrentUser } from './auth.js';
 
-const STORAGE_KEY = 'pokerHandHistory';
+const STORAGE_BASE = 'pokerHandHistory';
 const MAX_HANDS = 500;
 
 let history = [];
 let nextId = 1;
 
+function storageKey() {
+  const user = getCurrentUser();
+  return user?.id ? `${STORAGE_BASE}_${user.id}` : STORAGE_BASE;
+}
+
 // === Initialize: load from localStorage ===
 export function initHistory() {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const key = storageKey();
+    let stored = localStorage.getItem(key);
+
+    // Migration: if user just logged in and has no user-specific data,
+    // check for guest data and copy it over
+    if (!stored && key !== STORAGE_BASE) {
+      const guestData = localStorage.getItem(STORAGE_BASE);
+      if (guestData) {
+        stored = guestData;
+        localStorage.setItem(key, guestData);
+      }
+    }
+
     if (stored) {
       history = JSON.parse(stored);
       nextId = history.length > 0 ? Math.max(...history.map(h => h.id)) + 1 : 1;
@@ -235,7 +253,7 @@ export function clearHistory() {
 // === Persist to localStorage ===
 function persist() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    localStorage.setItem(storageKey(), JSON.stringify(history));
   } catch (e) {
     console.warn('Failed to save hand history:', e);
   }

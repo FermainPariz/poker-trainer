@@ -2,7 +2,14 @@
 // Virtual bankroll that feels like real money.
 // Buy-in management, session tracking, risk-of-ruin awareness.
 
-const BANKROLL_KEY = 'pokerBankroll';
+import { getCurrentUser } from './auth.js';
+
+const BANKROLL_BASE = 'pokerBankroll';
+
+function storageKey() {
+  const user = getCurrentUser();
+  return user?.id ? `${BANKROLL_BASE}_${user.id}` : BANKROLL_BASE;
+}
 
 const DEFAULTS = {
   bankroll: 10000,
@@ -21,10 +28,20 @@ let state = null;
 // === Init ===
 export function initBankroll() {
   try {
-    const stored = localStorage.getItem(BANKROLL_KEY);
+    const key = storageKey();
+    let stored = localStorage.getItem(key);
+
+    // Migration: copy guest data to user-specific key on first login
+    if (!stored && key !== BANKROLL_BASE) {
+      const guestData = localStorage.getItem(BANKROLL_BASE);
+      if (guestData) {
+        stored = guestData;
+        localStorage.setItem(key, guestData);
+      }
+    }
+
     if (stored) {
       state = JSON.parse(stored);
-      // Migrate old data
       if (!state.settings) state.settings = DEFAULTS.settings;
       if (!state.sessions) state.sessions = [];
     } else {
@@ -304,7 +321,7 @@ export function renderBankrollPanel(container) {
 
 function persist() {
   try {
-    localStorage.setItem(BANKROLL_KEY, JSON.stringify(state));
+    localStorage.setItem(storageKey(), JSON.stringify(state));
   } catch (e) {
     console.warn('Failed to save bankroll:', e);
   }
