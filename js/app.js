@@ -18,6 +18,7 @@ import { initMatrix, renderMatrix, toggleMatrix, isMatrixVisible } from './matri
 import { initAuth, onAuthReady, getCurrentUser, isGuestMode, isLoggedIn, getDisplayName, signOut } from './auth.js';
 import { cloudSaveSession, cloudSaveHand, cloudUpdateStats, cloudLoadUserData, cloudGetLeaderboard } from './db.js';
 import { initUserProfile, updateUserProfile, getPersonalizedTip, getTopLeaks } from './user-profile.js';
+import { escapeHtml, safeNum } from './utils.js';
 import * as UI from './ui.js';
 
 // === State ===
@@ -666,17 +667,17 @@ function showAnalysisFeedback(feedback, streetReview) {
       body.innerHTML += `
         <div style="padding:8px; margin-bottom:6px; border-radius:8px; background:rgba(255,255,255,.02); border-left:3px solid ${color};">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <span style="font-size:0.65em; font-weight:700; color:var(--text);">${s.street}</span>
-            <span style="font-size:0.5em; font-weight:700; color:${color}; padding:1px 6px; background:rgba(255,255,255,.05); border-radius:4px;">${label}</span>
+            <span style="font-size:0.65em; font-weight:700; color:var(--text);">${escapeHtml(s.street)}</span>
+            <span style="font-size:0.5em; font-weight:700; color:${color}; padding:1px 6px; background:rgba(255,255,255,.05); border-radius:4px;">${escapeHtml(label)}</span>
           </div>
-          ${s.board ? `<div style="font-size:0.55em; color:var(--text2); margin-bottom:2px;">Board: ${s.board} — ${s.handName}</div>` : ''}
-          <div style="font-size:0.55em; color:var(--text2); margin-bottom:2px;">${s.context}</div>
+          ${s.board ? `<div style="font-size:0.55em; color:var(--text2); margin-bottom:2px;">Board: ${escapeHtml(s.board)} — ${escapeHtml(s.handName)}</div>` : ''}
+          <div style="font-size:0.55em; color:var(--text2); margin-bottom:2px;">${escapeHtml(s.context)}</div>
           <div style="font-size:0.6em; margin-bottom:4px;">
             <span style="color:var(--text2);">Du: </span>
-            <span style="color:var(--text); font-weight:600;">${s.yourAction}</span>
+            <span style="color:var(--text); font-weight:600;">${escapeHtml(s.yourAction)}</span>
           </div>
           <div style="font-size:0.55em; color:var(--green); padding:3px 6px; background:rgba(34,197,94,.04); border-radius:4px;">
-            Optimal: ${s.optimal}
+            Optimal: ${escapeHtml(s.optimal)}
           </div>
         </div>`;
     }
@@ -688,10 +689,10 @@ function showAnalysisFeedback(feedback, streetReview) {
       const card = document.createElement('div');
       card.className = `feedback-card ${item.type}`;
       card.innerHTML = `
-        <div class="feedback-phase">${item.phase}</div>
-        <div class="feedback-title">${item.title}</div>
-        <div class="feedback-message">${item.message}</div>
-        ${item.tip ? `<div class="feedback-tip">${item.tip}</div>` : ''}
+        <div class="feedback-phase">${escapeHtml(item.phase)}</div>
+        <div class="feedback-title">${escapeHtml(item.title)}</div>
+        <div class="feedback-message">${escapeHtml(item.message)}</div>
+        ${item.tip ? `<div class="feedback-tip">${escapeHtml(item.tip)}</div>` : ''}
       `;
       body.appendChild(card);
     }
@@ -1103,11 +1104,11 @@ async function loadLeaderboard() {
       const meCls = e.isMe ? ' is-me' : '';
 
       html += `<tr class="${meCls}">
-        <td class="leaderboard-rank${rankCls}">${e.rank}</td>
-        <td>${e.username}${e.isMe ? ' (Du)' : ''}</td>
-        <td class="${pnlCls}">${e.totalPnl >= 0 ? '+' : ''}$${e.totalPnl}</td>
-        <td>${e.totalHands}</td>
-        <td>${e.accuracy ? e.accuracy.toFixed(0) + '%' : '--'}</td>
+        <td class="leaderboard-rank${rankCls}">${safeNum(e.rank)}</td>
+        <td>${escapeHtml(e.username)}${e.isMe ? ' (Du)' : ''}</td>
+        <td class="${pnlCls}">${safeNum(e.totalPnl) >= 0 ? '+' : ''}$${safeNum(e.totalPnl)}</td>
+        <td>${safeNum(e.totalHands)}</td>
+        <td>${e.accuracy ? safeNum(e.accuracy).toFixed(0) + '%' : '--'}</td>
       </tr>`;
     }
 

@@ -169,7 +169,8 @@ function setupAuthEvents() {
     try {
       if (mode === 'signup') {
         if (!username || username.length < 3) throw new Error('Username muss mind. 3 Zeichen haben');
-        if (password.length < 6) throw new Error('Passwort muss mind. 6 Zeichen haben');
+        if (!/^[A-Za-z0-9_-]{3,20}$/.test(username)) throw new Error('Username: nur Buchstaben, Zahlen, _ und - erlaubt');
+        if (password.length < 8) throw new Error('Passwort muss mind. 8 Zeichen haben');
         const result = await signUp(email, password, username);
         if (result.needsConfirmation) {
           errorEl.style.color = 'var(--green)';
@@ -203,8 +204,12 @@ function translateError(msg) {
   if (msg.includes('Invalid login')) return 'E-Mail oder Passwort falsch';
   if (msg.includes('already registered')) return 'E-Mail bereits registriert';
   if (msg.includes('valid email')) return 'Bitte gueltige E-Mail eingeben';
-  if (msg.includes('at least')) return 'Passwort zu kurz (mind. 6 Zeichen)';
-  return msg;
+  if (msg.includes('at least')) return 'Passwort zu kurz (mind. 8 Zeichen)';
+  if (msg.includes('rate limit') || msg.includes('too many')) return 'Zu viele Versuche. Bitte warte einen Moment.';
+  if (msg.includes('network') || msg.includes('fetch')) return 'Netzwerkfehler. Bitte pruefe deine Verbindung.';
+  // Never expose raw Supabase error messages to users
+  console.warn('Auth error:', msg);
+  return 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.';
 }
 
 // === Get display name (for top bar etc.) ===
