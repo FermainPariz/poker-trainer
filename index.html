@@ -9,11 +9,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/main.css?v=6">
-<link rel="stylesheet" href="css/table.css?v=20260321">
-<link rel="stylesheet" href="css/cards.css?v=6">
-<link rel="stylesheet" href="css/hud.css?v=6">
-<link rel="stylesheet" href="css/panels.css?v=6">
+<link rel="stylesheet" href="css/main.css?v=11">
+<link rel="stylesheet" href="css/table.css?v=11">
+<link rel="stylesheet" href="css/cards.css?v=11">
+<link rel="stylesheet" href="css/hud.css?v=11">
+<link rel="stylesheet" href="css/panels.css?v=11">
 <style>
   /* CSS fallback before JS runs — JS will override via inline style */
   .poker-table { width: min(88vw, calc((100dvh - 280px) * 5 / 3)); }
@@ -300,6 +300,7 @@
     app.classList.toggle('is-tiny', vw < 380);
 
     var isWide = vw >= 800;
+    var isNarrow = vw < 500;
     var cH = container.getBoundingClientRect().height;
     var cW = container.getBoundingClientRect().width;
 
@@ -308,6 +309,9 @@
     var action = document.getElementById('actionBar');
     var cont = document.getElementById('continueBar');
     var chromeH = 0, availW, margins;
+
+    // Aspect ratio: phones get a squarer table to use vertical space better
+    var ratio = isNarrow ? 3 / 2 : 5 / 3;
 
     if (isWide) {
       // Wide: HUD+coach in sidebar column, only action bar eats table height
@@ -325,13 +329,14 @@
       if (action && action.style.display !== 'none') chromeH += action.offsetHeight || 0;
       if (cont && cont.style.display !== 'none') chromeH += cont.offsetHeight || 0;
       if (chromeH < 20) chromeH = 80;
-      availW = cW * 0.88;
-      margins = Math.max(12, cH * 0.03) * 2;
+      availW = cW * 0.94;
+      margins = Math.max(8, cH * 0.015) * 2;
     }
 
-    // Divide by 1.55 to account for seats + cards that extend ~25% beyond table edges
-    var availH = (cH - chromeH - margins) / 1.55;
-    var fromH = Math.max(0, availH) * 5 / 3;
+    // Seat overflow factor: seats extend beyond table edges
+    var overflow = isNarrow ? 1.35 : 1.55;
+    var availH = (cH - chromeH - margins) / overflow;
+    var fromH = Math.max(0, availH) * ratio;
     var w = Math.max(80, Math.min(availW, fromH));
     table.style.width = w + 'px';
   }
@@ -349,6 +354,6 @@
   window.fitLayout = fitLayout;
 })();
 </script>
-<script type="module" src="js/app.js?v=9"></script>
+<script type="module" src="js/app.js?v=11"></script>
 </body>
 </html>

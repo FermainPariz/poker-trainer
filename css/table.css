@@ -12,7 +12,7 @@
   position: relative;
   overflow: visible;
   background: radial-gradient(ellipse at center, #0d1a12 0%, var(--bg) 70%);
-  padding: clamp(8px, 2vh, 24px) clamp(2px, 1vw, 12px) 0;
+  padding: clamp(4px, 1vh, 16px) clamp(2px, 1vw, 12px) 0;
 }
 
 /* Wide viewport: 2-column grid with sidebar for HUD/Coach */
@@ -62,29 +62,29 @@
 /* Narrow: action buttons stack into touch-friendly grid */
 .is-mobile .action-bar {
   flex-direction: column;
-  gap: 8px;
-  padding: 8px 12px;
-  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  gap: 5px;
+  padding: 6px 12px;
+  padding-bottom: max(6px, env(safe-area-inset-bottom));
 }
 
 .is-mobile .action-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
 }
 
 .is-mobile .btn {
-  padding: 14px 8px;
+  padding: 10px 8px;
   font-size: 0.85em;
-  border-radius: 12px;
-  min-height: 48px;
+  border-radius: 10px;
+  min-height: 42px;
   width: 100%;
 }
 
 .is-mobile .btn-allin {
   grid-column: span 3;
-  padding: 12px 8px;
+  padding: 8px 8px;
 }
 
 .is-mobile .raise-controls {
@@ -108,16 +108,16 @@
 
 .is-mobile .continue-bar {
   flex-direction: column;
-  gap: 10px;
-  padding: 12px 16px;
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  gap: 8px;
+  padding: 10px 16px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
 }
 
 .is-mobile .btn-deal {
   width: 100%;
-  padding: 16px 24px;
-  font-size: 1.05em;
-  min-height: 52px;
+  padding: 12px 24px;
+  font-size: 1em;
+  min-height: 46px;
 }
 
 /* === Community Area === */
@@ -178,13 +178,17 @@
 .seat-4 { top: 5%; right: -4%; transform: translateX(50%); flex-direction: column; }
 .seat-5 { bottom: 5%; right: -4%; transform: translateX(50%); flex-direction: column-reverse; }
 
-/* Narrow: bring seats closer to prevent clipping */
-.is-narrow .seat-0 { bottom: -12%; }
-.is-narrow .seat-1 { left: 0%; transform: translateX(-20%); }
-.is-narrow .seat-2 { left: 0%; transform: translateX(-20%); }
-.is-narrow .seat-3 { top: -12%; }
-.is-narrow .seat-4 { right: 0%; transform: translateX(20%); }
-.is-narrow .seat-5 { right: 0%; transform: translateX(20%); }
+/* Narrow phones: squarer table + tighter seats */
+.is-narrow .poker-table {
+  aspect-ratio: 3 / 2;
+}
+
+.is-narrow .seat-0 { bottom: -10%; }
+.is-narrow .seat-1 { left: 0%; transform: translateX(-15%); }
+.is-narrow .seat-2 { left: 0%; transform: translateX(-15%); }
+.is-narrow .seat-3 { top: -10%; }
+.is-narrow .seat-4 { right: 0%; transform: translateX(15%); }
+.is-narrow .seat-5 { right: 0%; transform: translateX(15%); }
 
 /* === Player Info Box === */
 .player-info {
