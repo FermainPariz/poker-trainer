@@ -9,12 +9,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/main.css?v=14">
-<link rel="stylesheet" href="css/table.css?v=14">
-<link rel="stylesheet" href="css/cards.css?v=14">
-<link rel="stylesheet" href="css/hud.css?v=14">
-<link rel="stylesheet" href="css/panels.css?v=16">
-<link rel="stylesheet" href="css/auth.css?v=15">
+<link rel="stylesheet" href="css/main.css?v=17">
+<link rel="stylesheet" href="css/table.css?v=17">
+<link rel="stylesheet" href="css/cards.css?v=17">
+<link rel="stylesheet" href="css/hud.css?v=17">
+<link rel="stylesheet" href="css/panels.css?v=17">
+<link rel="stylesheet" href="css/auth.css?v=17">
 <style>
   /* CSS fallback before JS runs — JS will override via inline style */
   .poker-table { width: min(88vw, calc((100dvh - 280px) * 5 / 3)); }
@@ -338,6 +338,32 @@
   </div>
 </div>
 
+<script>
+// === Guest Session Persistence (inline — never cached) ===
+(function() {
+  // Save guest mode on button click
+  document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('authGuest');
+    if (btn) btn.addEventListener('click', function() {
+      localStorage.setItem('pokerGuestMode', 'true');
+    });
+    // Clear guest flag when "Anmelden" is clicked from game view
+    var loginBtn = document.getElementById('topBarLogin');
+    if (loginBtn) loginBtn.addEventListener('click', function() {
+      localStorage.removeItem('pokerGuestMode');
+    });
+  });
+  // Auto-restore guest session: inject CSS to hide auth screen immediately
+  if (localStorage.getItem('pokerGuestMode') === 'true') {
+    // Set global flag so module's initAuth() knows to skip showing auth screen
+    window.__pokerGuestRestore = true;
+    // Hide auth screen via CSS (runs before DOM is parsed — no flash)
+    var s = document.createElement('style');
+    s.textContent = '#authScreen{display:none!important}';
+    document.head.appendChild(s);
+  }
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pokersolver@2.1.2/pokersolver.min.js"></script>
 <script>
@@ -345,6 +371,7 @@
 (function() {
   var rafId;
   function fitLayout() {
+    try {
     var table = document.getElementById('pokerTable');
     var container = document.querySelector('.table-container');
     var app = document.getElementById('app');
@@ -415,6 +442,7 @@
         coach.style.maxHeight = '';
       }
     }
+    } catch(e) { console.warn('fitLayout error:', e); }
   }
 
   function requestFit() {
@@ -427,9 +455,22 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLayout);
   });
   window.addEventListener('resize', requestFit);
+  window.addEventListener('orientationchange', function() {
+    setTimeout(fitLayout, 150);
+  });
+  // MutationObserver: re-fit when panels open/close (display changes)
+  document.addEventListener('DOMContentLoaded', function() {
+    var app = document.getElementById('app');
+    if (app && window.MutationObserver) {
+      new MutationObserver(requestFit).observe(app, {
+        childList: true, subtree: true, attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+    }
+  });
   window.fitLayout = fitLayout;
 })();
 </script>
-<script type="module" src="js/app.js?v=15"></script>
+<script type="module" src="js/app.js?v=17"></script>
 </body>
 </html>

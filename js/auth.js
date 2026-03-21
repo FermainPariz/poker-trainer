@@ -49,6 +49,15 @@ export async function initAuth() {
     console.warn('Auth session check failed:', e);
   }
 
+  // Check if user was previously in guest mode (localStorage or inline script flag)
+  if (localStorage.getItem('pokerGuestMode') === 'true' || window.__pokerGuestRestore) {
+    isGuest = true;
+    currentUser = null;
+    hideAuthScreen();
+    if (authReadyCallback) authReadyCallback(null);
+    return;
+  }
+
   // No session — show auth screen
   showAuthScreen();
 }
@@ -71,6 +80,7 @@ async function signUp(email, password, username) {
 
   currentUser = data.user;
   isGuest = false;
+  localStorage.removeItem('pokerGuestMode');
   await loadProfile();
   return { needsConfirmation: false, user: currentUser };
 }
@@ -82,6 +92,7 @@ async function signIn(email, password) {
   if (error) throw error;
   currentUser = data.user;
   isGuest = false;
+  localStorage.removeItem('pokerGuestMode');
   await loadProfile();
   return currentUser;
 }
@@ -94,6 +105,7 @@ export async function signOut() {
   }
   currentUser = null;
   isGuest = false;
+  localStorage.removeItem('pokerGuestMode');
   // Reload to show auth screen fresh
   window.location.reload();
 }
@@ -102,6 +114,7 @@ export async function signOut() {
 function playAsGuest() {
   isGuest = true;
   currentUser = null;
+  localStorage.setItem('pokerGuestMode', 'true');
 }
 
 // === Load profile data ===
