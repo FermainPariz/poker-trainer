@@ -225,6 +225,19 @@ body {
 .btn-call .gto-freq { color: rgba(100,165,246,.8); }
 .btn-raise .gto-freq { color: rgba(255,215,0,.7); }
 
+/* EV labels on action buttons */
+.ev-label {
+  display: block;
+  font-size: 0.6em;
+  font-weight: 600;
+  margin-top: 1px;
+  letter-spacing: 0.3px;
+}
+.ev-label:empty { display: none; }
+.ev-label.ev-pos { color: var(--green); }
+.ev-label.ev-neg { color: var(--accent); }
+.ev-label.ev-zero { color: var(--text2); }
+
 /* === Raise Slider === */
 .hand-counter {
   font-size: 0.8em;

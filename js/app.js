@@ -3,7 +3,7 @@
 import { Game, PHASES, ACTIONS } from './engine.js';
 import { AIPlayer, AI_ASSIGNMENTS } from './ai.js';
 import { analyzeHand, generateStreetReview } from './analyzer.js';
-import { initHUD, requestEquity, updateFullHUD, clearHUD, onEquityUpdate, toggleHUD } from './hud.js';
+import { initHUD, requestEquity, updateFullHUD, clearHUD, onEquityUpdate, toggleHUD, getCurrentEquity } from './hud.js';
 import { recordHand, getSessionStats } from './psychology.js';
 import { initSession, recordHandResult, getSessionPnL, renderStatsOverlay } from './stats.js';
 import { getPreflopComment, getPostflopComment, getActionComment, getHandSummary, getSituationComment, getAIActionComment, challengeCoachAdvice, getGTOFrequencies } from './coach.js';
@@ -102,6 +102,7 @@ function bindEvents() {
     const val = parseInt(slider.value);
     document.getElementById('raiseDisplay').textContent = `$${val}`;
     document.getElementById('raiseAmount').textContent = `$${val}`;
+    updateActionEVs();
   });
 
   // Pot-size presets — raise = toCall + fraction of (pot after calling)
@@ -203,6 +204,7 @@ function setSliderValue(val) {
   slider.value = val;
   document.getElementById('raiseDisplay').textContent = `$${val}`;
   document.getElementById('raiseAmount').textContent = `$${val}`;
+  updateActionEVs();
 }
 
 // === Start New Hand ===
@@ -978,13 +980,17 @@ function showTiltWarning(tiltFeedback) {
 }
 
 // === Coach Bubble ===
-// === GTO Frequency Display on Action Buttons ===
+// === GTO Frequency + EV Display on Action Buttons ===
 function updateGTOFrequencies() {
   const freq = getGTOFrequencies(game);
   const elFold = document.getElementById('freqFold');
   const elCheck = document.getElementById('freqCheck');
   const elCall = document.getElementById('freqCall');
   const elRaise = document.getElementById('freqRaise');
+  const evFold = document.getElementById('evFold');
+  const evCheck = document.getElementById('evCheck');
+  const evCall = document.getElementById('evCall');
+  const evRaise = document.getElementById('evRaise');
   if (!elFold) return;
 
   if (!freq) {
@@ -992,6 +998,7 @@ function updateGTOFrequencies() {
     elCheck.textContent = '';
     elCall.textContent = '';
     elRaise.textContent = '';
+    if (evFold) { evFold.textContent = ''; evCheck.textContent = ''; evCall.textContent = ''; evRaise.textContent = ''; }
     return;
   }
 
@@ -999,6 +1006,62 @@ function updateGTOFrequencies() {
   elCheck.textContent = freq.check > 0 ? `${freq.check}%` : '';
   elCall.textContent = freq.call > 0 ? `${freq.call}%` : '';
   elRaise.textContent = freq.raise > 0 ? `${freq.raise}%` : '';
+
+  // Compute and display EV for each action
+  if (evFold) updateActionEVs();
+}
+
+function updateActionEVs() {
+  const equity = getCurrentEquity();
+  const evFold = document.getElementById('evFold');
+  const evCheck = document.getElementById('evCheck');
+  const evCall = document.getElementById('evCall');
+  const evRaise = document.getElementById('evRaise');
+  if (!evFold) return;
+
+  // Clear all first
+  evFold.textContent = ''; evFold.className = 'ev-label';
+  evCheck.textContent = ''; evCheck.className = 'ev-label';
+  evCall.textContent = ''; evCall.className = 'ev-label';
+  evRaise.textContent = ''; evRaise.className = 'ev-label';
+
+  if (equity === null || !game) return;
+
+  const pot = game.pot + game.getCurrentBetsTotal();
+  const toCall = game.getCallAmount();
+  const eqPct = equity / 100;
+
+  // Fold EV: always 0 (you lose nothing more)
+  setEV(evFold, 0);
+
+  if (toCall > 0) {
+    // Facing a bet: Call EV = equity * (pot + call) - call
+    const callEV = eqPct * (pot + toCall) - toCall;
+    setEV(evCall, callEV);
+
+    // Raise EV estimate: assumes ~40% fold equity + equity when called
+    const raiseAmt = parseInt(document.getElementById('raiseSlider')?.value) || game.getMinRaise();
+    const raisePot = pot + raiseAmt;
+    const foldEq = 0.35; // conservative fold equity estimate
+    const raiseEV = foldEq * pot + (1 - foldEq) * (eqPct * (raisePot + raiseAmt) - raiseAmt);
+    setEV(evRaise, raiseEV);
+  } else {
+    // No bet facing: Check EV = 0 (keep current equity), Bet EV estimated
+    setEV(evCheck, 0);
+
+    const betAmt = parseInt(document.getElementById('raiseSlider')?.value) || Math.round(pot * 0.66);
+    const foldEq = 0.35;
+    const betEV = foldEq * pot + (1 - foldEq) * (eqPct * (pot + betAmt * 2) - betAmt);
+    setEV(evRaise, betEV);
+  }
+}
+
+function setEV(el, ev) {
+  if (!el) return;
+  const rounded = Math.round(ev);
+  const sign = rounded >= 0 ? '+' : '';
+  el.textContent = `EV ${sign}$${rounded}`;
+  el.className = 'ev-label ' + (rounded > 0 ? 'ev-pos' : rounded < 0 ? 'ev-neg' : 'ev-zero');
 }
 
 // === GTO Score Popup (flashes after each decision) ===
@@ -1330,6 +1393,10 @@ function switchMode(mode) {
   initBankroll();
   startSession(game.bigBlind);
   initSession(game.startingStack);
+
+  // Clear community cards from previous game
+  const cc = document.getElementById('communityCards');
+  if (cc) cc.innerHTML = '';
 
   // Re-render
   UI.renderAllSeats(game);
