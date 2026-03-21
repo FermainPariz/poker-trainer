@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="css/cards.css?v=14">
 <link rel="stylesheet" href="css/hud.css?v=14">
 <link rel="stylesheet" href="css/panels.css?v=16">
-<link rel="stylesheet" href="css/auth.css?v=14">
+<link rel="stylesheet" href="css/auth.css?v=15">
 <style>
   /* CSS fallback before JS runs — JS will override via inline style */
   .poker-table { width: min(88vw, calc((100dvh - 280px) * 5 / 3)); }
@@ -66,6 +66,7 @@
       <span class="user-badge" id="userBadge" style="display:none">
         <span class="user-icon">&#9827;</span>
         <span id="userName">Gast</span>
+        <button class="btn-login" id="btnLogin" style="display:none">Anmelden</button>
         <button class="btn-logout" id="btnLogout">Logout</button>
       </span>
       <!-- Desktop: inline buttons -->
@@ -416,6 +417,6 @@
   window.fitLayout = fitLayout;
 })();
 </script>
-<script type="module" src="js/app.js?v=14"></script>
+<script type="module" src="js/app.js?v=15"></script>
 </body>
 </html>

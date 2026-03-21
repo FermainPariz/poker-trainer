@@ -15,7 +15,7 @@ import { initQuiz, renderQuizPanel } from './quiz.js';
 import { initProfiler, processHandForProfiles, getOpponentBadgeHTML, getOpponentAdvice, getExploitTip } from './profiler.js';
 import { scoreDecision, formatScoreResult, getSessionScoring, recordHandPlayed, resetScoring, markTurnStart, getFatigueWarning } from './scoring.js';
 import { initMatrix, renderMatrix, toggleMatrix, isMatrixVisible } from './matrix.js';
-import { initAuth, onAuthReady, getCurrentUser, isGuestMode, isLoggedIn, getDisplayName, signOut } from './auth.js';
+import { initAuth, onAuthReady, getCurrentUser, isGuestMode, isLoggedIn, getDisplayName, signOut, showLoginScreen } from './auth.js';
 import { cloudSaveSession, cloudSaveHand, cloudUpdateStats, cloudLoadUserData, cloudGetLeaderboard } from './db.js';
 import { initUserProfile, updateUserProfile, getPersonalizedTip, getTopLeaks } from './user-profile.js';
 import { escapeHtml, safeNum } from './utils.js';
@@ -145,6 +145,11 @@ function bindEvents() {
   document.getElementById('btnLogout')?.addEventListener('click', async () => {
     if (getCurrentSession()) endSession();
     await signOut();
+  });
+
+  // Login (from guest mode — show auth screen)
+  document.getElementById('btnLogin')?.addEventListener('click', () => {
+    showLoginScreen();
   });
 
   // HUD toggle — handled by hud.js initHUD(), no duplicate listener here
@@ -1159,15 +1164,18 @@ function updateUserDisplay() {
   const badge = document.getElementById('userBadge');
   const nameEl = document.getElementById('userName');
   const logoutBtn = document.getElementById('btnLogout');
+  const loginBtn = document.getElementById('btnLogin');
   if (!badge) return;
 
   if (isLoggedIn()) {
     nameEl.textContent = getDisplayName();
     logoutBtn.style.display = '';
+    if (loginBtn) loginBtn.style.display = 'none';
     badge.style.display = 'flex';
   } else if (isGuestMode()) {
     nameEl.textContent = 'Gast';
     logoutBtn.style.display = 'none';
+    if (loginBtn) loginBtn.style.display = '';
     badge.style.display = 'flex';
   } else {
     badge.style.display = 'none';

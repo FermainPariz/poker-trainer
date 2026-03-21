@@ -116,6 +116,16 @@ async function loadProfile() {
   }
 }
 
+// === Re-show auth screen (e.g. from guest mode) ===
+let authEventsSetup = false;
+export function showLoginScreen() {
+  const screen = document.getElementById('authScreen');
+  if (screen) {
+    screen.style.display = 'flex';
+    if (!authEventsSetup) setupAuthEvents();
+  }
+}
+
 // === Auth Screen UI ===
 function showAuthScreen() {
   const screen = document.getElementById('authScreen');
@@ -127,6 +137,7 @@ function showAuthScreen() {
   }
   screen.style.display = 'flex';
   setupAuthEvents();
+  authEventsSetup = true;
 }
 
 function hideAuthScreen() {

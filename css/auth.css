@@ -226,6 +226,25 @@
   font-size: 1.1em;
 }
 
+.btn-login {
+  background: rgba(34,197,94,.1);
+  border: 1px solid rgba(34,197,94,.25);
+  border-radius: 4px;
+  color: var(--green);
+  font-size: .6em;
+  font-weight: 700;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-family: inherit;
+  margin-left: 4px;
+  transition: all .2s;
+}
+
+.btn-login:hover {
+  background: rgba(34,197,94,.2);
+  border-color: var(--green);
+}
+
 .btn-logout {
   background: transparent;
   border: 1px solid var(--glass-border);
