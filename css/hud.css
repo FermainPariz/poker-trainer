@@ -1,0 +1,182 @@
+/* === HUD: Horizontal strip by default, sidebar when container is wide === */
+/* Default: compact horizontal strip (works at any size) */
+.hud {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 2px;
+  justify-content: center;
+  margin: clamp(2px, 0.5cqh, 8px) auto 0;
+  padding: 0;
+  z-index: 15;
+  pointer-events: none;
+  background: transparent;
+  backdrop-filter: none;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: auto;
+  min-width: clamp(32px, 4vmin, 50px);
+  padding: clamp(1px, 0.3vmin, 3px) clamp(4px, 0.6vmin, 8px);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: clamp(4px, 0.5vmin, 8px);
+  border-bottom: none;
+}
+
+.hud-label {
+  font-size: clamp(0.35em, 0.6vmin, 0.7em);
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: clamp(0.4px, 0.06vmin, 1.2px);
+}
+
+.hud-value {
+  font-size: clamp(0.5em, 0.85vmin, 1em);
+  font-weight: 800;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Color classes */
+.hud-value.positive { color: var(--green); }
+.hud-value.negative { color: var(--accent); }
+.hud-value.neutral { color: var(--gold); }
+
+/* === Wide viewport: HUD becomes sidebar column === */
+.is-wide .hud {
+  grid-column: 2;
+  grid-row: 1;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  background: rgba(10, 10, 15, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: clamp(8px, 0.8vw, 12px);
+  overflow: hidden;
+}
+
+.is-wide .hud-item {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-width: unset;
+  padding: clamp(6px, 0.8vw, 12px) clamp(10px, 1.2vw, 18px);
+  background: transparent;
+  backdrop-filter: none;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 0;
+}
+
+.is-wide .hud-item:last-child {
+  border-bottom: none;
+}
+
+/* HUD divider between standard items and scoring items */
+.hud-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,.12);
+  align-self: center;
+  margin: 0 2px;
+}
+.is-wide .hud-divider {
+  width: 100%;
+  height: 1px;
+  margin: 0;
+  background: rgba(255,215,0,.15);
+}
+
+/* Scoring color classes */
+.hud-value.score-best { color: var(--green); }
+.hud-value.score-correct { color: #60a5fa; }
+.hud-value.score-inaccuracy { color: var(--gold); }
+.hud-value.score-mistake { color: #f97316; }
+.hud-value.score-blunder { color: var(--accent); }
+
+.is-wide .hud-label {
+  font-size: clamp(0.5em, 0.6vw, 0.7em);
+}
+
+.is-wide .hud-value {
+  font-size: clamp(0.7em, 0.85vw, 1em);
+}
+
+/* === Feedback cards (used inside analysis-panel) === */
+.feedback-card {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border-left: 3px solid;
+}
+
+.feedback-card.warning {
+  background: rgba(255, 180, 0, 0.06);
+  border-color: var(--gold);
+}
+
+.feedback-card.info {
+  background: rgba(59, 130, 246, 0.06);
+  border-color: #60a5fa;
+}
+
+.feedback-card.success {
+  background: rgba(34, 197, 94, 0.06);
+  border-color: var(--green);
+}
+
+.feedback-card.error {
+  background: rgba(233, 69, 96, 0.06);
+  border-color: var(--accent);
+}
+
+.feedback-phase {
+  font-size: 0.55em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+
+.feedback-title {
+  font-size: 0.8em;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.feedback-message {
+  font-size: 0.7em;
+  color: var(--text2);
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.feedback-tip {
+  font-size: 0.65em;
+  color: var(--green);
+  background: rgba(34, 197, 94, 0.06);
+  padding: 6px 8px;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+.feedback-tip::before {
+  content: 'Tipp: ';
+  font-weight: 700;
+}

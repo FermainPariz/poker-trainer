@@ -1,0 +1,194 @@
+{
+  "description": "Simplified GTO postflop strategy data for 6-Max 100bb. Based on solver outputs. Frequencies are approximations for training purposes.",
+
+  "cbet_strategy": {
+    "description": "C-Bet frequency and sizing based on board texture and position. IP = In Position, OOP = Out of Position.",
+    "ip_as_pfr": {
+      "high_dry_rainbow": {
+        "example": "Ah-7d-2c, Kc-8h-3s",
+        "frequency": 85,
+        "sizing_pct": 33,
+        "reason": "Raiser hat grossen Range-Advantage. Hohe Karten treffen PFR-Range besser. Kleine Bets reichen — Gegner hat selten starke Haende."
+      },
+      "high_dry_twotone": {
+        "example": "Kh-8h-3c, Ac-Jc-4d",
+        "frequency": 70,
+        "sizing_pct": 50,
+        "reason": "Range-Advantage noch vorhanden, aber Flush-Draws existieren. Etwas groesser betten fuer Protection."
+      },
+      "high_wet": {
+        "example": "Kh-Jh-Tc, Qh-Jh-9c",
+        "frequency": 45,
+        "sizing_pct": 66,
+        "reason": "Board trifft beide Ranges. Caller hat viele Draws und Two-Pair-Combos. Selektiv betten mit starken Haenden und guten Draws."
+      },
+      "medium_connected": {
+        "example": "8h-7d-6c, 9c-8h-7d",
+        "frequency": 30,
+        "sizing_pct": 75,
+        "reason": "Caller hat Range-Advantage! Viele Sets, Two Pairs, Straights in Caller-Range. Nur mit starken Haenden betten, dafuer gross."
+      },
+      "low_dry": {
+        "example": "5h-3d-2c, 4c-3h-2d",
+        "frequency": 80,
+        "sizing_pct": 25,
+        "reason": "Raiser hat Overpair-Advantage. Kleine Bets hoch-frequent — Gegner muss oft folden und hat selten Sets."
+      },
+      "monotone": {
+        "example": "Jh-8h-4h, Qs-7s-3s",
+        "frequency": 25,
+        "sizing_pct": 75,
+        "reason": "Extreme Vorsicht! Jeder mit 2 Karten der Farbe hat einen Flush. Nur mit Nut-Flush-Blocker oder Made Flush betten. Check-Frequenz sehr hoch."
+      },
+      "paired": {
+        "example": "8h-8d-3c, Kc-Kh-5d",
+        "frequency": 60,
+        "sizing_pct": 33,
+        "reason": "Board-Pair reduziert moegliche Strong-Hands dramatisch. Kleine Bets frequent — Gegner hat selten Trips. Grosse Bets nur mit Full House+."
+      }
+    },
+    "oop_as_pfr": {
+      "description": "OOP c-bet frequencies sollten ~15-20% niedriger sein als IP, da fehlende Position die Equity-Realisierung reduziert.",
+      "adjustment": -15
+    }
+  },
+
+  "bet_sizing_theory": {
+    "description": "GTO Bet Sizing basiert auf Range-Polarisierung. Je polarisierter die Range (nur Nuts oder Bluffs), desto groesser die Bets.",
+    "sizings": {
+      "25_pct": {
+        "use_when": "Grosse Range-Advantage, trockenes Board. Dein ganzer Range bettet.",
+        "value_bluff_ratio": "75% Value / 25% Bluffs",
+        "mdf_opponent": 80,
+        "example_hands_value": "Overpairs, Top Pair Good Kicker, Sets",
+        "example_hands_bluff": "Backdoor Draws, Overcards"
+      },
+      "33_pct": {
+        "use_when": "Standardgroesse auf trockenen Boards. Effizient — druckt Fold Equity ohne viel zu riskieren.",
+        "value_bluff_ratio": "70% Value / 30% Bluffs",
+        "mdf_opponent": 75,
+        "example_hands_value": "Top Pair+, Overpairs",
+        "example_hands_bluff": "Gutshots, Backdoor Flush Draws, Overcards"
+      },
+      "50_pct": {
+        "use_when": "Standard Value/Protection Bet. Two-Tone Boards oder wenn Draws drohen.",
+        "value_bluff_ratio": "65% Value / 35% Bluffs",
+        "mdf_opponent": 67,
+        "example_hands_value": "Top Pair+, Sets, Two Pair",
+        "example_hands_bluff": "Flush Draws, OESDs, Gutshots mit Overcards"
+      },
+      "66_pct": {
+        "use_when": "Protection gegen Draws, polarisierte Ranges auf wet Boards.",
+        "value_bluff_ratio": "60% Value / 40% Bluffs",
+        "mdf_opponent": 60,
+        "example_hands_value": "Strong Top Pair, Sets, Straights",
+        "example_hands_bluff": "Strong Draws (Flush Draw + Overcards), Semi-Bluffs"
+      },
+      "75_pct": {
+        "use_when": "Nasse Boards mit vielen Draws. Schuetze starke Haende.",
+        "value_bluff_ratio": "57% Value / 43% Bluffs",
+        "mdf_opponent": 57,
+        "example_hands_value": "Sets, Straights, Flushes",
+        "example_hands_bluff": "Combo Draws, Nut Flush Draws"
+      },
+      "100_pct": {
+        "use_when": "Pot-Size Bet. Sehr polarisiert — nur Nuts oder Bluffs.",
+        "value_bluff_ratio": "50% Value / 50% Bluffs",
+        "mdf_opponent": 50,
+        "example_hands_value": "Straights, Flushes, Full Houses",
+        "example_hands_bluff": "Busted Draws, Air mit Blockern"
+      },
+      "150_pct": {
+        "use_when": "Overbet am River. Extreme Nut-Advantage — Gegner hat fast nie die Nuts.",
+        "value_bluff_ratio": "40% Value / 60% Bluffs (paradoxerweise MEHR Bluffs erlaubt)",
+        "mdf_opponent": 40,
+        "example_hands_value": "Nut Flush, Full House, Quads",
+        "example_hands_bluff": "Busted Draws mit Nut-Flush-Blocker"
+      }
+    }
+  },
+
+  "range_advantage": {
+    "description": "Wer hat die staerkere Range auf diesem Board? Bestimmt Bet-Frequenz und Sizing.",
+    "pfr_advantage_boards": {
+      "description": "Boards wo der Preflop-Raiser (PFR) Range-Advantage hat",
+      "conditions": [
+        "High-Card Board (A/K/Q high): PFR hat mehr AK, AQ, AJ, KQ — alle treffen",
+        "Unpaired Dry Board: PFR hat mehr Overpairs (AA, KK, QQ)",
+        "Ace-High Board: PFR hat ~16% seiner Range mit Ax, Caller weniger",
+        "Rainbow Board: Keine Flush-Draws — PFR kann hoch-frequent c-betten"
+      ],
+      "strategy": "Hoch-frequent mit kleinem Sizing betten (25-33% Pot)"
+    },
+    "caller_advantage_boards": {
+      "description": "Boards wo der Caller Range-Advantage hat",
+      "conditions": [
+        "Low Connected Board (7-6-5, 8-7-6): Caller hat mehr suited connectors, Small Pocket Pairs",
+        "Medium Connected Board (J-T-9, T-9-8): Caller hat mehr Two-Pair, Straight Combos",
+        "Monotone Board: Caller hat mehr Flush-Combos (breitere suited Range)",
+        "Paired Low Board (4-4-x): Caller hat mehr 4x-Combos"
+      ],
+      "strategy": "Selektiv betten mit starken Haenden, groesseres Sizing (66-75% Pot). Viel checken."
+    }
+  },
+
+  "facing_3bet": {
+    "description": "Was tun wenn du ge-3-bettet wirst (du hast geraist, Gegner re-raist)",
+    "default_sizing": "3-Bet ist typisch 3x des urspruenglichen Raises. Pot ist jetzt gross.",
+    "strategy": {
+      "4bet_value": ["AA", "KK", "QQ", "AKs"],
+      "4bet_bluff": ["A5s", "A4s"],
+      "call": {
+        "ip": ["JJ", "TT", "99", "AQs", "AJs", "ATs", "KQs", "QJs", "JTs", "T9s", "98s", "87s", "76s", "AKo", "AQo"],
+        "oop": ["JJ", "TT", "AQs", "AJs", "KQs", "AKo"]
+      },
+      "fold_everything_else": true
+    },
+    "sizing": {
+      "4bet_ip": "2.5x der 3-Bet (z.B. 3-Bet auf $30 → 4-Bet auf $75)",
+      "4bet_oop": "3x der 3-Bet (z.B. 3-Bet auf $30 → 4-Bet auf $90)"
+    }
+  },
+
+  "river_strategy": {
+    "description": "Am River gibt es keine Draws mehr — Ranges sind komplett polarisiert.",
+    "value_betting": {
+      "principle": "Bette nur Haende die von SCHLECHTEREN gecallt werden. Wenn nur bessere callen, ist es kein Value-Bet sondern ein Fehler.",
+      "thin_value": "Am River duenner value-betten: Top Pair mit gutem Kicker ist oft die beste Hand. Aber: je groesser die Bet, desto weniger schlechtere Haende callen.",
+      "sizing": "Value-Bet-Groesse = wie viel wird der Gegner mit seinen Call-Haenden maximal bezahlen?"
+    },
+    "bluffing": {
+      "principle": "Bluffe am River nur mit Haenden die 0% Showdown-Value haben (busted draws, air). Verwende Blocker-Logik: Haende die die Nuts des Gegners blockieren sind die besten Bluffs.",
+      "frequency": "Bei Pot-Size-Bet: 1 Bluff fuer jede Value-Hand (50/50). Bei halber Pot: 1 Bluff fuer 2 Value-Hands (33/67).",
+      "best_bluff_candidates": [
+        "Busted Flush Draw mit Nut-Flush-Blocker (Ah auf Flush-Board)",
+        "Busted Straight Draw",
+        "Haende mit Set-Blockern (z.B. Pocket Pair eines Board-Rangs)"
+      ]
+    },
+    "calling": {
+      "principle": "Calle mit Bluff-Catchern — Haende die Bluffs schlagen aber gegen Value verlieren. Nicht ueber-folden!",
+      "mdf_reminder": "MDF = Pot / (Pot + Bet). Bei Pot-Size-Bet: calle mindestens 50% deiner Range."
+    }
+  },
+
+  "position_equity_realization": {
+    "description": "Nicht alle Equity wird gleich realisiert. Position bestimmt wie viel deiner theoretischen Equity du tatsaechlich gewinnst.",
+    "ip": {
+      "factor": 1.0,
+      "reason": "In Position: du agierst zuletzt, kontrollierst Pot-Groesse, realisierst 100% deiner Equity. Du entscheidest ob du Free Cards gibst oder den Pot aufbaust."
+    },
+    "oop_made_hand": {
+      "factor": 0.85,
+      "reason": "OOP mit Made Hand: ~85%. Du musst zuerst agieren, was dir weniger Kontrolle gibt. Check-Raises und Donk-Bets sind deine Waffen."
+    },
+    "oop_draw": {
+      "factor": 0.70,
+      "reason": "OOP mit Draw: nur ~70%. Du kannst Free Cards nicht erzwingen. Der Gegner kontrolliert die Pot-Groesse. Draws OOP muessen staerker sein um profitabel zu sein."
+    },
+    "oop_marginal": {
+      "factor": 0.75,
+      "reason": "OOP mit marginaler Hand: ~75%. Check-Call oder Check-Fold Entscheidungen sind schwer. Der Gegner kann Position nutzen um dich aus dem Pot zu druecken."
+    }
+  }
+}

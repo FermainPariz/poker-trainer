@@ -1,0 +1,321 @@
+/* === Poker Table — Fully Dynamic Layout === */
+/* JS fitLayout() handles precise table sizing. CSS uses @media for layout switches. */
+
+.table-container {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  grid-template-columns: 1fr;
+  align-content: center;
+  justify-items: center;
+  position: relative;
+  overflow: visible;
+  background: radial-gradient(ellipse at center, #0d1a12 0%, var(--bg) 70%);
+  padding: clamp(8px, 2vh, 24px) clamp(2px, 1vw, 12px) 0;
+}
+
+/* Wide viewport: 2-column grid with sidebar for HUD/Coach */
+.is-wide .table-container {
+  grid-template-columns: 1fr clamp(140px, 20vw, 300px);
+  grid-template-rows: 1fr auto auto;
+  align-content: stretch;
+  padding: 1vh clamp(12px, 2vw, 36px) 0 clamp(16px, 3vw, 50px);
+  gap: 0 clamp(10px, 2vw, 40px);
+}
+
+.poker-table {
+  position: relative;
+  justify-self: center;
+  /* JS sets exact width via fitLayout(). CSS fallback for no-JS: */
+  width: min(88vw, calc((100dvh - 280px) * 5 / 3));
+  aspect-ratio: 5 / 3;
+  /* Margins scale with viewport */
+  margin: clamp(4px, 1.5vh, 30px) 0;
+  background: radial-gradient(ellipse at center, var(--felt-light) 0%, var(--felt) 60%, #14351e 100%);
+  border-radius: 50%;
+  border: clamp(3px, 0.4vmin, 6px) solid #3d2b1f;
+  box-shadow:
+    0 0 0 clamp(4px, 0.5vmin, 10px) #2a1f15,
+    0 0 0 clamp(6px, 0.7vmin, 12px) rgba(255,215,0,.15),
+    inset 0 0 clamp(20px, 4vmin, 60px) rgba(0,0,0,.3),
+    0 clamp(8px, 2vmin, 20px) clamp(20px, 4vmin, 60px) rgba(0,0,0,.5);
+  overflow: visible;
+}
+
+/* Wide: place table in grid cell 1 */
+.is-wide .poker-table {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: center;
+  align-self: center;
+  margin: clamp(20px, 3vh, 50px) auto;
+}
+
+/* Wide: action bar spans full grid width */
+.is-wide .action-bar, .is-wide .continue-bar {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  justify-self: stretch;
+}
+
+/* Narrow: action buttons stack into touch-friendly grid */
+.is-mobile .action-bar {
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 12px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+.is-mobile .action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  width: 100%;
+}
+
+.is-mobile .btn {
+  padding: 14px 8px;
+  font-size: 0.85em;
+  border-radius: 12px;
+  min-height: 48px;
+  width: 100%;
+}
+
+.is-mobile .btn-allin {
+  grid-column: span 3;
+  padding: 12px 8px;
+}
+
+.is-mobile .raise-controls {
+  width: 100%;
+  gap: 6px;
+  justify-content: center;
+}
+
+.is-mobile .raise-slider {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  height: 8px;
+}
+
+.is-mobile .raise-slider::-webkit-slider-thumb { width: 28px; height: 28px; }
+.is-mobile .raise-slider::-moz-range-thumb { width: 28px; height: 28px; }
+
+.is-mobile .btn-raise-preset { padding: 10px 12px; font-size: 0.8em; min-height: 44px; }
+.is-mobile .raise-display { font-size: 0.9em; min-width: 44px; }
+
+.is-mobile .continue-bar {
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+.is-mobile .btn-deal {
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 1.05em;
+  min-height: 52px;
+}
+
+/* === Community Area === */
+.community-area {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2px, 0.5vmin, 8px);
+  z-index: 2;
+}
+
+.pot-display {
+  font-size: clamp(0.8em, 1.6vmin, 1.4em);
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(0,0,0,.5);
+  padding: clamp(2px, 0.35vmin, 6px) clamp(8px, 1.2vmin, 20px);
+  border-radius: 20px;
+  text-shadow: 0 0 8px rgba(255,215,0,.3);
+  white-space: nowrap;
+}
+
+.community-cards {
+  display: flex;
+  gap: clamp(2px, 0.4vmin, 8px);
+  justify-content: center;
+}
+
+.card-slot {
+  width: clamp(38px, 5.5vmin, 85px);
+  height: clamp(54px, 7.7vmin, 118px);
+  border-radius: clamp(3px, 0.5vmin, 8px);
+  border: 2px dashed rgba(255,255,255,.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.12);
+}
+
+/* === Seats — % positioned relative to table === */
+.seat {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1px, 0.2vmin, 4px);
+  z-index: 3;
+}
+
+.seat-0 { bottom: -10%; left: 50%; transform: translateX(-50%); flex-direction: column; }
+.seat-1 { bottom: 5%; left: -4%; transform: translateX(-50%); flex-direction: column-reverse; }
+.seat-2 { top: 5%; left: -4%; transform: translateX(-50%); flex-direction: column; }
+.seat-3 { top: -10%; left: 50%; transform: translateX(-50%); flex-direction: column; }
+.seat-4 { top: 5%; right: -4%; transform: translateX(50%); flex-direction: column; }
+.seat-5 { bottom: 5%; right: -4%; transform: translateX(50%); flex-direction: column-reverse; }
+
+/* Narrow: bring seats closer to prevent clipping */
+.is-narrow .seat-0 { bottom: -12%; }
+.is-narrow .seat-1 { left: 0%; transform: translateX(-20%); }
+.is-narrow .seat-2 { left: 0%; transform: translateX(-20%); }
+.is-narrow .seat-3 { top: -12%; }
+.is-narrow .seat-4 { right: 0%; transform: translateX(20%); }
+.is-narrow .seat-5 { right: 0%; transform: translateX(20%); }
+
+/* === Player Info Box === */
+.player-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: rgba(0,0,0,.65);
+  backdrop-filter: blur(8px);
+  padding: clamp(3px, 0.5vmin, 8px) clamp(8px, 1.3vmin, 24px);
+  border-radius: clamp(6px, 0.7vmin, 10px);
+  border: 1px solid rgba(255,255,255,.08);
+  min-width: clamp(56px, 8vmin, 130px);
+}
+
+.player-info.is-current {
+  border-color: var(--gold);
+  box-shadow: 0 0 clamp(6px, 1vmin, 12px) rgba(255,215,0,.25);
+}
+
+.player-info.is-folded { opacity: 0.4; }
+
+.player-name {
+  font-size: clamp(0.6em, 1.2vmin, 1.1em);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.player-stack {
+  font-size: clamp(0.7em, 1.35vmin, 1.15em);
+  font-weight: 700;
+  color: var(--green);
+}
+
+.position-badge {
+  font-size: clamp(0.45em, 0.8vmin, 0.85em);
+  font-weight: 700;
+  padding: 1px clamp(4px, 0.4vmin, 8px);
+  border-radius: 4px;
+  background: rgba(255,255,255,.1);
+  color: var(--text2);
+  letter-spacing: 0.5px;
+}
+
+.position-badge.btn-pos { background: rgba(255,215,0,.2); color: var(--gold); }
+.position-badge.sb-pos { background: rgba(59,130,246,.2); color: #60a5fa; }
+.position-badge.bb-pos { background: rgba(34,197,94,.2); color: var(--green); }
+
+/* === Player Cards === */
+.player-cards {
+  display: flex;
+  gap: clamp(1px, 0.2vmin, 3px);
+}
+
+/* === Bets === */
+.player-bet {
+  position: absolute;
+  font-size: clamp(0.65em, 1.15vmin, 1.1em);
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(0,0,0,.4);
+  padding: clamp(2px, 0.25vmin, 4px) clamp(6px, 0.7vmin, 12px);
+  border-radius: clamp(4px, 0.5vmin, 8px);
+  white-space: nowrap;
+  z-index: 4;
+}
+
+.player-bet:empty { display: none; }
+
+.seat-0 .player-bet { top: -18px; }
+.seat-1 .player-bet { top: -12px; right: -22px; }
+.seat-2 .player-bet { bottom: -12px; right: -22px; }
+.seat-3 .player-bet { bottom: -22px; }
+.seat-4 .player-bet { bottom: -12px; left: -22px; }
+.seat-5 .player-bet { top: -12px; left: -22px; }
+
+/* === Action Labels === */
+.player-action-label {
+  font-size: clamp(0.55em, 1vmin, 1em);
+  font-weight: 600;
+  padding: clamp(1px, 0.15vmin, 2px) clamp(4px, 0.5vmin, 10px);
+  border-radius: 5px;
+  position: absolute;
+  white-space: nowrap;
+  z-index: 5;
+  animation: actionPop 0.3s ease-out;
+}
+
+@keyframes actionPop {
+  from { transform: scale(0.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.seat-0 .player-action-label { top: -30px; }
+.seat-1 .player-action-label { top: -26px; right: 0; }
+.seat-2 .player-action-label { bottom: -26px; right: 0; }
+.seat-3 .player-action-label { bottom: -36px; }
+.seat-4 .player-action-label { bottom: -26px; left: 0; }
+.seat-5 .player-action-label { top: -26px; left: 0; }
+
+.player-action-label:empty { display: none; }
+
+.player-action-label.fold { background: rgba(255,255,255,.1); color: var(--text2); }
+.player-action-label.check { background: rgba(34,197,94,.2); color: var(--green); }
+.player-action-label.call { background: rgba(59,130,246,.2); color: #60a5fa; }
+.player-action-label.raise { background: rgba(255,215,0,.2); color: var(--gold); }
+.player-action-label.bet { background: rgba(255,215,0,.2); color: var(--gold); }
+.player-action-label.allin { background: rgba(233,69,96,.3); color: var(--accent); }
+
+/* === Dealer Button === */
+.dealer-chip {
+  position: absolute;
+  width: clamp(18px, 2.4vmin, 32px);
+  height: clamp(18px, 2.4vmin, 32px);
+  background: linear-gradient(135deg, #fff, #ddd);
+  color: #333;
+  font-size: clamp(0.5em, 0.8vmin, 0.85em);
+  font-weight: 800;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,.4);
+  z-index: 6;
+}
+
+.seat-0 .dealer-chip { top: -8px; right: -28px; }
+.seat-1 .dealer-chip { top: -8px; right: -8px; }
+.seat-2 .dealer-chip { bottom: -8px; right: -8px; }
+.seat-3 .dealer-chip { bottom: -8px; left: -28px; }
+.seat-4 .dealer-chip { bottom: -8px; left: -8px; }
+.seat-5 .dealer-chip { top: -8px; left: -8px; }
+

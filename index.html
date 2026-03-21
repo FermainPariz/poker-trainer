@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>Poker Pro Trainer | 6-Max Texas Hold'em</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css?v=6">
+<link rel="stylesheet" href="css/table.css?v=20260321">
+<link rel="stylesheet" href="css/cards.css?v=6">
+<link rel="stylesheet" href="css/hud.css?v=6">
+<link rel="stylesheet" href="css/panels.css?v=6">
+<style>
+  /* CSS fallback before JS runs — JS will override via inline style */
+  .poker-table { width: min(88vw, calc((100dvh - 280px) * 5 / 3)); }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <span class="logo">♠ Poker Pro</span>
+      <span class="blinds-info" id="blindsInfo">Blinds: $5/$10</span>
+      <span class="hand-counter" id="handCounter">Hand #0</span>
+    </div>
+    <div class="top-bar-right">
+      <span class="stack-info" id="stackInfo">Stack: $1,000</span>
+      <!-- Desktop: inline buttons -->
+      <button class="btn-hud-toggle desktop-only" id="btnToggleHud">HUD: AN</button>
+      <button class="btn-hud-toggle desktop-only" id="btnToggleStats">Stats</button>
+      <button class="btn-hud-toggle desktop-only" id="btnToggleLeaks">Leaks</button>
+      <button class="btn-hud-toggle desktop-only" id="btnToggleBankroll">Bankroll</button>
+      <button class="btn-hud-toggle desktop-only" id="btnToggleRanges">Ranges</button>
+      <button class="btn-hud-toggle desktop-only" id="btnToggleQuiz">Quiz</button>
+      <button class="btn-hud-toggle desktop-only" id="btnToggleAnalysis">Analyse</button>
+      <button class="btn-hud-toggle desktop-only" id="btnToggleMatrix">Matrix</button>
+      <!-- Mobile: hamburger menu -->
+      <button class="btn-mobile-menu mobile-only" id="btnMobileMenu" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Menu Drawer -->
+  <div class="mobile-menu-backdrop" id="mobileMenuBackdrop"></div>
+  <nav class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <span>Tools</span>
+      <button class="mobile-menu-close" id="btnCloseMobileMenu">&times;</button>
+    </div>
+    <button class="mobile-menu-item" data-toggle="hud"><span class="mm-icon">📊</span> HUD</button>
+    <button class="mobile-menu-item" data-toggle="stats"><span class="mm-icon">📈</span> Session Stats</button>
+    <button class="mobile-menu-item" data-toggle="leaks"><span class="mm-icon">🔍</span> Leak Finder</button>
+    <button class="mobile-menu-item" data-toggle="bankroll"><span class="mm-icon">💰</span> Bankroll</button>
+    <button class="mobile-menu-item" data-toggle="ranges"><span class="mm-icon">🎯</span> Ranges</button>
+    <button class="mobile-menu-item" data-toggle="quiz"><span class="mm-icon">🧠</span> Range Quiz</button>
+    <button class="mobile-menu-item" data-toggle="analysis"><span class="mm-icon">📝</span> Hand-Analyse</button>
+    <button class="mobile-menu-item" data-toggle="matrix"><span class="mm-icon">🎯</span> GTO Matrix</button>
+  </nav>
+
+  <!-- Main Table View -->
+  <main class="table-container">
+    <div class="poker-table" id="pokerTable">
+      <!-- Community Cards + Pot -->
+      <div class="community-area">
+        <div class="pot-display" id="potDisplay">Pot: $0</div>
+        <div class="community-cards" id="communityCards">
+          <div class="card-slot" id="cc0"></div>
+          <div class="card-slot" id="cc1"></div>
+          <div class="card-slot" id="cc2"></div>
+          <div class="card-slot" id="cc3"></div>
+          <div class="card-slot" id="cc4"></div>
+        </div>
+      </div>
+
+      <!-- 6 Seats -->
+      <div class="seat seat-0" id="seat0"></div>
+      <div class="seat seat-1" id="seat1"></div>
+      <div class="seat seat-2" id="seat2"></div>
+      <div class="seat seat-3" id="seat3"></div>
+      <div class="seat seat-4" id="seat4"></div>
+      <div class="seat seat-5" id="seat5"></div>
+    </div>
+
+    <!-- HUD — live stats strip below table -->
+    <div class="hud" id="hud">
+      <div class="hud-item">
+        <span class="hud-label">Equity</span>
+        <span class="hud-value" id="hudEquity">--</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Outs</span>
+        <span class="hud-value" id="hudOuts">--</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Pot Odds</span>
+        <span class="hud-value" id="hudPotOdds">--</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Call EV</span>
+        <span class="hud-value" id="hudEV">--</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Hand</span>
+        <span class="hud-value" id="hudHandStrength">--</span>
+      </div>
+      <div class="hud-divider"></div>
+      <div class="hud-item">
+        <span class="hud-label">GTO Score</span>
+        <span class="hud-value" id="hudGTOScore">--</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">EV Loss</span>
+        <span class="hud-value" id="hudEVLoss">0.00bb</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Accuracy</span>
+        <span class="hud-value" id="hudAccuracy">100%</span>
+      </div>
+    </div>
+
+    <!-- Score Popup (flashes after each decision) -->
+    <div class="score-popup" id="scorePopup"></div>
+
+    <!-- Coach Comment Bubble -->
+    <div class="coach-bubble" id="coachBubble">
+      <div class="coach-icon">🎓</div>
+      <div class="coach-text" id="coachText">Willkommen! Ich bin dein Poker-Coach. Ich begleite dich durch jede Hand.</div>
+      <button class="coach-feedback-btn" id="btnCoachFeedback" title="Coach-Rat hinterfragen">?</button>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-bar" id="actionBar" style="display:none">
+      <!-- Raise controls row (above main buttons on mobile) -->
+      <div class="raise-controls" id="raiseControls">
+        <button class="btn-raise-preset" id="btnHalfPot">½ Pot</button>
+        <button class="btn-raise-preset" id="btnFullPot">Pot</button>
+        <input type="range" id="raiseSlider" min="0" max="1000" value="20" class="raise-slider">
+        <span class="raise-display" id="raiseDisplay">$20</span>
+      </div>
+      <!-- Main action buttons -->
+      <div class="action-buttons">
+        <button class="btn btn-fold" id="btnFold">Fold<span class="gto-freq" id="freqFold"></span></button>
+        <button class="btn btn-check" id="btnCheck">Check<span class="gto-freq" id="freqCheck"></span></button>
+        <button class="btn btn-call" id="btnCall">Call <span id="callAmount"></span><span class="gto-freq" id="freqCall"></span></button>
+        <button class="btn btn-raise" id="btnRaise">Raise <span id="raiseAmount"></span><span class="gto-freq" id="freqRaise"></span></button>
+        <button class="btn btn-allin" id="btnAllIn">All-In</button>
+      </div>
+    </div>
+
+    <!-- Continue Bar -->
+    <div class="continue-bar" id="continueBar" style="display:none">
+      <div class="hand-result" id="handResult"></div>
+      <button class="btn btn-deal" id="btnDeal">Naechste Hand</button>
+    </div>
+  </main>
+
+  <!-- Stats Panel (left side) -->
+  <div class="stats-panel" id="statsPanel">
+    <div class="stats-header">
+      <h3>Session Stats</h3>
+      <button class="stats-close" id="btnCloseStats">&times;</button>
+    </div>
+    <div class="stats-body" id="statsBody">
+      <div style="text-align:center; color: var(--text2); font-size: 0.75em; padding: 20px;">
+        Spiele ein paar Haende um Stats zu sehen.
+      </div>
+    </div>
+  </div>
+
+  <!-- Tilt Warning Overlay -->
+  <div class="tilt-overlay" id="tiltOverlay">
+    <div class="tilt-card">
+      <h2 id="tiltTitle">TILT-WARNUNG!</h2>
+      <p id="tiltMessage"></p>
+      <ul class="tilt-tips" id="tiltTips"></ul>
+      <button class="tilt-dismiss" id="btnDismissTilt">Verstanden — Weiterspielen</button>
+    </div>
+  </div>
+
+  <!-- Quiz Panel (right side) -->
+  <div class="quiz-panel" id="quizPanel">
+    <div class="quiz-header">
+      <h3>Range Quiz</h3>
+      <button class="quiz-close" id="btnCloseQuiz">&times;</button>
+    </div>
+    <div class="quiz-body" id="quizBody">
+      <div style="text-align:center; color: var(--text2); font-size: 0.75em; padding: 20px;">
+        Klicke Quiz um zu starten.
+      </div>
+    </div>
+  </div>
+
+  <!-- Ranges Panel (left side) -->
+  <div class="ranges-panel" id="rangesPanel">
+    <div class="ranges-header">
+      <h3>Opening Ranges</h3>
+      <button class="ranges-close" id="btnCloseRanges">&times;</button>
+    </div>
+    <div class="ranges-body" id="rangesBody">
+      <div style="text-align:center; color: var(--text2); font-size: 0.75em; padding: 20px;">
+        Ranges werden geladen...
+      </div>
+    </div>
+  </div>
+
+  <!-- Bankroll Panel (left side) -->
+  <div class="bankroll-panel" id="bankrollPanel">
+    <div class="bankroll-header">
+      <h3>Bankroll</h3>
+      <button class="bankroll-close" id="btnCloseBankroll">&times;</button>
+    </div>
+    <div class="bankroll-body" id="bankrollBody">
+      <div style="text-align:center; color: var(--text2); font-size: 0.75em; padding: 20px;">
+        Bankroll wird geladen...
+      </div>
+    </div>
+  </div>
+
+  <!-- Leak Finder Panel (right side) -->
+  <div class="leaks-panel" id="leaksPanel">
+    <div class="leaks-header">
+      <h3>Leak Finder</h3>
+      <button class="leaks-close" id="btnCloseLeaks">&times;</button>
+    </div>
+    <div class="leaks-body" id="leaksBody">
+      <div style="text-align:center; color: var(--text2); font-size: 0.75em; padding: 20px;">
+        Spiele ein paar Haende um Leaks zu finden.
+      </div>
+    </div>
+  </div>
+
+  <!-- Analysis Panel (side panel) -->
+  <div class="analysis-panel" id="analysisPanel">
+    <div class="analysis-header">
+      <h3>Hand-Analyse</h3>
+      <button class="analysis-close" id="btnCloseAnalysis">&times;</button>
+    </div>
+    <div class="analysis-body" id="analysisBody">
+      <div style="text-align:center; color: var(--text2); font-size: 0.75em; padding: 20px;">
+        Spiele eine Hand um Analyse zu erhalten.
+      </div>
+    </div>
+  </div>
+
+  <!-- Range Matrix Panel -->
+  <div class="matrix-panel" id="matrixPanel">
+    <div class="matrix-header">
+      <h3>GTO Range Matrix</h3>
+      <button class="matrix-close" id="btnCloseMatrix">&times;</button>
+    </div>
+    <div class="matrix-body" id="matrixBody">
+      <div class="matrix-legend">
+        <span class="legend-item"><span class="legend-swatch" style="background:var(--accent)"></span>Raise/Bet</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:#3b82f6"></span>Call</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:var(--green)"></span>Check</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:rgba(255,255,255,.06)"></span>Fold</span>
+      </div>
+      <div class="matrix-grid" id="matrixGrid"></div>
+      <div class="matrix-info" id="matrixInfo">Starte ein Spiel um die Range Matrix zu sehen.</div>
+    </div>
+  </div>
+
+  <!-- Panel Backdrop (mobile) -->
+  <div class="panel-backdrop" id="panelBackdrop"></div>
+
+  <!-- Message Overlay -->
+  <div class="message-overlay" id="messageOverlay" style="display:none">
+    <div class="message-text" id="messageText"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/pokersolver@2.1.2/pokersolver.min.js"></script>
+<script>
+// === Dynamic Layout: measures available space and sizes table to fit ===
+(function() {
+  var rafId;
+  function fitLayout() {
+    var table = document.getElementById('pokerTable');
+    var container = document.querySelector('.table-container');
+    var app = document.getElementById('app');
+    if (!table || !container || !app) return;
+
+    var vh = window.innerHeight;
+    var vw = window.innerWidth;
+
+    // JS-controlled responsive classes (replaces @media queries)
+    // is-mobile: hamburger menu, stacked action buttons, bottom-sheet panels
+    // is-wide: 2-column grid with HUD sidebar
+    // Gap (700-799): desktop nav buttons, single-column table layout
+    app.classList.toggle('is-mobile', vw < 800);
+    app.classList.toggle('is-narrow', vw < 500);
+    app.classList.toggle('is-wide', vw >= 800);
+    app.classList.toggle('is-tiny', vw < 380);
+
+    var isWide = vw >= 800;
+    var cH = container.getBoundingClientRect().height;
+    var cW = container.getBoundingClientRect().width;
+
+    var hud = document.getElementById('hud');
+    var coach = document.getElementById('coachBubble');
+    var action = document.getElementById('actionBar');
+    var cont = document.getElementById('continueBar');
+    var chromeH = 0, availW, margins;
+
+    if (isWide) {
+      // Wide: HUD+coach in sidebar column, only action bar eats table height
+      var sideW = Math.min(300, Math.max(140, vw * 0.2));
+      var gaps = Math.min(40, Math.max(10, vw * 0.02));
+      var pad = Math.min(50, Math.max(16, vw * 0.03)) + Math.min(36, Math.max(12, vw * 0.02));
+      availW = cW - sideW - gaps - pad;
+      if (action && action.style.display !== 'none') chromeH += action.offsetHeight || 0;
+      if (cont && cont.style.display !== 'none') chromeH += cont.offsetHeight || 0;
+      margins = Math.max(40, cH * 0.06);
+    } else {
+      // Narrow: everything stacked vertically
+      if (hud) chromeH += hud.offsetHeight || 0;
+      if (coach) chromeH += coach.offsetHeight || 0;
+      if (action && action.style.display !== 'none') chromeH += action.offsetHeight || 0;
+      if (cont && cont.style.display !== 'none') chromeH += cont.offsetHeight || 0;
+      if (chromeH < 20) chromeH = 80;
+      availW = cW * 0.88;
+      margins = Math.max(12, cH * 0.03) * 2;
+    }
+
+    // Divide by 1.55 to account for seats + cards that extend ~25% beyond table edges
+    var availH = (cH - chromeH - margins) / 1.55;
+    var fromH = Math.max(0, availH) * 5 / 3;
+    var w = Math.max(80, Math.min(availW, fromH));
+    table.style.width = w + 'px';
+  }
+
+  function requestFit() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(fitLayout);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    fitLayout();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLayout);
+  });
+  window.addEventListener('resize', requestFit);
+  window.fitLayout = fitLayout;
+})();
+</script>
+<script type="module" src="js/app.js?v=9"></script>
+</body>
+</html>
