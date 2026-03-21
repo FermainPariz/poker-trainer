@@ -1737,7 +1737,46 @@ export function getSituationComment(game) {
         bestKey = key;
       }
     }
-    rec.bestAction = `${actionLabels[bestKey]} (GTO ${bestPct}%)`;
+
+    // Add sizing recommendation for raise/bet actions
+    let sizingText = '';
+    if (bestKey === 'raise' || bestKey === 'call') {
+      const pot = game.pot + game.getCurrentBetsTotal();
+      const stack = human.stack;
+      if (bestKey === 'raise' && toCall > 0) {
+        // Facing a bet — raise sizing
+        const potBeforeBet = pot - toCall;
+        const minRaise = game.getMinRaise();
+        const raiseSize = Math.round(Math.max(potBeforeBet * 0.75, minRaise));
+        if (raiseSize >= stack) {
+          sizingText = ' All-In';
+        } else {
+          sizingText = ` auf ~$${raiseSize}`;
+        }
+      } else if (bestKey === 'raise' && toCall === 0) {
+        // No bet facing — bet sizing based on board texture and phase
+        const board_ = game.communityCards.length >= 3 ? analyzeBoard(game.communityCards) : null;
+        const phase_ = game.phase;
+        const wasPFR_ = game.handHistory.some(a => a.player === game.humanSeat && a.phase === 'preflop' &&
+          (a.action === ACTIONS.RAISE || a.action === ACTIONS.BET));
+        const gtoCbet_ = board_ ? getGTOCbetStrategy(board_, game.getPosition(game.humanSeat), wasPFR_) : null;
+        let betPct;
+        if (phase_ === PHASES.FLOP && gtoCbet_ && wasPFR_) {
+          betPct = gtoCbet_.sizingPct / 100;
+        } else {
+          betPct = phase_ === PHASES.TURN ? 0.75 : 0.66;
+          if (board_?.isWet) betPct = Math.min(0.85, betPct + 0.15);
+          if (board_?.isDry) betPct = Math.max(0.33, betPct - 0.2);
+        }
+        const betSize = Math.round(pot * betPct);
+        sizingText = ` $${betSize} (${Math.round(betPct * 100)}% Pot)`;
+      } else if (bestKey === 'call' && toCall > 0) {
+        sizingText = ` $${toCall}`;
+      }
+    }
+
+    const label = actionLabels[bestKey];
+    rec.bestAction = `${label}${sizingText} (GTO ${bestPct}%)`;
   }
 
   // Board, blocker, SPR, GTO analysis for context
