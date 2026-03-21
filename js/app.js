@@ -1,4 +1,4 @@
-// === App: 6-Max Game Loop with HUD + Analysis + Psychology + Stats ===
+// === App: 6-Max Game Loop with HUD + Analysis + Psychology + Stats + Auth ===
 
 import { Game, PHASES, ACTIONS } from './engine.js';
 import { AIPlayer, AI_ASSIGNMENTS } from './ai.js';
@@ -7,14 +7,16 @@ import { initHUD, requestEquity, updateFullHUD, clearHUD, onEquityUpdate } from 
 import { recordHand, getSessionStats } from './psychology.js';
 import { initSession, recordHandResult, getSessionPnL, renderStatsOverlay } from './stats.js';
 import { getPreflopComment, getPostflopComment, getActionComment, getHandSummary, getSituationComment, getAIActionComment, challengeCoachAdvice, getGTOFrequencies } from './coach.js';
-import { initHistory, saveHand, captureSnapshot } from './history.js';
+import { initHistory, saveHand, captureSnapshot, getAggregateStats } from './history.js';
 import { renderLeakFinder } from './leakfinder.js';
-import { initBankroll, startSession, updateSession, endSession, getCurrentSession, checkSessionLimits, renderBankrollPanel } from './bankroll.js';
+import { initBankroll, startSession, updateSession, endSession, getCurrentSession, checkSessionLimits, renderBankrollPanel, getBankroll, getSessionHistory, getLifetimeStats } from './bankroll.js';
 import { loadRanges, renderRangeVisualizer } from './ranges.js';
 import { initQuiz, renderQuizPanel } from './quiz.js';
 import { initProfiler, processHandForProfiles, getOpponentBadgeHTML, getOpponentAdvice, getExploitTip } from './profiler.js';
 import { scoreDecision, formatScoreResult, getSessionScoring, recordHandPlayed, resetScoring, markTurnStart, getFatigueWarning } from './scoring.js';
 import { initMatrix, renderMatrix, toggleMatrix, isMatrixVisible } from './matrix.js';
+import { initAuth, onAuthReady, getCurrentUser, isGuestMode, isLoggedIn, getDisplayName, signOut } from './auth.js';
+import { cloudSaveSession, cloudSaveHand, cloudUpdateStats, cloudLoadUserData, cloudGetLeaderboard } from './db.js';
 import * as UI from './ui.js';
 
 // === State ===
@@ -59,7 +61,11 @@ function init() {
 
   // Save session on page unload
   window.addEventListener('beforeunload', () => {
-    if (getCurrentSession()) endSession();
+    if (getCurrentSession()) {
+      const record = endSession();
+      // Fire-and-forget cloud sync (may not complete on unload)
+      syncSessionToCloud(record);
+    }
   });
 }
 
@@ -118,6 +124,14 @@ function bindEvents() {
   document.getElementById('btnToggleMatrix').addEventListener('click', () => {
     toggleMatrix();
     if (isMatrixVisible()) renderMatrix(game);
+  });
+  document.getElementById('btnToggleLeaderboard').addEventListener('click', toggleLeaderboard);
+  document.getElementById('btnCloseLeaderboard').addEventListener('click', toggleLeaderboard);
+
+  // Logout
+  document.getElementById('btnLogout')?.addEventListener('click', async () => {
+    if (getCurrentSession()) endSession();
+    await signOut();
   });
 
   // HUD toggle
@@ -178,7 +192,8 @@ async function startNewHand() {
     if (game.players[i].stack <= 0) {
       // Human bust = end bankroll session, start new one
       if (i === game.humanSeat && getCurrentSession()) {
-        endSession();
+        const record = endSession();
+        syncSessionToCloud(record);
         startSession(game.bigBlind);
       }
       game.rebuyPlayer(i);
@@ -773,6 +788,7 @@ function initMobileMenu() {
     quiz: toggleQuiz,
     analysis: toggleAnalysis,
     matrix: () => { toggleMatrix(); if (isMatrixVisible()) renderMatrix(game); },
+    leaderboard: toggleLeaderboard,
   };
 
   menu.querySelectorAll('.mobile-menu-item').forEach(item => {
@@ -811,7 +827,7 @@ function hidePanelBackdrop() {
 }
 
 function closeAllPanels() {
-  const panels = ['statsPanel', 'leaksPanel', 'bankrollPanel', 'rangesPanel', 'quizPanel', 'analysisPanel'];
+  const panels = ['statsPanel', 'leaksPanel', 'bankrollPanel', 'rangesPanel', 'quizPanel', 'analysisPanel', 'leaderboardPanel'];
   panels.forEach(id => document.getElementById(id)?.classList.remove('visible'));
   hidePanelBackdrop();
 }
@@ -980,6 +996,104 @@ function updateOpponentBadges() {
   }
 }
 
+// === User Display (top bar badge) ===
+function updateUserDisplay() {
+  const badge = document.getElementById('userBadge');
+  const nameEl = document.getElementById('userName');
+  const logoutBtn = document.getElementById('btnLogout');
+  if (!badge) return;
+
+  if (isLoggedIn()) {
+    nameEl.textContent = getDisplayName();
+    logoutBtn.style.display = '';
+    badge.style.display = 'flex';
+  } else if (isGuestMode()) {
+    nameEl.textContent = 'Gast';
+    logoutBtn.style.display = 'none';
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// === Leaderboard Panel ===
+function toggleLeaderboard() {
+  togglePanel('leaderboardPanel', loadLeaderboard);
+}
+
+async function loadLeaderboard() {
+  const body = document.getElementById('leaderboardBody');
+  if (!body) return;
+
+  if (!isLoggedIn()) {
+    body.innerHTML = '<div class="leaderboard-empty">Erstelle einen Account um dein Ranking zu sehen und dich mit Freunden zu vergleichen.</div>';
+    return;
+  }
+
+  body.innerHTML = '<div class="leaderboard-empty">Lade Ranking...</div>';
+
+  try {
+    const entries = await cloudGetLeaderboard();
+    if (entries.length === 0) {
+      body.innerHTML = '<div class="leaderboard-empty">Noch keine Spieler im Ranking. Spiele mindestens 10 Haende!</div>';
+      return;
+    }
+
+    let html = '<table class="leaderboard-table"><thead><tr><th>#</th><th>Spieler</th><th>P&L</th><th>Haende</th><th>Acc.</th></tr></thead><tbody>';
+
+    for (const e of entries) {
+      const pnlCls = e.totalPnl >= 0 ? 'leaderboard-pnl-pos' : 'leaderboard-pnl-neg';
+      const rankCls = e.rank <= 3 ? ` leaderboard-rank-${e.rank}` : '';
+      const meCls = e.isMe ? ' is-me' : '';
+
+      html += `<tr class="${meCls}">
+        <td class="leaderboard-rank${rankCls}">${e.rank}</td>
+        <td>${e.username}${e.isMe ? ' (Du)' : ''}</td>
+        <td class="${pnlCls}">${e.totalPnl >= 0 ? '+' : ''}$${e.totalPnl}</td>
+        <td>${e.totalHands}</td>
+        <td>${e.accuracy ? e.accuracy.toFixed(0) + '%' : '--'}</td>
+      </tr>`;
+    }
+
+    html += '</tbody></table>';
+    body.innerHTML = html;
+  } catch (e) {
+    body.innerHTML = '<div class="leaderboard-empty">Fehler beim Laden des Rankings.</div>';
+    console.warn('Leaderboard error:', e);
+  }
+}
+
+// === Cloud Sync: push data after session ends ===
+async function syncSessionToCloud(sessionRecord) {
+  if (!isLoggedIn() || !sessionRecord) return;
+
+  try {
+    // Save session
+    await cloudSaveSession(sessionRecord);
+
+    // Update lifetime stats
+    const lifetime = getLifetimeStats();
+    const histStats = getAggregateStats();
+    if (lifetime) {
+      await cloudUpdateStats({
+        totalHands: lifetime.totalHands,
+        totalSessions: lifetime.sessions,
+        totalPnl: lifetime.totalPnL,
+        bankroll: getBankroll(),
+        totalDeposited: lifetime.totalDeposited || 10000,
+        vpip: histStats ? parseFloat(histStats.vpip) : 0,
+        pfr: histStats ? parseFloat(histStats.pfr) : 0,
+        accuracy: getSessionScoring().accuracy || 0,
+        totalEvLoss: getSessionScoring().totalEVLoss || 0,
+        bestSessionPnl: lifetime.bestSessionPnl || Math.max(...(getSessionHistory().map(s => s.pnl) || [0])),
+        worstSessionPnl: lifetime.worstSessionPnl || Math.min(...(getSessionHistory().map(s => s.pnl) || [0])),
+      });
+    }
+  } catch (e) {
+    console.warn('Cloud sync failed:', e);
+  }
+}
+
 // === Utility ===
 function delay(ms) {
   return new Promise(r => setTimeout(r, ms));
@@ -989,5 +1103,30 @@ function updatePotDisplay() {
   UI.updatePot(game.pot, game.getCurrentBetsTotal());
 }
 
-// === Boot ===
-document.addEventListener('DOMContentLoaded', init);
+// === Boot: Auth gate → then game init ===
+document.addEventListener('DOMContentLoaded', () => {
+  onAuthReady(async (user) => {
+    // Auth complete — user is logged in or guest
+    if (user) {
+      // Load cloud data to merge with local state
+      try {
+        const cloudData = await cloudLoadUserData();
+        if (cloudData?.stats) {
+          // Show cloud bankroll if it's different from local
+          console.log('Cloud data loaded:', cloudData.stats.total_hands, 'hands');
+        }
+      } catch (e) {
+        console.warn('Cloud data load failed:', e);
+      }
+    }
+
+    // Show the game UI
+    document.getElementById('app').style.visibility = 'visible';
+    updateUserDisplay();
+    init();
+  });
+
+  // Hide game until auth resolves (prevents flash)
+  document.getElementById('app').style.visibility = 'hidden';
+  initAuth();
+});

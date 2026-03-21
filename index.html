@@ -9,17 +9,49 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/main.css?v=11">
-<link rel="stylesheet" href="css/table.css?v=11">
-<link rel="stylesheet" href="css/cards.css?v=11">
-<link rel="stylesheet" href="css/hud.css?v=11">
-<link rel="stylesheet" href="css/panels.css?v=11">
+<link rel="stylesheet" href="css/main.css?v=12">
+<link rel="stylesheet" href="css/table.css?v=12">
+<link rel="stylesheet" href="css/cards.css?v=12">
+<link rel="stylesheet" href="css/hud.css?v=12">
+<link rel="stylesheet" href="css/panels.css?v=12">
+<link rel="stylesheet" href="css/auth.css?v=12">
 <style>
   /* CSS fallback before JS runs — JS will override via inline style */
   .poker-table { width: min(88vw, calc((100dvh - 280px) * 5 / 3)); }
 </style>
 </head>
 <body>
+
+<!-- Auth Screen (shown before game if Supabase configured) -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">&#9824; Poker Pro Trainer</div>
+    <div class="auth-subtitle">Tracke deinen Fortschritt. Vergleiche mit Freunden.</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin">Login</button>
+      <button class="auth-tab" id="tabSignup">Registrieren</button>
+    </div>
+    <form class="auth-form" id="authForm">
+      <div class="auth-field" id="usernameField" style="display:none">
+        <label>Username</label>
+        <input type="text" id="authUsername" placeholder="PokerPro123" autocomplete="username" minlength="3" maxlength="20">
+      </div>
+      <div class="auth-field">
+        <label>E-Mail</label>
+        <input type="email" id="authEmail" placeholder="deine@email.de" autocomplete="email" required>
+      </div>
+      <div class="auth-field">
+        <label>Passwort</label>
+        <input type="password" id="authPassword" placeholder="Min. 6 Zeichen" autocomplete="current-password" required minlength="6">
+      </div>
+      <button type="submit" class="auth-submit" id="authSubmit">Einloggen</button>
+      <div class="auth-error" id="authError"></div>
+    </form>
+    <div class="auth-divider"><span>oder</span></div>
+    <button class="auth-guest" id="authGuest">Als Gast spielen</button>
+    <div class="auth-hint">Gast-Daten werden nur lokal gespeichert</div>
+  </div>
+</div>
 
 <div id="app">
   <!-- Top Bar -->
@@ -31,6 +63,11 @@
     </div>
     <div class="top-bar-right">
       <span class="stack-info" id="stackInfo">Stack: $1,000</span>
+      <span class="user-badge" id="userBadge" style="display:none">
+        <span class="user-icon">&#9827;</span>
+        <span id="userName">Gast</span>
+        <button class="btn-logout" id="btnLogout">Logout</button>
+      </span>
       <!-- Desktop: inline buttons -->
       <button class="btn-hud-toggle desktop-only" id="btnToggleHud">HUD: AN</button>
       <button class="btn-hud-toggle desktop-only" id="btnToggleStats">Stats</button>
@@ -40,6 +77,7 @@
       <button class="btn-hud-toggle desktop-only" id="btnToggleQuiz">Quiz</button>
       <button class="btn-hud-toggle desktop-only" id="btnToggleAnalysis">Analyse</button>
       <button class="btn-hud-toggle desktop-only" id="btnToggleMatrix">Matrix</button>
+      <button class="btn-hud-toggle desktop-only" id="btnToggleLeaderboard">Ranking</button>
       <!-- Mobile: hamburger menu -->
       <button class="btn-mobile-menu mobile-only" id="btnMobileMenu" aria-label="Menu">
         <span></span><span></span><span></span>
@@ -62,6 +100,7 @@
     <button class="mobile-menu-item" data-toggle="quiz"><span class="mm-icon">🧠</span> Range Quiz</button>
     <button class="mobile-menu-item" data-toggle="analysis"><span class="mm-icon">📝</span> Hand-Analyse</button>
     <button class="mobile-menu-item" data-toggle="matrix"><span class="mm-icon">🎯</span> GTO Matrix</button>
+    <button class="mobile-menu-item" data-toggle="leaderboard"><span class="mm-icon">🏆</span> Ranking</button>
   </nav>
 
   <!-- Main Table View -->
@@ -267,6 +306,17 @@
     </div>
   </div>
 
+  <!-- Leaderboard Panel -->
+  <div class="leaderboard-panel" id="leaderboardPanel">
+    <div class="leaderboard-header">
+      <h3>Ranking</h3>
+      <button class="leaderboard-close" id="btnCloseLeaderboard">&times;</button>
+    </div>
+    <div class="leaderboard-body" id="leaderboardBody">
+      <div class="leaderboard-empty">Lade Ranking...</div>
+    </div>
+  </div>
+
   <!-- Panel Backdrop (mobile) -->
   <div class="panel-backdrop" id="panelBackdrop"></div>
 
@@ -276,6 +326,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/pokersolver@2.1.2/pokersolver.min.js"></script>
 <script>
 // === Dynamic Layout: measures available space and sizes table to fit ===
@@ -354,6 +405,6 @@
   window.fitLayout = fitLayout;
 })();
 </script>
-<script type="module" src="js/app.js?v=11"></script>
+<script type="module" src="js/app.js?v=12"></script>
 </body>
 </html>
