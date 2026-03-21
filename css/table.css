@@ -199,7 +199,7 @@
 .table-9max .seat-5 { top: 2%; right: 10%; transform: translateX(50%); flex-direction: column; }
 .table-9max .seat-6 { top: 35%; right: -5%; transform: translateX(50%); flex-direction: column; }
 .table-9max .seat-7 { bottom: -2%; right: 5%; transform: translateX(50%); flex-direction: column-reverse; }
-.table-9max .seat-8 { bottom: -10%; left: 28%; transform: translateX(-50%); flex-direction: column; }
+.table-9max .seat-8 { bottom: -2%; left: 22%; transform: translateX(-50%); flex-direction: column; }
 .table-9max .seat-6, .table-9max .seat-7, .table-9max .seat-8 { display: flex; }
 
 /* Narrow phones: portrait oval like GGPoker + tighter seats */
@@ -221,7 +221,7 @@
 .is-narrow.table-9max .seat-5 { top: 0%; right: 15%; }
 .is-narrow.table-9max .seat-6 { top: 35%; right: -2%; }
 .is-narrow.table-9max .seat-7 { bottom: -4%; right: 2%; }
-.is-narrow.table-9max .seat-8 { bottom: -10%; left: 26%; }
+.is-narrow.table-9max .seat-8 { bottom: -4%; left: 20%; }
 
 /* === Player Info Box === */
 .player-info {

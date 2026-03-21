@@ -195,6 +195,7 @@ export function postAntes(game) {
       const ante = Math.min(p.stack, blinds.ante);
       p.stack -= ante;
       totalAntes += ante;
+      if (p.stack === 0) p.allIn = true;
     }
   }
   game.pot += totalAntes;

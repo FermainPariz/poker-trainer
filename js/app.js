@@ -3,7 +3,7 @@
 import { Game, PHASES, ACTIONS } from './engine.js';
 import { AIPlayer, AI_ASSIGNMENTS } from './ai.js';
 import { analyzeHand, generateStreetReview } from './analyzer.js';
-import { initHUD, requestEquity, updateFullHUD, clearHUD, onEquityUpdate } from './hud.js';
+import { initHUD, requestEquity, updateFullHUD, clearHUD, onEquityUpdate, toggleHUD } from './hud.js';
 import { recordHand, getSessionStats } from './psychology.js';
 import { initSession, recordHandResult, getSessionPnL, renderStatsOverlay } from './stats.js';
 import { getPreflopComment, getPostflopComment, getActionComment, getHandSummary, getSituationComment, getAIActionComment, challengeCoachAdvice, getGTOFrequencies } from './coach.js';
@@ -147,8 +147,10 @@ function bindEvents() {
     await signOut();
   });
 
-  // HUD toggle
-  document.getElementById('btnToggleHud').addEventListener('click', toggleHud);
+  // HUD toggle — handled by hud.js initHUD(), no duplicate listener here
+
+  // Sound toggle
+  document.getElementById('btnToggleSound')?.addEventListener('click', toggleSound);
 
   // Coach feedback — challenge the coach's advice
   document.getElementById('btnCoachFeedback').addEventListener('click', () => {
@@ -206,6 +208,7 @@ async function startNewHand() {
   const isSNG = currentMode.startsWith('sng');
   if (isSNG && !isTournament()) {
     switchMode(currentMode); // re-creates game + starts tournament
+    return; // let player click "Spiel starten" from the setup screen
   }
 
   if (isTournament()) {
@@ -888,7 +891,8 @@ function initMobileMenu() {
 
   // Menu item handlers
   const toggleMap = {
-    hud: toggleHud,
+    sound: toggleSound,
+    hud: toggleHUD,
     stats: toggleStats,
     leaks: toggleLeaks,
     bankroll: toggleBankroll,
@@ -911,12 +915,13 @@ function initMobileMenu() {
   });
 }
 
-function toggleHud() {
-  const hud = document.getElementById('hud');
-  const btn = document.getElementById('btnToggleHud');
-  const isVisible = hud.style.display !== 'none';
-  hud.style.display = isVisible ? 'none' : 'flex';
-  if (btn) btn.textContent = isVisible ? 'HUD: AUS' : 'HUD: AN';
+// toggleHud removed — hud.js toggleHUD() is the single source of truth
+
+function toggleSound() {
+  const on = !isSoundEnabled();
+  setSoundEnabled(on);
+  const btn = document.getElementById('btnToggleSound');
+  if (btn) btn.textContent = on ? 'Sound: AN' : 'Sound: AUS';
 }
 
 // === Panel backdrop management (mobile) ===
@@ -1305,6 +1310,7 @@ function switchMode(mode) {
   }
 
   // Re-init subsystems
+  resetScoring();
   initBankroll();
   startSession(game.bigBlind);
   initSession(game.startingStack);
