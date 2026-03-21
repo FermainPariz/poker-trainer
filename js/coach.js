@@ -1721,8 +1721,24 @@ export function getSituationComment(game) {
   const eval_ = game.communityCards.length >= 3 ? evaluateHand(human.hand, game.communityCards) : null;
   const handStrength = eval_ ? eval_.strength : -1;
 
-  // Pass range info to recommendation engine
+  // Pass range info to recommendation engine (keeps reasoning text)
   const rec = getRecommendation(game, equity, outs, oppAnalyses);
+
+  // Override best action with GTO frequencies — same source as button percentages
+  // This ensures coach recommendation and button labels never contradict
+  const gtoFreqs = getGTOFrequencies(game);
+  if (gtoFreqs) {
+    const actionLabels = { fold: 'Fold', check: 'Check', call: 'Call', raise: toCall > 0 ? 'Raise' : 'Bet' };
+    let bestKey = 'check';
+    let bestPct = -1;
+    for (const key of Object.keys(actionLabels)) {
+      if ((gtoFreqs[key] || 0) > bestPct) {
+        bestPct = gtoFreqs[key] || 0;
+        bestKey = key;
+      }
+    }
+    rec.bestAction = `${actionLabels[bestKey]} (GTO ${bestPct}%)`;
+  }
 
   // Board, blocker, SPR, GTO analysis for context
   const board = game.communityCards.length >= 3 ? analyzeBoard(game.communityCards) : null;
