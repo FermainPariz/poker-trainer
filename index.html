@@ -9,12 +9,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/main.css?v=17">
-<link rel="stylesheet" href="css/table.css?v=17">
-<link rel="stylesheet" href="css/cards.css?v=17">
-<link rel="stylesheet" href="css/hud.css?v=17">
-<link rel="stylesheet" href="css/panels.css?v=17">
-<link rel="stylesheet" href="css/auth.css?v=17">
+<link rel="stylesheet" href="css/main.css?v=18">
+<link rel="stylesheet" href="css/table.css?v=18">
+<link rel="stylesheet" href="css/cards.css?v=18">
+<link rel="stylesheet" href="css/hud.css?v=18">
+<link rel="stylesheet" href="css/panels.css?v=18">
+<link rel="stylesheet" href="css/auth.css?v=18">
 <style>
   /* CSS fallback before JS runs — JS will override via inline style */
   .poker-table { width: min(88vw, calc((100dvh - 280px) * 5 / 3)); }
@@ -445,32 +445,38 @@
     } catch(e) { console.warn('fitLayout error:', e); }
   }
 
+  var fitting = false;
   function requestFit() {
+    if (fitting) return; // guard: don't re-enter from MutationObserver
     if (rafId) cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(fitLayout);
+    rafId = requestAnimationFrame(function() {
+      fitting = true;
+      fitLayout();
+      fitting = false;
+    });
   }
 
   document.addEventListener('DOMContentLoaded', function() {
     fitLayout();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitLayout);
-  });
-  window.addEventListener('resize', requestFit);
-  window.addEventListener('orientationchange', function() {
-    setTimeout(fitLayout, 150);
-  });
-  // MutationObserver: re-fit when panels open/close (display changes)
-  document.addEventListener('DOMContentLoaded', function() {
+    // MutationObserver: re-fit when panels open/close
     var app = document.getElementById('app');
     if (app && window.MutationObserver) {
-      new MutationObserver(requestFit).observe(app, {
+      new MutationObserver(function() {
+        if (!fitting) requestFit();
+      }).observe(app, {
         childList: true, subtree: true, attributes: true,
         attributeFilter: ['style', 'class']
       });
     }
   });
+  window.addEventListener('resize', requestFit);
+  window.addEventListener('orientationchange', function() {
+    setTimeout(fitLayout, 150);
+  });
   window.fitLayout = fitLayout;
 })();
 </script>
-<script type="module" src="js/app.js?v=17"></script>
+<script type="module" src="js/app.js?v=18"></script>
 </body>
 </html>

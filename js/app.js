@@ -1011,6 +1011,42 @@ function updateGTOFrequencies() {
   if (evFold) updateActionEVs();
 }
 
+function estimateFoldEquity(game) {
+  // Dynamic fold equity based on game state
+  const phase = game.phase;
+  const players = game.players;
+  const hero = players[game.currentPlayerIndex];
+
+  // Count players who voluntarily put money in (not just blinds)
+  const bbAmt = game.bb || 10;
+  const activeInvested = players.filter(p =>
+    !p.folded && !p.sittingOut && p !== hero && p.bet > 0
+  );
+  const raisers = activeInvested.filter(p => p.bet > bbAmt);
+  const callers = activeInvested.filter(p => p.bet === Math.max(...activeInvested.map(x => x.bet)) && p.bet > bbAmt);
+  const numInvested = activeInvested.length;
+  const hasRaiser = raisers.length > 0;
+  const numCallers = Math.max(0, numInvested - (hasRaiser ? 1 : 0));
+
+  if (phase === 'preflop') {
+    if (!hasRaiser) {
+      // Open raise vs blinds only
+      return Math.max(0.05, 0.50 - numInvested * 0.05);
+    } else if (numCallers === 0) {
+      // 3-bet vs single raiser
+      return 0.55; // 3-bets get a lot of folds
+    } else {
+      // 3-bet vs raiser + caller(s): very low fold equity
+      return Math.max(0.03, 0.15 - (numCallers - 1) * 0.05);
+    }
+  } else {
+    // Postflop: fold equity depends on number of opponents
+    if (numInvested <= 1) return 0.40;
+    if (numInvested === 2) return 0.25;
+    return Math.max(0.05, 0.20 - (numInvested - 2) * 0.05);
+  }
+}
+
 function updateActionEVs() {
   const equity = getCurrentEquity();
   const evFold = document.getElementById('evFold');
@@ -1030,6 +1066,11 @@ function updateActionEVs() {
   const pot = game.pot + game.getCurrentBetsTotal();
   const toCall = game.getCallAmount();
   const eqPct = equity / 100;
+  const foldEq = estimateFoldEquity(game);
+
+  // Count opponents still in hand (for multiway equity adjustment)
+  const hero = game.players[game.currentPlayerIndex];
+  const oppsInHand = game.players.filter(p => !p.folded && !p.sittingOut && p !== hero).length;
 
   // Fold EV: always 0 (you lose nothing more)
   setEV(evFold, 0);
@@ -1039,19 +1080,23 @@ function updateActionEVs() {
     const callEV = eqPct * (pot + toCall) - toCall;
     setEV(evCall, callEV);
 
-    // Raise EV estimate: assumes ~40% fold equity + equity when called
+    // Raise EV: fold equity * pot + (1 - fold equity) * (equity when called * new pot - raise cost)
     const raiseAmt = parseInt(document.getElementById('raiseSlider')?.value) || game.getMinRaise();
-    const raisePot = pot + raiseAmt;
-    const foldEq = 0.35; // conservative fold equity estimate
-    const raiseEV = foldEq * pot + (1 - foldEq) * (eqPct * (raisePot + raiseAmt) - raiseAmt);
+    // When called, the new pot = current pot + our raise + opponent's call
+    const calledPot = pot + raiseAmt + raiseAmt;
+    // Against calling range, our equity is worse (they only call with strong hands)
+    // Discount equity by ~20-30% vs calling range
+    const eqVsCalling = eqPct * (oppsInHand > 1 ? 0.65 : 0.75);
+    const raiseEV = foldEq * pot + (1 - foldEq) * (eqVsCalling * calledPot - raiseAmt);
     setEV(evRaise, raiseEV);
   } else {
     // No bet facing: Check EV = 0 (keep current equity), Bet EV estimated
     setEV(evCheck, 0);
 
     const betAmt = parseInt(document.getElementById('raiseSlider')?.value) || Math.round(pot * 0.66);
-    const foldEq = 0.35;
-    const betEV = foldEq * pot + (1 - foldEq) * (eqPct * (pot + betAmt * 2) - betAmt);
+    const calledPot = pot + betAmt * 2;
+    const eqVsCalling = eqPct * (oppsInHand > 1 ? 0.65 : 0.75);
+    const betEV = foldEq * pot + (1 - foldEq) * (eqVsCalling * calledPot - betAmt);
     setEV(evRaise, betEV);
   }
 }
