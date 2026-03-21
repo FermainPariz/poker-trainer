@@ -593,6 +593,9 @@ async function handleHumanFold(engineResult) {
 
 // === Phase Transition ===
 async function handlePhaseTransition(result) {
+  // Skip redundant rendering if this is a showdown transition (handleHandEnd will handle it)
+  if (result.nextPhase === PHASES.SHOWDOWN) return;
+
   await delay(400);
   playCardFlip();
   playChipPot();
@@ -630,9 +633,13 @@ async function handleHandEnd(result) {
   const potWon = result.potWon || game.pot;
 
   if (result.showdown) {
+    // Show community cards first
     UI.renderCommunityCards(game.communityCards);
+    await delay(600);
+
+    // Reveal all hands at showdown — single render to preserve card-reveal animation
     UI.renderAllSeats(game);
-    await delay(800);
+    await delay(2000); // Give player time to see all hands
   }
 
   // Build result text
@@ -669,7 +676,8 @@ async function handleHandEnd(result) {
     }
   }
 
-  UI.renderAllSeats(game);
+  // Don't re-render seats if showdown already rendered them
+  if (!result.showdown) UI.renderAllSeats(game);
   UI.updateTopBar(game);
   UI.updatePot(0);
   clearHUD();
