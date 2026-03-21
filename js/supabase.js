@@ -2,8 +2,8 @@
 // Replace URL + Key after creating project at supabase.com
 // The anon key is safe to expose in frontend code — RLS protects data.
 
-const SUPABASE_URL = 'REPLACE_WITH_YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'REPLACE_WITH_YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://vsvhtkssktuxfjxgnkbc.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_aqO1ba1k2QnYyzzaSILHzg_HIP7wm7m';
 
 let client = null;
 
