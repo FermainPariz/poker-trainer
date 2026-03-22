@@ -529,7 +529,7 @@ function analyzePreflopAction(action, game, history, ctx) {
         return {
           phase: 'Preflop', type: 'error',
           title: 'Premium gegen 3-Bet gefoldet!',
-          message: `${handKey} gegen 3-Bet folden ist ein schwerer Fehler. Du hast eine der staerksten Haende — 4-Bet oder Call.`,
+          message: `${handKey} gegen 3-Bet folden ist ein schwerer Fehler. Du hast eine der stärksten Hände — 4-Bet oder Call.`,
           tip: 'AA/KK: IMMER 4-bet oder Call. QQ/JJ: mindestens callen, oft 4-betten.',
         };
       }
@@ -537,7 +537,7 @@ function analyzePreflopAction(action, game, history, ctx) {
         return {
           phase: 'Preflop', type: 'warning',
           title: 'Starke Hand gegen 3-Bet gefoldet',
-          message: `${handKey} gegen 3-Bet folden. Haende wie TT, AQs, AKo sind stark genug fuer einen Call oder 4-Bet.`,
+          message: `${handKey} gegen 3-Bet folden. Hände wie TT, AQs, AKo sind stark genug für einen Call oder 4-Bet.`,
           tip: isLatePosition
             ? 'In Position: Call gegen 3-Bet mit TT+, AQs+. Postflop Skill-Vorteil nutzen.'
             : 'OOP: 4-Bet oder Fold ist oft besser als Flat — aber mit AK/TT+ nicht folden.',
@@ -548,7 +548,7 @@ function analyzePreflopAction(action, game, history, ctx) {
         return {
           phase: 'Preflop', type: 'success',
           title: 'Korrekt gegen 3-Bet gefoldet',
-          message: `${handKey} gegen 3-Bet folden ist richtig. ${handKey} hat nicht genug Equity fuer den vergroesserten Pot.`,
+          message: `${handKey} gegen 3-Bet folden ist richtig. ${handKey} hat nicht genug Equity für den vergrößerten Pot.`,
           tip: 'Gegen 3-Bets: Nur mit Top-Range weiterspielen (TT+, AQs+, AKo). Rest aufgeben.',
         };
       }
@@ -560,7 +560,7 @@ function analyzePreflopAction(action, game, history, ctx) {
         phase: 'Preflop', type: 'error',
         title: 'GTO-Hand gefoldet',
         message: `${handKey} gehoert zur Standard-Opening-Range aus ${position}. Du solltest hier raisen.`,
-        tip: `Aus ${position} kannst du laut GTO ca. ${getRangePercent(position)}% der Haende oeffnen.`,
+        tip: `Aus ${position} kannst du laut GTO ca. ${getRangePercent(position)}% der Hände oeffnen.`,
       };
     }
     // Folded premium/strong to a raise
@@ -570,8 +570,8 @@ function analyzePreflopAction(action, game, history, ctx) {
         title: 'Starke Hand gegen Raise gefoldet',
         message: `${handKey} ist stark genug um gegen einen Raise zu spielen — mindestens callen, oft 3-betten.`,
         tip: handStrength === 'premium'
-          ? 'Premium Haende (AA-JJ, AKs) fast nie preflop folden.'
-          : 'Starke Haende in Position callen, manchmal 3-betten.',
+          ? 'Premium Hände (AA-JJ, AKs) fast nie preflop folden.'
+          : 'Starke Hände in Position callen, manchmal 3-betten.',
       };
     }
     // Folded a hand in 3-bet range
@@ -579,7 +579,7 @@ function analyzePreflopAction(action, game, history, ctx) {
       return {
         phase: 'Preflop', type: 'warning',
         title: '3-Bet Hand gefoldet',
-        message: `${handKey} ist in der 3-Bet Range vs. ${raiserInfo.position}-Open. Du koenntest hier 3-betten oder callen.`,
+        message: `${handKey} ist in der 3-Bet Range vs. ${raiserInfo.position}-Open. Du könntest hier 3-betten oder callen.`,
         tip: `Gegen ${raiserInfo.profile?.name || 'Gegner'} (${raiserInfo.profile?.style || '?'}) ist ein 3-Bet hier profitabel.`,
       };
     }
@@ -597,7 +597,7 @@ function analyzePreflopAction(action, game, history, ctx) {
           phase: 'Preflop', type: 'warning',
           title: 'BB Defense verpasst',
           message: `${handKey} ist in der BB-Defend-Range vs. Standard-Raise (${raiseSize.toFixed(1)}x). Du bekommst gute Pot Odds.`,
-          tip: 'Im BB verteidigst du ca. 55% deiner Haende gegen einen Standard-Raise (2-2.5x BB).',
+          tip: 'Im BB verteidigst du ca. 55% deiner Hände gegen einen Standard-Raise (2-2.5x BB).',
         };
       }
       if (isInDefendRange && raiseIsLarge) {
@@ -606,8 +606,8 @@ function analyzePreflopAction(action, game, history, ctx) {
           return {
             phase: 'Preflop', type: 'warning',
             title: 'Starke Hand im BB gefoldet',
-            message: `${handKey} gegen ${raiseSize.toFixed(1)}x Raise folden. Auch gegen grosse Raises: starke Haende verteidigen.`,
-            tip: 'Gegen grosse Raises (3.5x+): Defend-Range schrumpft auf ~35-40%. Premium/Strong Haende trotzdem spielen.',
+            message: `${handKey} gegen ${raiseSize.toFixed(1)}x Raise folden. Auch gegen grosse Raises: starke Hände verteidigen.`,
+            tip: 'Gegen grosse Raises (3.5x+): Defend-Range schrumpft auf ~35-40%. Premium/Strong Hände trotzdem spielen.',
           };
         }
         // Marginal hand vs large raise — fold is acceptable
@@ -625,7 +625,7 @@ function analyzePreflopAction(action, game, history, ctx) {
       message: `${handKey} im SB nur gecompletet. Im 6-Max ist die SB-Strategie: Raise oder Fold.`,
       tip: inGTORange === true
         ? `${handKey} ist in der SB-Opening-Range — raise auf 3x BB statt zu limpen.`
-        : `${handKey} ist zu schwach fuer den SB — fold statt limpen. Limpen baut einen kleinen Pot OOP.`,
+        : `${handKey} ist zu schwach für den SB — fold statt limpen. Limpen baut einen kleinen Pot OOP.`,
     };
   }
 
@@ -660,7 +660,7 @@ function analyzePreflopAction(action, game, history, ctx) {
         return {
           phase: 'Preflop', type: 'success',
           title: 'Call der 3-Bet mit Premium',
-          message: `${handKey} gegen 3-Bet callen — solide Linie. Alternativ: 4-Bet fuer maximalen Value.`,
+          message: `${handKey} gegen 3-Bet callen — solide Linie. Alternativ: 4-Bet für maximalen Value.`,
           tip: 'AA/KK: 4-Bet ist Standard. QQ/AKs: Call oder 4-Bet — beide Optionen sind GTO-korrekt.',
         };
       }
@@ -686,16 +686,16 @@ function analyzePreflopAction(action, game, history, ctx) {
         return {
           phase: 'Preflop', type: 'warning',
           title: 'Zu loose 3-Bet Call',
-          message: `${handKey} OOP gegen 3-Bet callen ist unprofitabel. Du spielst einen vergroesserten Pot ohne Position.`,
-          tip: 'OOP gegen 3-Bet: Fold die meisten Haende. Nur 4-Bet (Value/Bluff) oder Call mit Top-Range.',
+          message: `${handKey} OOP gegen 3-Bet callen ist unprofitabel. Du spielst einen vergrößerten Pot ohne Position.`,
+          tip: 'OOP gegen 3-Bet: Fold die meisten Hände. Nur 4-Bet (Value/Bluff) oder Call mit Top-Range.',
         };
       }
       if (handStrength === 'weak') {
         return {
           phase: 'Preflop', type: 'error',
           title: 'Schwache Hand gegen 3-Bet gecallt',
-          message: `${handKey} gegen 3-Bet callen ist ein Leak. Schwache Haende haben nicht genug Equity fuer den grossen Pot.`,
-          tip: 'Gegen 3-Bets: Nur mit Top 15-20% der Haende weiterspielen. Rest folden.',
+          message: `${handKey} gegen 3-Bet callen ist ein Leak. Schwache Hände haben nicht genug Equity für den grossen Pot.`,
+          tip: 'Gegen 3-Bets: Nur mit Top 15-20% der Hände weiterspielen. Rest folden.',
         };
       }
     }
@@ -716,7 +716,7 @@ function analyzePreflopAction(action, game, history, ctx) {
         phase: 'Preflop', type: 'warning',
         title: '3-Bet verpasst',
         message: `${handKey} ist eine klare 3-Bet gegen ${raiserInfo?.position || 'den Raise'}. Flat-Call verschenkt Value.`,
-        tip: 'Premium Haende 3-betten fuer Value — du willst den Pot vergroessern.',
+        tip: 'Premium Hände 3-betten für Value — du willst den Pot vergrößern.',
       };
     }
     // Calling in position with playable hand — good
@@ -733,7 +733,7 @@ function analyzePreflopAction(action, game, history, ctx) {
       return {
         phase: 'Preflop', type: 'info',
         title: 'Marginaler Call OOP',
-        message: `${handKey} ohne Position gegen den Raise callen ist grenzwertig. Ueberlege ob 3-Bet oder Fold nicht besser waere.`,
+        message: `${handKey} ohne Position gegen den Raise callen ist grenzwertig. Überlege ob 3-Bet oder Fold nicht besser wäre.`,
         tip: 'Out of Position: 3-Bet oder Fold ist oft besser als Flat-Call.',
       };
     }
@@ -771,7 +771,7 @@ function analyzePreflopAction(action, game, history, ctx) {
           return {
             phase: 'Preflop', type: 'info',
             title: 'Steal-Raise',
-            message: `${handKey} ist nicht in der Standard-Range fuer ${position}, aber Steals aus spaeter Position sind profitabel.`,
+            message: `${handKey} ist nicht in der Standard-Range für ${position}, aber Steals aus später Position sind profitabel.`,
             tip: 'Achte auf die Spieler in den Blinds — gegen tight Spieler steale oefter, gegen loose Spieler weniger.',
           };
         }
@@ -779,7 +779,7 @@ function analyzePreflopAction(action, game, history, ctx) {
           phase: 'Preflop', type: 'warning',
           title: 'Zu loose aus frueher Position',
           message: `${handKey} ist nicht in der ${position}-Opening-Range. Aus frueher Position solltest du tighter spielen.`,
-          tip: `GTO-Range fuer ${position} ist ca. ${getRangePercent(position)}%. ${handKey} liegt ausserhalb.`,
+          tip: `GTO-Range für ${position} ist ca. ${getRangePercent(position)}%. ${handKey} liegt ausserhalb.`,
         };
       }
       // GTO range unknown, fall back to hand strength
@@ -817,7 +817,7 @@ function analyzePreflopAction(action, game, history, ctx) {
             phase: 'Preflop', type: 'info',
             title: 'Squeeze-Play',
             message: `Squeeze mit ${handKey} — ${callersBefore} Caller haben gecappte Ranges. ${handKey} ist nicht in der Standard-3-Bet Range, aber Dead Money macht den Squeeze profitabel.`,
-            tip: `Squeeze-Sizing: 4x Open + 1x pro Caller. Caller muessen mehr Haende folden als direkt gegen eine 3-Bet.`,
+            tip: `Squeeze-Sizing: 4x Open + 1x pro Caller. Caller müssen mehr Hände folden als direkt gegen eine 3-Bet.`,
           };
         }
         if (handStrength === 'playable' && isLatePosition) {
@@ -832,7 +832,7 @@ function analyzePreflopAction(action, game, history, ctx) {
           return {
             phase: 'Preflop', type: 'warning',
             title: 'Zu loose 3-Bet',
-            message: `${handKey} ist zu schwach fuer eine 3-Bet gegen ${raiserInfo?.position || 'den Open'}. ${raiserInfo?.profile ? `${raiserInfo.profile.name} ist ${raiserInfo.profile.style}` : ''}.`,
+            message: `${handKey} ist zu schwach für eine 3-Bet gegen ${raiserInfo?.position || 'den Open'}. ${raiserInfo?.profile ? `${raiserInfo.profile.name} ist ${raiserInfo.profile.style}` : ''}.`,
             tip: raiserInfo?.profile?.foldToRaiseRate > 0.4
               ? 'Dieser Gegner foldet oft auf Raises — ein Bluff kann funktionieren, aber waehle bessere Blocker.'
               : 'Dieser Gegner foldet selten — spare dir die 3-Bet ohne starke Hand.',
@@ -845,13 +845,13 @@ function analyzePreflopAction(action, game, history, ctx) {
     // 4-Bet+
     if (raisesBefore >= 2) {
       if (handStrength === 'premium') {
-        return { phase: 'Preflop', type: 'success', title: 'Starke 4-Bet', message: `${handKey} — 4-Bet fuer Value. Korrekt.`, tip: null };
+        return { phase: 'Preflop', type: 'success', title: 'Starke 4-Bet', message: `${handKey} — 4-Bet für Value. Korrekt.`, tip: null };
       }
       return {
         phase: 'Preflop', type: 'warning',
         title: 'Riskante 4-Bet',
-        message: `4-Bet mit ${handKey} ist sehr aggressiv. Bei diesem Action-Level sind meistens nur Premium-Haende profitabel.`,
-        tip: '4-Bet Bluffs nur mit Blocker-Haenden (Ax, Kx) die gegnerische Premium-Haende blocken.',
+        message: `4-Bet mit ${handKey} ist sehr aggressiv. Bei diesem Action-Level sind meistens nur Premium-Hände profitabel.`,
+        tip: '4-Bet Bluffs nur mit Blocker-Händen (Ax, Kx) die gegnerische Premium-Hände blocken.',
       };
     }
   }
@@ -875,7 +875,7 @@ function analyzePreflopAction(action, game, history, ctx) {
         phase: 'Preflop', type: 'error',
         title: 'Riskantes All-In',
         message: `All-In mit ${handKey} bei ${spr.toFixed(1)} SPR ist zu riskant. Du riskierst deinen ganzen Stack mit einer schwachen Hand.`,
-        tip: 'All-In Bluffs preflop nur als Short-Stack (< 15 BB) oder mit Blocker-Haenden.',
+        tip: 'All-In Bluffs preflop nur als Short-Stack (< 15 BB) oder mit Blocker-Händen.',
       };
     }
   }
@@ -999,7 +999,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           tip: turnCardImpact?.isOvercard
             ? 'Overcards auf dem Turn sind gute Barrel-Karten — sie verbessern deine wahrgenommene Range als PFR.'
             : turnCardImpact?.isBrick
-              ? 'Brick Turn-Karten aendern nichts. Wenn du am Flop gebettet hast, setze deine Story fort.'
+              ? 'Brick Turn-Karten ändern nichts. Wenn du am Flop gebettet hast, setze deine Story fort.'
               : 'Wer am Flop bettet und am Turn aufgibt, verschenkt oft das Ergebnis der Flop-Investition.',
         };
       }
@@ -1019,7 +1019,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         return {
           phase: phaseLabel(phase), type: 'info',
           title: 'Probe-Bet Gelegenheit',
-          message: `Gegner hat den Flop zurueckgecheckt — seine Range ist gecappt. ${pairType ? pairName : handName} ist stark genug fuer eine Probe-Bet.`,
+          message: `Gegner hat den Flop zurückgecheckt — seine Range ist gecappt. ${pairType ? pairName : handName} ist stark genug für eine Probe-Bet.`,
           tip: 'Probe-Bets: Wenn der IP-Spieler den Flop checkt, hat er meistens keine starke Hand. Bet 50-66% Pot.',
         };
       }
@@ -1040,8 +1040,8 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         return {
           phase: phaseLabel(phase), type: 'info',
           title: 'Kein C-Bet Multiway',
-          message: `Check als PFR in Multiway-Pot ist oft korrekt. C-Bets in Multiway-Pots brauchen staerkere Haende.`,
-          tip: 'In Multiway-Pots c-bette nur mit Top Pair+ oder starken Draws. Air und schwache Haende checken.',
+          message: `Check als PFR in Multiway-Pot ist oft korrekt. C-Bets in Multiway-Pots brauchen stärkere Hände.`,
+          tip: 'In Multiway-Pots c-bette nur mit Top Pair+ oder starken Draws. Air und schwache Hände checken.',
         };
       }
     }
@@ -1053,7 +1053,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         message: `${handName} ist eine starke Hand. Durch Checken laesst du Value liegen.`,
         tip: board?.isWet
           ? 'Auf nassem Board unbedingt betten — dein Gegner kann auf vielen Turn/River-Karten verbessern.'
-          : 'Auch auf trockenem Board Value betten — der Gegner kann mit schwaecheren Haenden callen.',
+          : 'Auch auf trockenem Board Value betten — der Gegner kann mit schwächeren Händen callen.',
       };
     }
     // Checked with overpair — should almost always bet
@@ -1063,8 +1063,8 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         title: 'Overpair gecheckt — Value verpasst',
         message: `${pairName} gecheckt. Overpairs sind stark genug zum Betten auf fast allen Boards.`,
         tip: board?.isWet
-          ? 'Auf nassem Board: Bet 66-75% Pot fuer Value + Protection gegen Draws.'
-          : 'Auch auf trockenem Board: Bet 50% Pot fuer Value. Overpairs sind fast immer vorne.',
+          ? 'Auf nassem Board: Bet 66-75% Pot für Value + Protection gegen Draws.'
+          : 'Auch auf trockenem Board: Bet 50% Pot für Value. Overpairs sind fast immer vorne.',
       };
     }
     // Checked with two pair/trips/set on wet board
@@ -1080,7 +1080,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         message: `${tripsType ? tripsName : handName} auf ${board.description} Board — du solltest betten um Draws teuer zu machen.${tripsNote}`,
         tip: isMultiway
           ? 'In Multiway-Pots auf nassen Boards IMMER betten — mehr Spieler = mehr Draws gegen dich.'
-          : 'Auf wet Boards: Bet 66-75% Pot fuer Value + Protection.',
+          : 'Auf wet Boards: Bet 66-75% Pot für Value + Protection.',
       };
     }
     // Checked with pair on dry board — depends on pair type
@@ -1090,10 +1090,10 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         return {
           phase: phaseLabel(phase), type: 'info',
           title: 'Top Pair gecheckt',
-          message: `${pairName} auf ${board.description} Board — Bet fuer Thin Value ist hier Standard.`,
+          message: `${pairName} auf ${board.description} Board — Bet für Thin Value ist hier Standard.`,
           tip: humanHasPosition
-            ? 'In Position mit TPTK: Bet 50% Pot fuer Value. Du wirst von schwaecheren Paaren gecallt.'
-            : 'OOP: Check ist vertretbar, aber Bet fuer Value/Protection ist oft besser.',
+            ? 'In Position mit TPTK: Bet 50% Pot für Value. Du wirst von schwächeren Paaren gecallt.'
+            : 'OOP: Check ist vertretbar, aber Bet für Value/Protection ist oft besser.',
         };
       }
       // Bottom pair / underpair — checking is correct
@@ -1101,7 +1101,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         return {
           phase: phaseLabel(phase), type: 'success',
           title: `${pairName} gecheckt — korrekt`,
-          message: `Check mit ${pairName} ist richtig. Dein Pair ist zu schwach fuer eine Value-Bet.`,
+          message: `Check mit ${pairName} ist richtig. Dein Pair ist zu schwach für eine Value-Bet.`,
           tip: facedBet ? null : 'Gegen einen Bet: Fold, ausser du bekommst sehr gute Pot Odds.',
         };
       }
@@ -1128,16 +1128,16 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           phase: phaseLabel(phase), type: 'success',
           title: 'Check mit Draw Multiway',
           message: `Check mit Draw in Multiway-Pot ist korrekt. Semi-Bluffs gegen mehrere Gegner sind weniger effektiv.`,
-          tip: 'In Multiway-Pots Draws guenstig sehen — die Pot Odds sind ohnehin besser durch den groesseren Pot.',
+          tip: 'In Multiway-Pots Draws günstig sehen — die Pot Odds sind ohnehin besser durch den größeren Pot.',
         };
       }
       return {
         phase: phaseLabel(phase), type: 'info',
         title: 'Semi-Bluff Gelegenheit',
-        message: `Du hast einen ${draws.isComboDraws ? 'Combo-Draw' : draws.hasFlushDraw ? 'Flush-Draw' : 'Straight-Draw'}. Ein Semi-Bluff haette Fold Equity + Draw Equity.`,
+        message: `Du hast einen ${draws.isComboDraws ? 'Combo-Draw' : draws.hasFlushDraw ? 'Flush-Draw' : 'Straight-Draw'}. Ein Semi-Bluff hätte Fold Equity + Draw Equity.`,
         tip: humanHasPosition
           ? 'In Position Semi-Bluffs aggressiver spielen — du siehst die Reaktion des Gegners.'
-          : 'OOP Semi-Bluffs sind riskanter — ueberlege Check-Raise als Alternative zum Lead.',
+          : 'OOP Semi-Bluffs sind riskanter — überlege Check-Raise als Alternative zum Lead.',
       };
     }
     return null;
@@ -1163,7 +1163,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
             ? `${betterProfile.name} blufft oft — du solltest oefter callen als MDF vorschreibt.`
             : betterProfile?.bluffRate < 0.1
               ? `${betterProfile.name} blufft fast nie — Fold mit marginaler Hand ist korrekt.`
-              : 'Ueberlege: Welche Bluffs kann der Gegner realistisch haben? Wenn er kaum Bluffs hat, ist Fold okay.',
+              : 'Überlege: Welche Bluffs kann der Gegner realistisch haben? Wenn er kaum Bluffs hat, ist Fold okay.',
         };
       }
       // Folded bottom pair or underpair — usually correct
@@ -1172,7 +1172,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           phase: phaseLabel(phase), type: 'success',
           title: `${pairName} gefoldet — korrekt`,
           message: `Fold mit ${pairName} gegen einen Bet ist diszipliniert. ${pairName} hat oft nur 2-5 Outs zur Verbesserung.`,
-          tip: betterProfile?.bluffRate > 0.3 ? `${betterProfile.name} blufft allerdings oft — ein Call waere auch vertretbar.` : null,
+          tip: betterProfile?.bluffRate > 0.3 ? `${betterProfile.name} blufft allerdings oft — ein Call wäre auch vertretbar.` : null,
         };
       }
       // Folded overpair — too strong to fold on most boards
@@ -1181,7 +1181,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           phase: phaseLabel(phase), type: 'error',
           title: 'Overpair gefoldet',
           message: `${pairName} gefoldet — Overpairs sind auf den meisten Boards zu stark zum Folden.`,
-          tip: 'Overpairs nur gegen sehr starke Action (Raise + Reraise) auf gefaehrlichen Boards folden.',
+          tip: 'Overpairs nur gegen sehr starke Action (Raise + Reraise) auf gefährlichen Boards folden.',
         };
       }
       // Folded a strong made hand (two pair+)
@@ -1209,7 +1209,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
               ? 'Vorsicht: Dein Draw ist nicht zur Nuts — Reverse Implied Odds reduzieren den Wert. Fold kann trotz Odds korrekt sein.'
               : impliedOddsFactor > 1.2
                 ? 'Implied Odds: Du kannst mehr gewinnen wenn du triffst, weil der Gegner noch Stacks hat.'
-                : 'Berechne immer Pot Odds vs. Draw Odds. Bei guenstigen Odds ist ein Call profitabel.',
+                : 'Berechne immer Pot Odds vs. Draw Odds. Bei günstigen Odds ist ein Call profitabel.',
           };
         }
       }
@@ -1219,8 +1219,8 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           return {
             phase: phaseLabel(phase), type: 'info',
             title: 'Fold gegen Donk-Bet',
-            message: `Gegner bettet in den Preflop-Raiser (Donk-Bet). Ohne Hand ist Fold okay, aber Donk-Bets signalisieren oft schwache bis mittlere Haende.`,
-            tip: 'Gegen Donk-Bets: Raise als Bluff kann profitabel sein, da Donk-Bets selten starke Haende sind.',
+            message: `Gegner bettet in den Preflop-Raiser (Donk-Bet). Ohne Hand ist Fold okay, aber Donk-Bets signalisieren oft schwache bis mittlere Hände.`,
+            tip: 'Gegen Donk-Bets: Raise als Bluff kann profitabel sein, da Donk-Bets selten starke Hände sind.',
           };
         }
         return {
@@ -1271,7 +1271,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           phase: phaseLabel(phase), type: 'success',
           title: 'Slowplay in Multiway',
           message: `Call mit ${handName} in Multiway-Pot. Smooth-Call kann hier mehr Spieler im Pot halten.`,
-          tip: board?.isWet ? 'Vorsicht: Auf nassem Board in Multiway lieber raisen fuer Protection.' : null,
+          tip: board?.isWet ? 'Vorsicht: Auf nassem Board in Multiway lieber raisen für Protection.' : null,
         };
       }
       return {
@@ -1279,8 +1279,8 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         title: 'Raise verpasst',
         message: `${handName} ist stark genug zum Raisen. Durch nur Callen laesst du Value liegen.`,
         tip: betterProfile?.foldToRaiseRate < 0.3
-          ? `${betterProfile.name} foldet selten auf Raises — perfekt fuer einen Value-Raise.`
-          : 'Raise fuer Value — du willst den Pot vergroessern mit der besten Hand.',
+          ? `${betterProfile.name} foldet selten auf Raises — perfekt für einen Value-Raise.`
+          : 'Raise für Value — du willst den Pot vergrößern mit der besten Hand.',
       };
     }
     // Calling with nothing and no draw
@@ -1310,16 +1310,16 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           title: 'Zu teurer Draw-Call',
           message: `${outs} Outs. Direkte Equity: ~${(oneCardEquity * 100).toFixed(0)}%${isFlop ? ` (gesamt bis River: ~${(twoCardEquity * 100).toFixed(0)}%)` : ''}. Pot Odds: ${(potOdds * 100).toFixed(0)}%.`,
           tip: isFlop
-            ? 'Auf dem Flop: Du zahlst fuer eine Karte, aber hast noch 2 Chancen. Implied Odds und Semi-Bluff Raise als Alternative.'
+            ? 'Auf dem Flop: Du zahlst für eine Karte, aber hast noch 2 Chancen. Implied Odds und Semi-Bluff Raise als Alternative.'
             : 'Alternative: Semi-Bluff Raise — du gibst dir eine zweite Chance zu gewinnen (Fold Equity).',
         };
       }
       return {
         phase: phaseLabel(phase), type: 'success',
         title: 'Korrekter Draw-Call',
-        message: `${draws.isComboDraws ? 'Combo-Draw' : draws.hasFlushDraw ? 'Flush-Draw' : 'Straight-Draw'} mit ${outs} Outs (~${(oneCardEquity * 100).toFixed(0)}% direkt${isFlop ? `, ~${(twoCardEquity * 100).toFixed(0)}% bis River` : ''}). Pot Odds (${(potOdds * 100).toFixed(0)}%) sind guenstig.`,
+        message: `${draws.isComboDraws ? 'Combo-Draw' : draws.hasFlushDraw ? 'Flush-Draw' : 'Straight-Draw'} mit ${outs} Outs (~${(oneCardEquity * 100).toFixed(0)}% direkt${isFlop ? `, ~${(twoCardEquity * 100).toFixed(0)}% bis River` : ''}). Pot Odds (${(potOdds * 100).toFixed(0)}%) sind günstig.`,
         tip: draws.hasReverseImpliedOdds
-          ? 'Vorsicht: Dein Flush-Draw ist nicht zum Ass — Reverse Implied Odds. Wenn du triffst, kann ein hoeherer Flush dich schlagen.'
+          ? 'Vorsicht: Dein Flush-Draw ist nicht zum Ass — Reverse Implied Odds. Wenn du triffst, kann ein höherer Flush dich schlagen.'
           : isFlop ? 'Am Flop: Implied Odds machen Draws profitabler — du kannst auf Turn+River noch viel gewinnen.' : null,
       };
     }
@@ -1348,11 +1348,11 @@ function analyzePostflopAction(action, game, history, result, ctx) {
       if (strength >= 4) {
         return {
           phase: phaseLabel(phase), type: 'success',
-          title: 'Check-Raise fuer Value!',
-          message: `Check-Raise mit ${handName} — starke Linie. Du laesst den Gegner betten, dann raisest fuer maximalen Value.`,
+          title: 'Check-Raise für Value!',
+          message: `Check-Raise mit ${handName} — starke Linie. Du laesst den Gegner betten, dann raisest für maximalen Value.`,
           tip: humanHasPosition
             ? 'IP Check-Raise ist ungewoehnlich — kann sehr profitabel sein wenn der Gegner nicht damit rechnet.'
-            : 'OOP Check-Raise mit Monster ist die beste Value-Linie. Groesse: 3-3.5x des Opponent Bets.',
+            : 'OOP Check-Raise mit Monster ist die beste Value-Linie. Größe: 3-3.5x des Opponent Bets.',
         };
       }
       if (strength >= 2 || (draws.isComboDraws)) {
@@ -1362,7 +1362,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           message: `Check-Raise mit ${draws.isComboDraws ? 'Combo-Draw' : handName}. ${draws.isComboDraws ? 'Semi-Bluff Check-Raise mit hoher Equity.' : 'Value + Protection Check-Raise.'}`,
           tip: draws.isComboDraws
             ? 'Combo-Draw Check-Raise: Du gewinnst sofort (Fold Equity) oder hast 12-15 Outs wenn gecallt.'
-            : 'Check-Raise mit mittelstarker Hand: Gut fuer Protection, aber sei bereit fuer eine 3-Bet zu folden.',
+            : 'Check-Raise mit mittelstarker Hand: Gut für Protection, aber sei bereit für eine 3-Bet zu folden.',
         };
       }
       if (strength <= 1 && !draws.hasFlushDraw && !draws.hasStraightDraw) {
@@ -1372,7 +1372,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           message: `Check-Raise als Bluff mit ${handName}. Riskant — du baust einen grossen Pot mit einer schwachen Hand.`,
           tip: betterProfile?.foldToRaiseRate > 0.4
             ? `${betterProfile.name} foldet oft auf Raises — Check-Raise Bluff kann hier funktionieren.`
-            : 'Check-Raise Bluffs brauchen hohe Fold Equity. Waehle Haende mit Blocker-Wirkung oder Backdoor-Equity.',
+            : 'Check-Raise Bluffs brauchen hohe Fold Equity. Waehle Hände mit Blocker-Wirkung oder Backdoor-Equity.',
         };
       }
       if (draws.hasFlushDraw || draws.hasStraightDraw) {
@@ -1380,7 +1380,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           phase: phaseLabel(phase), type: 'success',
           title: 'Semi-Bluff Check-Raise',
           message: `Check-Raise als Semi-Bluff mit ${describeDraw(draws)}. Fold Equity + Draw Equity = profitabel.`,
-          tip: 'Semi-Bluff Check-Raise OOP ist eine der staerksten Linien. Wenn gecallt, hast du Outs zum Treffen.',
+          tip: 'Semi-Bluff Check-Raise OOP ist eine der stärksten Linien. Wenn gecallt, hast du Outs zum Treffen.',
         };
       }
     }
@@ -1390,7 +1390,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
       if (strength >= 1) {
         let turnTip = null;
         if (turnCardImpact?.isOvercard) {
-          turnTip = 'Overcard Turn — gute Barrel-Karte. Du repraesentiertst staerkere Haende als PFR.';
+          turnTip = 'Overcard Turn — gute Barrel-Karte. Du repraesentiertst stärkere Hände als PFR.';
         } else if (turnCardImpact?.isBrick) {
           turnTip = 'Brick Turn — konsistente Story. Wenn du den Flop gebettet hast, setze fort.';
         } else if (turnCardImpact?.turnCompletesDraw) {
@@ -1409,7 +1409,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           title: 'Turn Semi-Bluff Barrel',
           message: `Double Barrel als Semi-Bluff mit ${describeDraw(draws)}. Fold Equity + Draw Equity.`,
           tip: turnCardImpact?.turnBringsDraw
-            ? 'Die Turn-Karte bringt neue Draws — das gibt deinem Bluff Glaubwuerdigkeit.'
+            ? 'Die Turn-Karte bringt neue Draws — das gibt deinem Bluff Glaubwürdigkeit.'
             : 'Barrel mit Draws: Du hast zwei Wege zu gewinnen (Gegner foldet oder du triffst).',
         };
       }
@@ -1417,7 +1417,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         return {
           phase: phaseLabel(phase), type: 'info',
           title: 'Turn Bluff Barrel',
-          message: `Double Barrel als Bluff auf ${turnCardImpact.description}-Karte. Deine PFR-Range trifft Overcards — glaubwuerdige Story.`,
+          message: `Double Barrel als Bluff auf ${turnCardImpact.description}-Karte. Deine PFR-Range trifft Overcards — glaubwürdige Story.`,
           tip: 'Barrel-Bluffs auf Overcards funktionieren gut. Plane aber den River: Wirst du auch die dritte Kugel feuern?',
         };
       }
@@ -1430,7 +1430,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         title: 'Probe-Bet',
         message: `Probe-Bet nach Flop-Check-Through ${posContext}. Gegner-Range ist gecappt. ${sizing.label} (${(sizing.ratio * 100).toFixed(0)}% Pot).`,
         tip: strength >= 1
-          ? 'Probe-Bet fuer Value/Protection — Gegner hat keine starke Hand (haette Flop gebettet).'
+          ? 'Probe-Bet für Value/Protection — Gegner hat keine starke Hand (hätte Flop gebettet).'
           : draws.hasFlushDraw || draws.hasStraightDraw
             ? 'Probe-Bet als Semi-Bluff — profitabel gegen gecappte Ranges.'
             : 'Probe-Bet als Bluff — kann funktionieren, aber sei bereit bei Resistance aufzugeben.',
@@ -1444,14 +1444,14 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         if (board?.isDry && sizing.ratio > 0.5) {
           sizingTip = 'Auf trockenen Boards reicht eine kleine C-Bet (25-33% Pot) — du erreichst denselben Fold Equity.';
         } else if (board?.isWet && sizing.ratio < 0.5) {
-          sizingTip = `Auf ${board.description} Board groesser c-betten (66-75% Pot) um Draws teuer zu machen.`;
+          sizingTip = `Auf ${board.description} Board größer c-betten (66-75% Pot) um Draws teuer zu machen.`;
         }
         if (isMultiway) {
           return {
             phase: phaseLabel(phase), type: 'success',
             title: 'C-Bet mit starker Hand Multiway',
             message: `C-Bet mit ${handName} in Multiway-Pot ${posContext}. Korrekt — du hast die Hand dafuer.`,
-            tip: sizingTip || 'In Multiway-Pots groesser c-betten (66%+ Pot). Mehr Spieler = mehr Protection noetig.',
+            tip: sizingTip || 'In Multiway-Pots größer c-betten (66%+ Pot). Mehr Spieler = mehr Protection nötig.',
           };
         }
         return {
@@ -1465,7 +1465,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         return {
           phase: phaseLabel(phase), type: 'warning',
           title: 'C-Bet Multiway ohne starke Hand',
-          message: `C-Bet mit ${strength === 0 ? 'keiner Made Hand' : handName} in Multiway-Pot. In Multiway nur mit starken Haenden oder Draws c-betten.`,
+          message: `C-Bet mit ${strength === 0 ? 'keiner Made Hand' : handName} in Multiway-Pot. In Multiway nur mit starken Händen oder Draws c-betten.`,
           tip: 'In Multiway-Pots braucht deine C-Bet mehr Equity. Air c-betten funktioniert nur Heads-Up.',
         };
       }
@@ -1474,7 +1474,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           phase: phaseLabel(phase), type: 'success',
           title: 'C-Bet als Semi-Bluff',
           message: `C-Bet mit ${draws.isComboDraws ? 'Combo-Draw' : draws.hasFlushDraw ? 'Flush-Draw' : 'Straight-Draw'} als PFR. Fold Equity + Draw Equity + Initiative.`,
-          tip: humanHasPosition ? 'In Position hast du mehr Kontrolle ueber spaeteren Streets wenn du gecallt wirst.' : null,
+          tip: humanHasPosition ? 'In Position hast du mehr Kontrolle über späteren Streets wenn du gecallt wirst.' : null,
         };
       }
       if (strength === 0 && board?.isDry) {
@@ -1501,7 +1501,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         return {
           phase: phaseLabel(phase), type: 'success',
           title: 'Raise gegen Donk-Bet',
-          message: `Raise gegen Donk-Bet mit ${handName}. Donk-Bets signalisieren oft schwache bis mittlere Haende — guter Raise fuer Value.`,
+          message: `Raise gegen Donk-Bet mit ${handName}. Donk-Bets signalisieren oft schwache bis mittlere Hände — guter Raise für Value.`,
           tip: null,
         };
       }
@@ -1511,7 +1511,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         message: `Raise gegen Donk-Bet als Bluff. Donk-Bets sind oft schwach, aber du brauchst eine gute Read.`,
         tip: betterProfile?.foldToRaiseRate > 0.4
           ? `${betterProfile.name} foldet oft auf Raises — guter Bluff-Spot.`
-          : 'Vorsicht: Manche Gegner donk-betten auch mit starken Haenden.',
+          : 'Vorsicht: Manche Gegner donk-betten auch mit starken Händen.',
       };
     }
 
@@ -1529,8 +1529,8 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           return {
             phase: phaseLabel(phase), type: 'warning',
             title: `Vorsicht: ${threat} Board`,
-            message: `${act === ACTIONS.RAISE ? 'Raise' : 'Bet'} mit ${handName} auf einem ${threat} Board. Deine Hand ist hier ein Bluff-Catcher — viele schlechtere Haende folden, bessere callen.`,
-            tip: `Auf ${threat} Boards: Nur mit der Nuts (${fourFlush ? 'Nut Flush' : 'Nut Straight'}+) fuer Value betten. Zwei Paar / Trips sind hier Check-Call oder Check-Fold.`,
+            message: `${act === ACTIONS.RAISE ? 'Raise' : 'Bet'} mit ${handName} auf einem ${threat} Board. Deine Hand ist hier ein Bluff-Catcher — viele schlechtere Hände folden, bessere callen.`,
+            tip: `Auf ${threat} Boards: Nur mit der Nuts (${fourFlush ? 'Nut Flush' : 'Nut Straight'}+) für Value betten. Zwei Paar / Trips sind hier Check-Call oder Check-Fold.`,
           };
         }
 
@@ -1538,15 +1538,15 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         const isThickValue = strength >= 4;
         // On scary boards with strong hands, still warn about sizing
         const scaryBoardNote = scaryBoard && isThickValue
-          ? ` Achtung: ${fourFlush ? '4-Flush' : '4-Straight'} Board — nur Top-Range Haende sollten hier gross betten.`
+          ? ` Achtung: ${fourFlush ? '4-Flush' : '4-Straight'} Board — nur Top-Range Hände sollten hier gross betten.`
           : '';
         return {
           phase: phaseLabel(phase), type: 'success',
           title: isThickValue ? 'River Value Bet!' : 'River Thin Value',
-          message: `${act === ACTIONS.RAISE ? 'Raise' : 'Bet'} am River mit ${handName}. ${isThickValue ? 'Starke Hand — maximalen Value extrahieren.' + scaryBoardNote : 'Thin Value — welche schwaecheren Haende callen?'}`,
+          message: `${act === ACTIONS.RAISE ? 'Raise' : 'Bet'} am River mit ${handName}. ${isThickValue ? 'Starke Hand — maximalen Value extrahieren.' + scaryBoardNote : 'Thin Value — welche schwächeren Hände callen?'}`,
           tip: isThickValue
-            ? (sizing.ratio < 0.6 ? 'Am River groesser betten fuer maximalen Value (75%+ Pot).' : null)
-            : 'Thin Value am River: Frage dich immer — welche schwaecheren Haende rufen? Wenn keine, lieber Check.',
+            ? (sizing.ratio < 0.6 ? 'Am River größer betten für maximalen Value (75%+ Pot).' : null)
+            : 'Thin Value am River: Frage dich immer — welche schwächeren Hände rufen? Wenn keine, lieber Check.',
         };
       }
       if (strength === 0 && !draws.hasFlushDraw && !draws.hasStraightDraw) {
@@ -1556,10 +1556,10 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           title: 'River Bluff',
           message: `${act === ACTIONS.RAISE ? 'Raise' : 'Bet'} am River als Bluff. ${sizing.label} (${(sizing.ratio * 100).toFixed(0)}% Pot).`,
           tip: betterProfile?.foldToRaiseRate > 0.35
-            ? `${betterProfile.name} foldet oft genug — Bluff kann profitabel sein. Groessere Sizing (75%+ Pot) erzeugt mehr Fold Equity.`
+            ? `${betterProfile.name} foldet oft genug — Bluff kann profitabel sein. Größere Sizing (75%+ Pot) erzeugt mehr Fold Equity.`
             : betterProfile?.foldToRaiseRate < 0.2
               ? `${betterProfile.name} foldet fast nie — River-Bluff ist unprofitabel. Nur bluffen mit guter Blocker-Wirkung.`
-              : 'River-Bluffs: Waehle Haende die gegnerische Value-Haende blocken (z.B. Ax auf Ace-high Board).',
+              : 'River-Bluffs: Waehle Hände die gegnerische Value-Hände blocken (z.B. Ax auf Ace-high Board).',
         };
       }
     }
@@ -1568,16 +1568,16 @@ function analyzePostflopAction(action, game, history, result, ctx) {
     if (strength >= 2) {
       let sizingFeedback = null;
       if (sizing.ratio < 0.3 && strength >= 4) {
-        sizingFeedback = 'Dein Bet ist zu klein fuer die Handstaerke. Bet mindestens 50-66% Pot.';
+        sizingFeedback = 'Dein Bet ist zu klein für die Handstärke. Bet mindestens 50-66% Pot.';
       } else if (sizing.ratio > 1.2 && strength >= 4) {
         sizingFeedback = 'Overbet mit Monster-Hand — polarisierte Strategie. Sehr profitabel wenn du Nut Advantage hast.';
       } else if (sizing.ratio > 1.2 && strength <= 3) {
-        sizingFeedback = 'Overbet mit mittelstarker Hand ist riskant — schwaechere Haende folden, staerkere callen. Overbets nur mit Nuts oder Air.';
+        sizingFeedback = 'Overbet mit mittelstarker Hand ist riskant — schwächere Hände folden, stärkere callen. Overbets nur mit Nuts oder Air.';
       } else if (board?.isWet && sizing.ratio < 0.5) {
-        sizingFeedback = `Auf ${board.description} Board groesser betten (66-75% Pot) um Draws teuer zu machen.`;
+        sizingFeedback = `Auf ${board.description} Board größer betten (66-75% Pot) um Draws teuer zu machen.`;
       }
       if (isMultiway && strength <= 3) {
-        sizingFeedback = (sizingFeedback || '') + ' In Multiway-Pots groesser betten — mehr Spieler haben mehr Draws.';
+        sizingFeedback = (sizingFeedback || '') + ' In Multiway-Pots größer betten — mehr Spieler haben mehr Draws.';
       }
 
       // CRITICAL: When raising INTO an opponent who bet, check if our hand is strong enough
@@ -1594,7 +1594,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           return {
             phase: phaseLabel(phase), type: 'warning',
             title: 'Raise gegen Multi-Street Aggression',
-            message: `Raise mit ${handName} gegen einen Gegner der ueber mehrere Streets bettet/raist. Seine Range ist sehr stark — Two Pair ist hier oft dominiert.`,
+            message: `Raise mit ${handName} gegen einen Gegner der über mehrere Streets bettet/raist. Seine Range ist sehr stark — Two Pair ist hier oft dominiert.`,
             tip: 'Wenn ein Gegner Flop UND Turn bettet, hat er meist eine starke Hand. Call ist die sichere Linie, Raise nur mit Nuts.',
           };
         }
@@ -1602,15 +1602,15 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           return {
             phase: phaseLabel(phase), type: 'info',
             title: `Raise mit ${handName}`,
-            message: `Raise mit ${handName} gegen Opponent-Bet ${posContext}. ${strength === 2 ? 'Two Pair ist gut aber nicht die Nuts — Call ist sicherer.' : 'Mittelstarke Hand, Raise baut den Pot gegen bessere Haende.'}`,
-            tip: 'OOP Raise gegen Bet: Nur mit sehr starken Haenden (Sets+). Two Pair = Call, nicht Raise.',
+            message: `Raise mit ${handName} gegen Opponent-Bet ${posContext}. ${strength === 2 ? 'Two Pair ist gut aber nicht die Nuts — Call ist sicherer.' : 'Mittelstarke Hand, Raise baut den Pot gegen bessere Hände.'}`,
+            tip: 'OOP Raise gegen Bet: Nur mit sehr starken Händen (Sets+). Two Pair = Call, nicht Raise.',
           };
         }
       }
 
       return {
         phase: phaseLabel(phase), type: 'success',
-        title: strength >= 4 ? 'Value Bet!' : 'Guter Bet fuer Value',
+        title: strength >= 4 ? 'Value Bet!' : 'Guter Bet für Value',
         message: `${handName} aggressiv gespielt ${posContext} — korrekt. ${sizing.label} (${(sizing.ratio * 100).toFixed(0)}% Pot).`,
         tip: sizingFeedback,
       };
@@ -1623,13 +1623,13 @@ function analyzePostflopAction(action, game, history, result, ctx) {
         return {
           phase: phaseLabel(phase), type: 'warning',
           title: `Bet mit ${pairName}`,
-          message: `Bet mit ${pairName} ${posContext}. Dein Pair ist zu schwach — welche schwaecheren Haende callen?`,
-          tip: 'Mit Bottom Pair/Underpair: Check-Call oder Check-Fold. Betten bringt nur Calls von besseren Haenden.',
+          message: `Bet mit ${pairName} ${posContext}. Dein Pair ist zu schwach — welche schwächeren Hände callen?`,
+          tip: 'Mit Bottom Pair/Underpair: Check-Call oder Check-Fold. Betten bringt nur Calls von besseren Händen.',
         };
       }
       if (board?.isDry) {
         let tip = null;
-        if (sizing.ratio > 0.75) tip = 'Etwas kleiner betten (33-50% Pot) wuerde auf trockenem Board genuegen.';
+        if (sizing.ratio > 0.75) tip = 'Etwas kleiner betten (33-50% Pot) würde auf trockenem Board genügen.';
         if (!humanHasPosition && !tip) tip = 'OOP mit Pair auf Dry Board: Check-Call ist oft besser als eine Lead-Bet.';
         return {
           phase: phaseLabel(phase), type: pairType === 'top_pair_good_kicker' ? 'success' : 'info',
@@ -1671,9 +1671,9 @@ function analyzePostflopAction(action, game, history, result, ctx) {
           title: draws.isComboDraws ? 'Starker Semi-Bluff!' : 'Semi-Bluff',
           message: `Semi-Bluff mit ${draws.isComboDraws ? 'Combo-Draw' : draws.hasFlushDraw ? 'Flush-Draw' : 'Straight-Draw'} ${posContext} — du hast Fold Equity + Draw Equity.`,
           tip: betterProfile?.foldToRaiseRate > 0.35
-            ? `${betterProfile?.name || 'Gegner'} foldet oft — guter Spot fuer Semi-Bluffs.`
+            ? `${betterProfile?.name || 'Gegner'} foldet oft — guter Spot für Semi-Bluffs.`
             : humanHasPosition
-              ? 'In Position: Wenn du gecallt wirst, hast du Kontrolle ueber den Turn.'
+              ? 'In Position: Wenn du gecallt wirst, hast du Kontrolle über den Turn.'
               : 'OOP Semi-Bluffs sind riskanter — du musst auf dem Turn oft wieder Druck machen.',
         };
       }
@@ -1695,7 +1695,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
             ? `Vorsicht: ${betterProfile.name} foldet selten. Bluffs gegen Calling Stations sind unprofitabel.`
             : humanHasPosition
               ? 'In Position kannst du Bluffs auf mehreren Streets durchziehen — aber plane die ganze Linie.'
-              : 'OOP Bluffs sind riskanter. Waehle gute Blocker-Haende (Ax blockt Top Pair).',
+              : 'OOP Bluffs sind riskanter. Waehle gute Blocker-Hände (Ax blockt Top Pair).',
         };
       }
       if (board?.isWet) {
@@ -1724,7 +1724,7 @@ function analyzePostflopAction(action, game, history, result, ctx) {
       return {
         phase: phaseLabel(phase), type: 'info',
         title: 'All-In mit guter Hand',
-        message: `${handName} All-In. Akzeptabel, aber ein Raise koennte mehr Value extrahieren.`,
+        message: `${handName} All-In. Akzeptabel, aber ein Raise könnte mehr Value extrahieren.`,
         tip: spr > 3 ? 'Bei hohem SPR lieber raisen statt All-In — du willst den Gegner nicht verscheuchen.' : null,
       };
     }
@@ -1768,7 +1768,7 @@ function overallAssessment(humanActions, game, result, ctx) {
       phase: 'Gesamt', type: 'warning',
       title: 'Passives Spiel',
       message: `${calls}x gecallt ohne zu raisen. Passives Spiel kostet dich Fold Equity und macht dich lesbar.`,
-      tip: 'Poker ist ein Spiel der Aggression. Mische Raises in dein Spiel fuer Balance. Frage dich: Haette ich hier Raisen sollen?',
+      tip: 'Poker ist ein Spiel der Aggression. Mische Raises in dein Spiel für Balance. Frage dich: Hätte ich hier Raisen sollen?',
     };
   }
 
@@ -1777,8 +1777,8 @@ function overallAssessment(humanActions, game, result, ctx) {
     return {
       phase: 'Gesamt', type: 'info',
       title: 'Aggressive Linie',
-      message: `${raises}x gebettet/geraist. Aggression ist gut, aber uebertriebene Aggression wird exploitbar.`,
-      tip: 'Pruefe: Hast du auf jeder Street genug Equity gehabt? Multi-Street Bluffs muessen geplant sein.',
+      message: `${raises}x gebettet/geraist. Aggression ist gut, aber übertriebene Aggression wird exploitbar.`,
+      tip: 'Pruefe: Hast du auf jeder Street genug Equity gehabt? Multi-Street Bluffs müssen geplant sein.',
     };
   }
 
@@ -1850,10 +1850,10 @@ export function generateStreetReview(game, handHistory, result) {
       } else {
         // Fallback to hand strength
         if (handStrength === 'premium' || handStrength === 'strong') {
-          optimal = 'Open-Raise fuer Value.';
+          optimal = 'Open-Raise für Value.';
           grade = preflopActions.some(a => a.action === ACTIONS.RAISE || a.action === ACTIONS.BET) ? 'good' : 'ok';
         } else if (handStrength === 'playable') {
-          optimal = ['BTN', 'CO'].includes(position) ? 'Open-Raise aus spaeter Position.' : 'Raise oder Fold.';
+          optimal = ['BTN', 'CO'].includes(position) ? 'Open-Raise aus später Position.' : 'Raise oder Fold.';
           grade = 'ok';
         } else {
           optimal = 'Fold.';
@@ -1865,18 +1865,18 @@ export function generateStreetReview(game, handHistory, result) {
       const raiserPos = findFirstRaiser(allPreflopActions, humanSeat, game)?.position || '';
       const in3Bet = isIn3BetRange(human.hand, raiserPos);
       if (in3Bet === true) {
-        optimal = `3-Bet fuer Value vs. ${raiserPos}-Open. ${handKey} ist in der 3-Bet Range.`;
+        optimal = `3-Bet für Value vs. ${raiserPos}-Open. ${handKey} ist in der 3-Bet Range.`;
         if (preflopActions.some(a => a.action === ACTIONS.RAISE)) grade = 'good';
         else if (preflopActions.some(a => a.action === ACTIONS.CALL)) grade = 'ok';
         else grade = 'bad';
       } else if (handStrength === 'premium') {
-        optimal = '3-Bet / 4-Bet fuer Value. Premium Haende wollen grosse Pots.';
+        optimal = '3-Bet / 4-Bet für Value. Premium Hände wollen grosse Pots.';
         grade = preflopActions.some(a => a.action === ACTIONS.RAISE || a.action === ACTIONS.ALLIN) ? 'good' : 'ok';
       } else if (handStrength === 'strong' || handStrength === 'playable') {
         optimal = ['BTN', 'CO', 'BB'].includes(position) ? 'Call in Position oder 3-Bet.' : 'Call oder Fold OOP.';
         grade = preflopActions.some(a => a.action === ACTIONS.FOLD) && handStrength === 'strong' ? 'bad' : 'ok';
       } else {
-        optimal = 'Fold. Schwache Haende gegen Raises nicht spielen.';
+        optimal = 'Fold. Schwache Hände gegen Raises nicht spielen.';
         grade = preflopActions.some(a => a.action === ACTIONS.FOLD) ? 'good' : 'bad';
       }
     }
@@ -1949,20 +1949,20 @@ export function generateStreetReview(game, handHistory, result) {
     let grade = 'ok';
 
     if (strength >= 6) {
-      optimal = `Bet/Raise fuer Value. Monster-Hand maximal Value extrahieren ${posContext}.`;
+      optimal = `Bet/Raise für Value. Monster-Hand maximal Value extrahieren ${posContext}.`;
       grade = streetActions.some(a => a.action === ACTIONS.BET || a.action === ACTIONS.RAISE || a.action === ACTIONS.ALLIN) ? 'good' : 'ok';
     } else if (strength >= 4) {
       if (isRiver) {
-        optimal = facedBet ? 'Raise fuer Value.' : 'Value Bet 66-80% Pot — maximalen Value am River extrahieren.';
+        optimal = facedBet ? 'Raise für Value.' : 'Value Bet 66-80% Pot — maximalen Value am River extrahieren.';
       } else {
-        optimal = facedBet ? 'Raise fuer Value.' : `Bet 60-75% Pot fuer Value${board?.isWet ? ' + Protection' : ''} ${posContext}.`;
+        optimal = facedBet ? 'Raise für Value.' : `Bet 60-75% Pot für Value${board?.isWet ? ' + Protection' : ''} ${posContext}.`;
       }
       grade = streetActions.some(a => a.action === ACTIONS.BET || a.action === ACTIONS.RAISE) ? 'good' : streetActions.some(a => a.action === ACTIONS.CALL) ? 'ok' : 'bad';
     } else if (strength >= 2) {
       if (isRiver) {
-        optimal = facedBet ? 'Call — Thin Value Hand am River.' : 'Thin Value Bet oder Check. Welche schwaecheren Haende callen?';
+        optimal = facedBet ? 'Call — Thin Value Hand am River.' : 'Thin Value Bet oder Check. Welche schwächeren Hände callen?';
       } else {
-        optimal = facedBet ? 'Call oder Raise je nach Board-Textur.' : `Bet 50-66% Pot${board?.isWet ? ' fuer Protection' : ' fuer Thin Value'} ${posContext}.`;
+        optimal = facedBet ? 'Call oder Raise je nach Board-Textur.' : `Bet 50-66% Pot${board?.isWet ? ' für Protection' : ' für Thin Value'} ${posContext}.`;
       }
       grade = streetActions.some(a => a.action === ACTIONS.BET || a.action === ACTIONS.RAISE) ? 'good' : streetActions.some(a => a.action === ACTIONS.CALL) ? 'ok' : 'bad';
     } else if (strength === 1) {
@@ -1976,9 +1976,9 @@ export function generateStreetReview(game, handHistory, result) {
         }
       } else {
         if (isCBetSpot) {
-          optimal = board?.isDry ? 'C-Bet 25-33% Pot als PFR.' : 'C-Bet 50-66% Pot fuer Value + Protection.';
+          optimal = board?.isDry ? 'C-Bet 25-33% Pot als PFR.' : 'C-Bet 50-66% Pot für Value + Protection.';
         } else {
-          optimal = board?.isWet ? `Bet 50% Pot fuer Value + Protection ${posContext}.` : `Check oder kleine Bet fuer Thin Value ${posContext}.`;
+          optimal = board?.isWet ? `Bet 50% Pot für Value + Protection ${posContext}.` : `Check oder kleine Bet für Thin Value ${posContext}.`;
         }
       }
       grade = 'ok';
@@ -2077,7 +2077,7 @@ function getRangePercent(position) {
 function get3BetAdvice(profile) {
   if (profile.foldToRaiseRate > 0.5) return 'Dieser Spieler foldet sehr oft auf 3-Bets — oefter light 3-betten.';
   if (profile.foldToRaiseRate < 0.2) return 'Dieser Spieler foldet fast nie — nur mit Value 3-betten.';
-  if (profile.style === 'Loose-Aggressive' || profile.style === 'Maniac') return 'Gegen LAGs/Maniacs mit Value 3-betten — sie spielen zurueck mit schlechteren Haenden.';
+  if (profile.style === 'Loose-Aggressive' || profile.style === 'Maniac') return 'Gegen LAGs/Maniacs mit Value 3-betten — sie spielen zurück mit schlechteren Händen.';
   if (profile.style === 'Tight-Aggressive') return 'Gegen TAGs selektiver 3-betten — sie haben meistens etwas.';
   return '';
 }
@@ -2105,14 +2105,14 @@ export function getSessionTips(handResults) {
     tips.push({
       type: 'warning',
       title: 'Zu tight!',
-      message: `Du hast ${Math.round(foldRate * 100)}% deiner Haende gefoldet. In 6-Max solltest du ca. 60-70% folden (VPIP 25-35%).`,
+      message: `Du hast ${Math.round(foldRate * 100)}% deiner Hände gefoldet. In 6-Max solltest du ca. 60-70% folden (VPIP 25-35%).`,
     });
   }
   if (foldRate < 0.55) {
     tips.push({
       type: 'warning',
       title: 'Zu loose!',
-      message: `Du spielst ${Math.round((1 - foldRate) * 100)}% deiner Haende. Standard-VPIP in 6-Max ist 25-30%. Fokussiere dich auf bessere Starting Hands.`,
+      message: `Du spielst ${Math.round((1 - foldRate) * 100)}% deiner Hände. Standard-VPIP in 6-Max ist 25-30%. Fokussiere dich auf bessere Starting Hands.`,
     });
   }
 

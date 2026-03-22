@@ -63,7 +63,7 @@ export function renderRangeVisualizer(container, selectedPosition = 'UTG') {
 
   // Position info
   html += `<div style="text-align:center; font-size:0.55em; color:var(--text2); margin-bottom:6px;">
-    ${posData.description || ''} — <span style="color:var(--gold); font-weight:700;">${raisePct}%</span> der Haende
+    ${posData.description || ''} — <span style="color:var(--gold); font-weight:700;">${raisePct}%</span> der Hände
   </div>`;
 
   // Legend

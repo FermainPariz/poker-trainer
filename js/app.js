@@ -73,7 +73,7 @@ function init() {
   UI.updateTopBar(game);
   UI.renderAllSeats(game);
   UI.showActionBar(false);
-  UI.showContinueBar(true, '6-Max Texas Hold\'em Trainer — Druecke Start!', '');
+  UI.showContinueBar(true, '6-Max Texas Hold\'em Trainer — Drücke Start!', '');
   document.getElementById('btnDeal').textContent = 'Spiel starten';
   setupModeSelector();
 
@@ -163,9 +163,17 @@ function bindEvents() {
   // Sound toggle
   document.getElementById('btnToggleSound')?.addEventListener('click', toggleSound);
 
-  // Coach feedback — challenge the coach's advice
+  // Coach feedback — show detail first, then challenge on second tap
   document.getElementById('btnCoachFeedback').addEventListener('click', () => {
     if (!gameInProgress) return;
+    // First tap: show detail text if available
+    if (currentCoachDetail) {
+      const text = document.getElementById('coachText');
+      if (text) text.textContent = currentCoachDetail;
+      currentCoachDetail = null; // consumed — next tap will challenge
+      return;
+    }
+    // Second tap (or no detail): challenge coach advice
     const critique = challengeCoachAdvice(game);
     if (critique) showCoachComment(critique);
   });
@@ -260,6 +268,16 @@ async function startNewHand() {
   streetSnapshots = {};
   solverFreqsPerAction = [];
   activeSolveResult = null;
+
+  // Clear stale GTO frequency labels on buttons
+  for (const id of ['freqFold', 'freqCheck', 'freqCall', 'freqRaise', 'evFold', 'evCheck', 'evCall', 'evRaise']) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = ''; el.className = el.className.replace(/positive|negative|neutral/g, '').trim(); }
+  }
+
+  // Clear analysis panel from previous hand
+  const analysisContent = document.getElementById('analysisContent');
+  if (analysisContent) analysisContent.innerHTML = '<p style="color:var(--text2)">Analyse wird nach der nächsten Hand angezeigt.</p>';
 
   const info = game.startHand();
   if (!info) {
@@ -414,6 +432,10 @@ async function aiTurn(seatIndex) {
   UI.renderAllSeats(game);
   updatePotDisplay();
 
+  // Delay so user can see each AI action (faster for folds/checks, slower for bets)
+  const isAggressive = decision.action === ACTIONS.RAISE || decision.action === ACTIONS.BET || decision.action === ACTIONS.ALLIN;
+  await delay(isAggressive ? 800 : 500);
+
   if (result.nextPhase) {
     await handlePhaseTransition(result);
   }
@@ -466,7 +488,7 @@ async function playerAction(action, amount = 0) {
   UI.showActionLabel(game.humanSeat, action, labelAmount);
 
   // Coach: action review — append solver-based feedback if available
-  const actionCoach = getActionComment(action, game, callAmount);
+  const actionCoach = getActionComment(action, game, callAmount, gtoFreqs);
   if (actionCoach && gtoFreqs && game.phase !== 'preflop') {
     // Add solver annotation showing what GTO preferred
     const actionKey = action === ACTIONS.FOLD ? 'fold'
@@ -578,7 +600,6 @@ async function handleHumanFold(engineResult) {
 
   UI.renderAllSeats(game);
   UI.updateTopBar(game);
-  UI.updatePot(0);
   clearHUD();
 
   // Coach: fold summary
@@ -617,7 +638,7 @@ async function handleHumanFold(engineResult) {
     if (events) {
       for (const ev of events) {
         if (ev.type === 'blinds_up') {
-          UI.showMessage(`Blinds erhoehen: ${ev.sb}/${ev.bb}`, 2000);
+          UI.showMessage(`Blinds erhöhen: ${ev.sb}/${ev.bb}`, 2000);
         } else if (ev.type === 'human_eliminated' || ev.type === 'tournament_end') {
           await delay(400);
           showTournamentSummary();
@@ -630,7 +651,7 @@ async function handleHumanFold(engineResult) {
 
   await delay(400);
   UI.showContinueBar(true, resultText, resultClass);
-  document.getElementById('btnDeal').textContent = 'Naechste Hand';
+  document.getElementById('btnDeal').textContent = 'Nächste Hand';
 }
 
 // === Phase Transition ===
@@ -721,7 +742,8 @@ async function handleHandEnd(result) {
   // Don't re-render seats if showdown already rendered them
   if (!result.showdown) UI.renderAllSeats(game);
   UI.updateTopBar(game);
-  UI.updatePot(0);
+  // Show final pot at showdown (not $0)
+  UI.updatePot(potWon);
   clearHUD();
 
   // Coach: hand summary
@@ -771,7 +793,7 @@ async function handleHandEnd(result) {
         if (ev.type === 'elimination') {
           resultText += ` | ${ev.player.name} eliminated (#${ev.position})`;
         } else if (ev.type === 'blinds_up') {
-          UI.showMessage(`Blinds erhoehen: ${ev.sb}/${ev.bb}`, 2000);
+          UI.showMessage(`Blinds erhöhen: ${ev.sb}/${ev.bb}`, 2000);
         } else if (ev.type === 'human_eliminated' || ev.type === 'tournament_end') {
           await delay(800);
           showTournamentSummary();
@@ -784,7 +806,7 @@ async function handleHandEnd(result) {
 
   await delay(800);
   UI.showContinueBar(true, resultText, resultClass);
-  document.getElementById('btnDeal').textContent = 'Naechste Hand';
+  document.getElementById('btnDeal').textContent = 'Nächste Hand';
 }
 
 // === Analysis Panel ===
@@ -1264,6 +1286,8 @@ function updateScoringHUD() {
   elAccuracy.className = 'hud-value' + (data.accuracy >= 90 ? ' score-best' : data.accuracy >= 70 ? ' score-correct' : ' score-mistake');
 }
 
+let currentCoachDetail = null; // stored detail text for "?" button
+
 function showCoachComment(comment) {
   const bubble = document.getElementById('coachBubble');
   const text = document.getElementById('coachText');
@@ -1274,6 +1298,13 @@ function showCoachComment(comment) {
   bubble.classList.add(comment.type || 'neutral');
   text.textContent = comment.text;
   bubble.classList.add('visible');
+
+  // Store detail for "?" button
+  currentCoachDetail = comment.detail || null;
+  const detailBtn = document.getElementById('btnCoachFeedback');
+  if (detailBtn) {
+    detailBtn.style.display = currentCoachDetail ? '' : 'none';
+  }
 
   // Re-trigger animation
   bubble.style.animation = 'none';
@@ -1427,11 +1458,11 @@ async function loadLeaderboard() {
   try {
     const entries = await cloudGetLeaderboard();
     if (entries.length === 0) {
-      body.innerHTML = '<div class="leaderboard-empty">Noch keine Spieler im Ranking. Spiele mindestens 10 Haende!</div>';
+      body.innerHTML = '<div class="leaderboard-empty">Noch keine Spieler im Ranking. Spiele mindestens 10 Hände!</div>';
       return;
     }
 
-    let html = '<table class="leaderboard-table"><thead><tr><th>#</th><th>Spieler</th><th>P&L</th><th>Haende</th><th>Acc.</th></tr></thead><tbody>';
+    let html = '<table class="leaderboard-table"><thead><tr><th>#</th><th>Spieler</th><th>P&L</th><th>Hände</th><th>Acc.</th></tr></thead><tbody>';
 
     for (const e of entries) {
       const pnlCls = e.totalPnl >= 0 ? 'leaderboard-pnl-pos' : 'leaderboard-pnl-neg';
@@ -1500,7 +1531,10 @@ function setupModeSelector() {
 
   container.querySelectorAll('.mode-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      if (gameInProgress) return; // can't switch mid-hand
+      if (gameInProgress) {
+        showCoachComment({ type: 'neutral', text: 'Modus kann nur zwischen den Händen gewechselt werden.' });
+        return;
+      }
       container.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       switchMode(btn.dataset.mode);
@@ -1561,7 +1595,7 @@ function switchMode(mode) {
   const modeLabel = isSNG
     ? `SNG ${numPlayers}-Max — $${game.startingStack} Buy-in`
     : `Cash ${numPlayers}-Max — $${game.smallBlind}/$${game.bigBlind}`;
-  UI.showContinueBar(true, `${modeLabel} — Druecke Start!`, '');
+  UI.showContinueBar(true, `${modeLabel} — Drücke Start!`, '');
   document.getElementById('btnDeal').textContent = 'Spiel starten';
 
   // Toggle tournament HUD
@@ -1607,7 +1641,7 @@ function showTournamentSummary() {
         <div style="font-size:1em; font-weight:800; color:var(--gold); margin-bottom:4px;">TURNIER BEENDET</div>
         <div style="font-size:1.4em; font-weight:800; color:${pos <= 2 ? 'var(--green)' : 'var(--text)'};">Platz #${pos}</div>
         <div style="font-size:0.8em; color:${profitColor}; font-weight:700; margin:8px 0;">${profit >= 0 ? '+' : ''}$${profit} Profit</div>
-        <div style="font-size:0.6em; color:var(--text2);">${info.totalHandsPlayed} Haende | ${duration} Min</div>
+        <div style="font-size:0.6em; color:var(--text2);">${info.totalHandsPlayed} Hände | ${duration} Min</div>
       </div>
       <div style="padding:8px; margin:8px 0; background:rgba(255,255,255,.03); border-radius:8px;">
         <div style="font-size:0.6em; font-weight:700; color:var(--text); margin-bottom:4px;">Auszahlung:</div>

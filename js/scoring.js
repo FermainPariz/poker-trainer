@@ -246,7 +246,7 @@ export function getFatigueWarning() {
   if (mins > 60 && analysis.scoreDrop > 8) {
     return {
       level: 'mild',
-      message: `Session laeuft seit ${mins} Min. Leichter Qualitaetsrueckgang erkennbar. Pause empfohlen.`,
+      message: `Session laeuft seit ${mins} Min. Leichter Qualitaetsrückgang erkennbar. Pause empfohlen.`,
       scoreDrop: analysis.scoreDrop,
       sessionMinutes: mins,
     };

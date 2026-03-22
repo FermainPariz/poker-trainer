@@ -264,24 +264,24 @@ function getExplanation(hand, correctAction, scenarioId, position, raiserPos) {
   if (scenarioId === 'rfi') {
     if (correctAction === 'Raise') {
       if (isPair) return `${hand} ist ein Pocket Pair — immer raisen als RFI aus ${position}.`;
-      if (isSuited && highRank === 'A') return `${hand} ist ein suited Ace — stark genug fuer einen Open-Raise aus ${position}. Suited Aces haben Flush- und Straight-Potential.`;
+      if (isSuited && highRank === 'A') return `${hand} ist ein suited Ace — stark genug für einen Open-Raise aus ${position}. Suited Aces haben Flush- und Straight-Potential.`;
       if (isSuited) return `${hand} (suited) hat gutes Postflop-Potential durch Flush-Draws. Aus ${position} profitabel zu raisen.`;
-      return `${hand} ist stark genug fuer einen Open-Raise aus ${position}.`;
+      return `${hand} ist stark genug für einen Open-Raise aus ${position}.`;
     } else {
       const isLate = ['BTN', 'CO'].includes(position);
-      if (isLate) return `${hand} ist aus ${position} zu schwach zum Raisen. Auch wenn ${position} loose spielt, gibt es bessere Haende.`;
-      return `${hand} ist aus ${position} zu schwach. In fruehen Positionen nur starke Haende spielen.`;
+      if (isLate) return `${hand} ist aus ${position} zu schwach zum Raisen. Auch wenn ${position} loose spielt, gibt es bessere Hände.`;
+      return `${hand} ist aus ${position} zu schwach. In fruehen Positionen nur starke Hände spielen.`;
     }
   }
 
   if (scenarioId === 'vs_raise' || scenarioId === 'bb_defense') {
     if (correctAction === '3-Bet') {
-      return `${hand} vs. ${raiserPos}-Raise: 3-Bet fuer Value! Diese Hand ist stark genug um den Pot preflop aufzubauen und Fold Equity zu gewinnen.`;
+      return `${hand} vs. ${raiserPos}-Raise: 3-Bet für Value! Diese Hand ist stark genug um den Pot preflop aufzubauen und Fold Equity zu gewinnen.`;
     }
     if (correctAction === 'Call') {
-      return `${hand} vs. ${raiserPos}-Raise: Call. Gutes Postflop-Potential aber nicht stark genug fuer eine 3-Bet. Spielbar wegen Implied Odds${position === 'BB' ? ' und guten Pot Odds im BB' : ''}.`;
+      return `${hand} vs. ${raiserPos}-Raise: Call. Gutes Postflop-Potential aber nicht stark genug für eine 3-Bet. Spielbar wegen Implied Odds${position === 'BB' ? ' und guten Pot Odds im BB' : ''}.`;
     }
-    return `${hand} vs. ${raiserPos}-Raise: Fold. Zu schwach um profitabel gegen eine Raise zu spielen${position !== 'BB' ? '. Aus ' + position + ' brauchst du eine staerkere Hand.' : '.'}`;
+    return `${hand} vs. ${raiserPos}-Raise: Fold. Zu schwach um profitabel gegen eine Raise zu spielen${position !== 'BB' ? '. Aus ' + position + ' brauchst du eine stärkere Hand.' : '.'}`;
   }
 
   return '';
@@ -472,7 +472,7 @@ function handleQuizAnswer(container, playerAnswer) {
         width:100%; margin-top:8px; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,.1);
         background:rgba(255,255,255,.05); color:var(--text); font-size:0.7em; font-weight:600;
         cursor:pointer; font-family:inherit;
-      ">Naechste Frage →</button>`;
+      ">Nächste Frage →</button>`;
     feedbackEl.style.display = 'block';
 
     // Bind next button

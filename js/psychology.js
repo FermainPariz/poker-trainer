@@ -120,11 +120,11 @@ function getTiltFeedback() {
       level: 'critical',
       score,
       title: 'TILT-WARNUNG!',
-      message: 'Dein Spielmuster zeigt starke Anzeichen von Tilt. Empfehlung: Mach eine Pause, atme durch, und komm mit klarem Kopf zurueck.',
+      message: 'Dein Spielmuster zeigt starke Anzeichen von Tilt. Empfehlung: Mach eine Pause, atme durch, und komm mit klarem Kopf zurück.',
       tips: [
-        'Steh auf und beweg dich fuer 5 Minuten',
-        'Erinnere dich: Poker ist ein Langzeit-Spiel. Eine Session aendert nichts.',
-        'Setze dir ein Stop-Loss fuer die Session',
+        'Steh auf und beweg dich für 5 Minuten',
+        'Erinnere dich: Poker ist ein Langzeit-Spiel. Eine Session ändert nichts.',
+        'Setze dir ein Stop-Loss für die Session',
       ],
     };
   }
@@ -134,9 +134,9 @@ function getTiltFeedback() {
       level: 'warning',
       score,
       title: 'Achtung: Tilt-Gefahr',
-      message: `Du hast ${sessionData.consecutiveLosses} Haende in Folge verloren. Achte darauf, deine Entscheidungen nicht von Emotionen beeinflussen zu lassen.`,
+      message: `Du hast ${sessionData.consecutiveLosses} Hände in Folge verloren. Achte darauf, deine Entscheidungen nicht von Emotionen beeinflussen zu lassen.`,
       tips: [
-        'Spiele nur Haende in deiner Range — keine Revenge-Plays',
+        'Spiele nur Hände in deiner Range — keine Revenge-Plays',
         'Nimm dir bewusst 5 Sekunden vor jeder Entscheidung',
         'Akzeptiere Varianz: Auch perfekte Entscheidungen verlieren kurzfristig',
       ],

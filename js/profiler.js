@@ -11,7 +11,7 @@ const PLAYER_TYPES = {
     label: 'Fish',
     icon: '🐟',
     color: '#60a5fa', // blue
-    description: 'Loose-Passive: Spielt viele Haende, callt zu viel, raist selten.',
+    description: 'Loose-Passive: Spielt viele Hände, callt zu viel, raist selten.',
     exploit: 'Value bet breit! Bluff selten — er callt alles.',
     match: (s) => s.vpip > 40 && s.pfr < 15,
   },
@@ -20,14 +20,14 @@ const PLAYER_TYPES = {
     icon: '📞',
     color: '#a78bfa', // purple
     description: 'Callt fast alles. Foldet extrem selten.',
-    exploit: 'Nie bluffen! Nur fuer Value betten. Grosse Bets mit starken Haenden.',
+    exploit: 'Nie bluffen! Nur für Value betten. Grosse Bets mit starken Händen.',
     match: (s) => s.vpip > 35 && s.af < 1.2 && s.foldToBet < 30,
   },
   nit: {
     label: 'Nit',
     icon: '🔒',
     color: '#94a3b8', // gray
-    description: 'Spielt nur Premium-Haende. Extrem tight.',
+    description: 'Spielt nur Premium-Hände. Extrem tight.',
     exploit: 'Steal seine Blinds aggressiv! Wenn er raist, geh aus dem Weg.',
     match: (s) => s.vpip < 18 && s.pfr < 16,
   },
@@ -35,7 +35,7 @@ const PLAYER_TYPES = {
     label: 'TAG',
     icon: '🎯',
     color: '#22c55e', // green
-    description: 'Tight-Aggressive: Solider Spieler. Spielt wenige Haende, aber aggressiv.',
+    description: 'Tight-Aggressive: Solider Spieler. Spielt wenige Hände, aber aggressiv.',
     exploit: 'Vorsicht! Respektiere seine Raises. 3-Bette Light aus Position.',
     match: (s) => s.vpip >= 18 && s.vpip <= 28 && s.pfr >= 16 && s.af >= 2,
   },
@@ -43,8 +43,8 @@ const PLAYER_TYPES = {
     label: 'LAG',
     icon: '🔥',
     color: '#f59e0b', // amber
-    description: 'Loose-Aggressive: Spielt viele Haende und ist aggressiv. Schwer zu lesen.',
-    exploit: 'Tighte up! Warte auf starke Haende und lass ihn in deine Traps laufen.',
+    description: 'Loose-Aggressive: Spielt viele Hände und ist aggressiv. Schwer zu lesen.',
+    exploit: 'Tighte up! Warte auf starke Hände und lass ihn in deine Traps laufen.',
     match: (s) => s.vpip > 28 && s.pfr > 22 && s.af >= 2.5,
   },
   maniac: {
@@ -266,7 +266,7 @@ export function classifyOpponent(seatIndex) {
     icon: '❓',
     color: 'var(--text2)',
     description: 'Noch nicht genug Daten oder durchschnittlicher Spieler.',
-    exploit: 'Sammle mehr Haende fuer eine bessere Einschaetzung.',
+    exploit: 'Sammle mehr Hände für eine bessere Einschätzung.',
     stats,
   };
 }
@@ -457,7 +457,7 @@ export function getExploitRecommendations(seatIndex, context = {}) {
         priority: 'high',
         action: 'NIE bluffen! Nur Value betten.',
         reason: `Fold-to-Bet nur ${stats.foldToBet}% — callt fast alles.`,
-        sizing: context.pot ? `${Math.round(context.pot * 0.8)}–${context.pot} (80-100% Pot fuer max Value)` : 'Grosse Bets fuer Value.',
+        sizing: context.pot ? `${Math.round(context.pot * 0.8)}–${context.pot} (80-100% Pot für max Value)` : 'Grosse Bets für Value.',
       });
     }
 

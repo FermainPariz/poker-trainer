@@ -267,7 +267,7 @@ export function renderTournamentHUD(container) {
         <span class="tourney-value">${info.sb}/${info.bb}${info.ante ? ' +' + info.ante : ''}</span>
       </div>
       <div class="tourney-hud-item">
-        <span class="tourney-label">Naechstes</span>
+        <span class="tourney-label">Nächstes</span>
         <span class="tourney-value tourney-next">${nextBlindsStr} (${info.handsRemaining}h)</span>
       </div>
       <div class="tourney-hud-item">

@@ -123,10 +123,10 @@ function analyzeBoard(community) {
   if (isMonotone) textures.push('Monoton — Flush dominiert');
   else if (flushComplete) textures.push('Flush auf dem Board');
   else if (flushDraw) textures.push('4 gleiche Farbe — Flush Draw');
-  else if (flushPossible) textures.push('3 gleiche Farbe — Flush moeglich');
+  else if (flushPossible) textures.push('3 gleiche Farbe — Flush möglich');
   if (straightComplete) textures.push('Straight auf dem Board');
-  else if (isConnected) textures.push('Connected Board — viele Straight-Moeglichkeiten');
-  else if (straightPossible) textures.push('Straight moeglich');
+  else if (isConnected) textures.push('Connected Board — viele Straight-Möglichkeiten');
+  else if (straightPossible) textures.push('Straight möglich');
   if (boardTrips) textures.push('Drilling auf dem Board');
   else if (doublePaired) textures.push('Double-Paired — Full House dominiert');
   else if (boardPaired) textures.push('Board gepaart');
@@ -206,13 +206,13 @@ function analyzeTurnRiverImpact(community, phase) {
 
   // Build description
   const parts = [];
-  if (impact.isAce) parts.push('Ace am ' + (phase === PHASES.TURN ? 'Turn' : 'River') + ' — veraendert alles');
-  else if (impact.isOvercard) parts.push('Overcard — neue hoechste Karte');
+  if (impact.isAce) parts.push('Ace am ' + (phase === PHASES.TURN ? 'Turn' : 'River') + ' — verändert alles');
+  else if (impact.isOvercard) parts.push('Overcard — neue höchste Karte');
   if (impact.completesFlush) parts.push('Flush komplettiert!');
-  else if (impact.bringsFlushDraw) parts.push('Flush Draw jetzt moeglich');
-  if (impact.completesStraight) parts.push('Straight moeglich!');
-  if (impact.pairsBoard) parts.push('Board gepaart — Full House moeglich');
-  if (impact.isBrick) parts.push('Brick — aendert wenig');
+  else if (impact.bringsFlushDraw) parts.push('Flush Draw jetzt möglich');
+  if (impact.completesStraight) parts.push('Straight möglich!');
+  if (impact.pairsBoard) parts.push('Board gepaart — Full House möglich');
+  if (impact.isBrick) parts.push('Brick — ändert wenig');
   impact.description = parts.join('. ');
 
   // Danger level
@@ -320,7 +320,7 @@ function getSPRStrategy(stack, pot) {
   if (spr <= 8) {
     return {
       spr, zone: 'medium',
-      strategy: 'Mittlerer SPR — Standard-Poker. Two Pair+ fuer grossen Pot, Top Pair fuer mittleren.',
+      strategy: 'Mittlerer SPR — Standard-Poker. Two Pair+ für grossen Pot, Top Pair für mittleren.',
       commitThreshold: 2, // two pair
     };
   }
@@ -400,7 +400,7 @@ function calculateRangeAdvantage(board, position, wasPFR) {
     explanation = 'Raiser hat klaren Range-Advantage — hoch-frequentes C-Bet mit kleinem Sizing (GTO).';
   } else if (pfrScore >= 1) {
     advantage = 'pfr_slight';
-    explanation = 'Raiser hat leichten Range-Advantage — moderates C-Bet moeglich.';
+    explanation = 'Raiser hat leichten Range-Advantage — moderates C-Bet möglich.';
   } else if (pfrScore <= -3) {
     advantage = 'caller_strong';
     explanation = 'Caller hat Range-Advantage! Board trifft Caller-Range besser. PFR sollte viel checken.';
@@ -488,7 +488,7 @@ function getRiverGTOAdvice(game, handStrength, board, blockerData, equity) {
       const sizing = board?.isWet ? 75 : 66;
       return {
         action: 'value_bet',
-        note: `River Value-Bet (${sizing}% Pot). GTO: Bette nur wenn schlechtere Haende callen.`,
+        note: `River Value-Bet (${sizing}% Pot). GTO: Bette nur wenn schlechtere Hände callen.`,
       };
     }
     if (handStrength === 0 && blockerData && blockerData.bluffValue >= 2) {
@@ -502,7 +502,7 @@ function getRiverGTOAdvice(game, handStrength, board, blockerData, equity) {
       // Marginal/no showdown value — check or thin value
       return {
         action: 'check',
-        note: 'River Check. GTO: Schwache Haende mit Showdown-Value checken. Nicht bluffen ohne Blocker.',
+        note: 'River Check. GTO: Schwache Hände mit Showdown-Value checken. Nicht bluffen ohne Blocker.',
       };
     }
   }
@@ -520,7 +520,7 @@ function getRiverGTOAdvice(game, handStrength, board, blockerData, equity) {
       // Bluff catcher territory
       return {
         action: 'bluff_catcher',
-        note: `Bluff-Catcher Situation. ${mdf?.description || ''} GTO: Du brauchst nur zu glauben, dass der Gegner in >${(100 - (mdf?.mdf || 50))}% der Faelle blufft, damit ein Call profitabel ist.`,
+        note: `Bluff-Catcher Situation. ${mdf?.description || ''} GTO: Du brauchst nur zu glauben, dass der Gegner in >${(100 - (mdf?.mdf || 50))}% der Fälle blufft, damit ein Call profitabel ist.`,
       };
     }
   }
@@ -542,7 +542,7 @@ function getFacing3BetAdvice(hand, position) {
   const inPosition = ['BTN', 'CO', 'BTN/SB'].includes(position);
 
   if (FACING_3BET.fourbet_value.has(key)) {
-    return { action: '4-Bet', type: 'positive', note: `4-Bet fuer Value! ${h.name} ist stark genug. Sizing: ${inPosition ? '2.5x' : '3x'} der 3-Bet.` };
+    return { action: '4-Bet', type: 'positive', note: `4-Bet für Value! ${h.name} ist stark genug. Sizing: ${inPosition ? '2.5x' : '3x'} der 3-Bet.` };
   }
   if (FACING_3BET.fourbet_bluff.has(key)) {
     return { action: '4-Bet Bluff', type: 'neutral', note: `4-Bet als Bluff (GTO). ${h.name} hat Ace-Blocker (blockst AA/AK) und wird zum Nut-Flush-Draw wenn gecallt.` };
@@ -701,7 +701,7 @@ function estimateOpponentRange(game) {
       } else if (betPct > 35) {
         betSizingTell = { size: 'medium', pct: betPct, meaning: 'Standard-Bet = Value oder Semi-Bluff' };
       } else if (betPct > 0) {
-        betSizingTell = { size: 'small', pct: betPct, meaning: 'Kleiner Bet = Blocking Bet, thin Value, oder Draw auf guenstige Odds' };
+        betSizingTell = { size: 'small', pct: betPct, meaning: 'Kleiner Bet = Blocking Bet, thin Value, oder Draw auf günstige Odds' };
       }
     }
 
@@ -785,7 +785,7 @@ function estimateOpponentRange(game) {
         rangeEstimate.push('Flush/Flush-Draw');
       }
       if (boardPaired && aggressiveStreets >= 1) {
-        rangeEstimate.push('Full House / Trips moeglich');
+        rangeEstimate.push('Full House / Trips möglich');
       }
       // Monotone board: heavy aggression = likely flush
       if (board?.isMonotone && aggressiveStreets >= 1) {
@@ -808,7 +808,7 @@ function estimateOpponentRange(game) {
         typeNote = `${player.name} blufft oft — Range ist breiter als normal.`;
         if (rangeStrength === 'strong') rangeStrength = 'medium';
       } else if (classification.key === 'fish' || classification.key === 'whale') {
-        typeNote = `${player.name} spielt zu viele Haende — kann alles haben.`;
+        typeNote = `${player.name} spielt zu viele Hände — kann alles haben.`;
         confidence = 'low';
       }
     }
@@ -869,7 +869,7 @@ function getStrategicOptions(game, equity, handStrength, opponentAnalyses) {
     if (handStrength <= 1) {
       options.push({
         move: 'Probe-Bet (33% Pot)',
-        desc: `Kleiner Bet um den Gegner zu testen. ${mainOpp.name} hat gecheckt — das zeigt Schwaeche. Ein kleiner Bet gewinnt den Pot oft sofort oder gibt dir Information ueber seine Hand.`,
+        desc: `Kleiner Bet um den Gegner zu testen. ${mainOpp.name} hat gecheckt — das zeigt Schwäche. Ein kleiner Bet gewinnt den Pot oft sofort oder gibt dir Information über seine Hand.`,
         risk: 'niedrig',
       });
     }
@@ -879,7 +879,7 @@ function getStrategicOptions(game, equity, handStrength, opponentAnalyses) {
   if (mainOpp.rangeStrength === 'weak' || (mainOpp.classification?.key === 'nit' && !mainOpp.preflopRaised)) {
     options.push({
       move: 'Aggression nutzen',
-      desc: `${mainOpp.name} zeigt Schwaeche (${mainOpp.pattern}). Eine Bet/Raise wird oft einen Fold erzwingen. Jede gecheckte Hand von einem tighten Gegner ist ein Zeichen von Schwaeche.`,
+      desc: `${mainOpp.name} zeigt Schwäche (${mainOpp.pattern}). Eine Bet/Raise wird oft einen Fold erzwingen. Jede gecheckte Hand von einem tighten Gegner ist ein Zeichen von Schwäche.`,
       risk: 'niedrig',
     });
   }
@@ -920,9 +920,9 @@ function formatRangeAnalysis(opponentAnalyses, game) {
     } else if (opp.rangeStrength === 'polarized') {
       text += `Polarisiert: Entweder Monster oder Bluff. ${opp.rangeEstimate.slice(0, 2).join(' oder ')}. `;
     } else if (opp.rangeStrength === 'weak') {
-      text += `Zeigt Schwaeche: ${opp.rangeEstimate.slice(0, 2).join(', ')}. `;
+      text += `Zeigt Schwäche: ${opp.rangeEstimate.slice(0, 2).join(', ')}. `;
     } else {
-      text += `Moegliche Haende: ${opp.rangeEstimate.slice(0, 2).join(', ')}. `;
+      text += `Mögliche Hände: ${opp.rangeEstimate.slice(0, 2).join(', ')}. `;
     }
 
     if (opp.betSizingTell) text += `Sizing: ${opp.betSizingTell.meaning}. `;
@@ -1012,7 +1012,7 @@ function getRecommendation(game, equity, outs, oppAnalyses) {
     // Fold option
     const foldReason = equity !== null && equity < potOddsPct
       ? `Deine Equity (${equity.toFixed(0)}%) < Pot Odds (${potOddsPct.toFixed(0)}%) = unprofitabler Call.`
-      : `Spare Chips fuer bessere Spots.`;
+      : `Spare Chips für bessere Spots.`;
     result.options.push({ action: 'Fold', reasoning: foldReason });
 
     // Call option
@@ -1036,7 +1036,7 @@ function getRecommendation(game, equity, outs, oppAnalyses) {
       } else if (villain && (villain.type === 'nit' || villain.type === 'rock') && villain.stats?.foldToBet > 60) {
         raiseReason = `Gegen ${villain.label} (Fold-to-Bet: ${villain.stats.foldToBet}%) ist ein Bluff-Raise profitabel.`;
       } else {
-        raiseReason = 'Raise zeigt Staerke und gibt dir die Initiative fuer spaetere Streets.';
+        raiseReason = 'Raise zeigt Stärke und gibt dir die Initiative für spätere Streets.';
       }
       result.options.push({ action: `Raise ~$${raiseSize}`, reasoning: raiseReason });
     }
@@ -1064,7 +1064,7 @@ function getRecommendation(game, equity, outs, oppAnalyses) {
 
     if (realizedEquity === null && adjustedEquity === null) {
       result.bestAction = 'Call (keine Equity-Daten)';
-      result.reasoning = 'Equity wird berechnet. Entscheide nach Hand-Staerke und Pot Odds.';
+      result.reasoning = 'Equity wird berechnet. Entscheide nach Hand-Stärke und Pot Odds.';
     }
     // === LOW SPR: commit-or-fold with top pair+ ===
     else if (sprData && sprData.zone === 'low' && handStrength >= sprData.commitThreshold) {
@@ -1079,11 +1079,11 @@ function getRecommendation(game, equity, outs, oppAnalyses) {
     // === VALUE RAISE: strong hand + strong adjusted equity ===
     else if (adjustedEquity >= 65 && handStrength >= 2) {
       result.bestAction = `Raise auf ~$${raiseSize}`;
-      result.reasoning = `${eqDisplay} mit ${eval_?.descr || eval_?.name || 'starker Hand'} — Raise fuer Value!${sizingNote}`;
+      result.reasoning = `${eqDisplay} mit ${eval_?.descr || eval_?.name || 'starker Hand'} — Raise für Value!${sizingNote}`;
       if (villain) result.reasoning += ` ${villainContext(villain, 'value')}`;
     } else if (adjustedEquity >= 55 && handStrength >= 3) {
       result.bestAction = `Raise auf ~$${raiseSize}`;
-      result.reasoning = `${eqDisplay} mit ${eval_?.descr || eval_?.name} — stark genug fuer Value-Raise.${sizingNote}`;
+      result.reasoning = `${eqDisplay} mit ${eval_?.descr || eval_?.name} — stark genug für Value-Raise.${sizingNote}`;
       if (villain) result.reasoning += ` ${villainContext(villain, 'value')}`;
     }
     // === CALL: decent hand, not strong enough to raise ===
@@ -1097,7 +1097,7 @@ function getRecommendation(game, equity, outs, oppAnalyses) {
     else if (equity >= 50 && handStrength <= 1) {
       if (realizedEquity > potOddsPct) {
         result.bestAction = `Call $${toCall}`;
-        result.reasoning = `${eqDisplay}. Nur ${eval_?.descr || 'schwache Hand'} — Equity hoch vs Random, aber Gegner bettet (Range staerker). Call auf Pot Odds.${sizingNote}`;
+        result.reasoning = `${eqDisplay}. Nur ${eval_?.descr || 'schwache Hand'} — Equity hoch vs Random, aber Gegner bettet (Range stärker). Call auf Pot Odds.${sizingNote}`;
       } else {
         result.bestAction = 'Fold';
         result.reasoning = `${eqDisplay}. ${eval_?.descr || 'Schwache Hand'} gegen aktiven Gegner. Realisierte Equity < Pot Odds (${potOddsPct.toFixed(0)}%). Fold.${sizingNote}`;
@@ -1128,7 +1128,7 @@ function getRecommendation(game, equity, outs, oppAnalyses) {
       // Bluff-raise with good blockers (flush blocker = great bluff candidate)
       else if (blockerData && blockerData.bluffValue >= 3 && oppRangeStrength !== 'very_strong' && stack > raiseSize && phase !== PHASES.RIVER) {
         result.bestAction = `Semi-Bluff Raise auf ~$${raiseSize}`;
-        result.reasoning = `${eqDisplay}. Starke Blocker: ${blockerData.summary} Dein Bluff ist glaubwuerdig.`;
+        result.reasoning = `${eqDisplay}. Starke Blocker: ${blockerData.summary} Dein Bluff ist glaubwürdig.`;
       }
       else {
         result.bestAction = 'Fold';
@@ -1187,11 +1187,11 @@ function getRecommendation(game, equity, outs, oppAnalyses) {
       result.reasoning = `${equity.toFixed(0)}% Equity mit ${eval_?.descr || eval_?.name} — Value Bet!${board?.isWet ? ' Wet Board — protect!' : ''}`;
     } else if (equity !== null && equity >= 60 && strength >= 2) {
       result.bestAction = `Bet $${betSize66} (${Math.round(betPct * 100)}% Pot)`;
-      result.reasoning = `${equity.toFixed(0)}% Equity mit ${eval_?.descr || eval_?.name} — Bet fuer Value.${inPosition ? ' Position nutzen!' : ''}${board?.isDry ? ' Dry Board — kleines Sizing reicht.' : ''}`;
+      result.reasoning = `${equity.toFixed(0)}% Equity mit ${eval_?.descr || eval_?.name} — Bet für Value.${inPosition ? ' Position nutzen!' : ''}${board?.isDry ? ' Dry Board — kleines Sizing reicht.' : ''}`;
     } else if (equity !== null && equity >= 55 && strength <= 1) {
       // High equity against random but only a weak pair — check for pot control
       result.bestAction = 'Check';
-      result.reasoning = `${equity.toFixed(0)}% Equity, aber nur ${eval_?.descr || eval_?.name || 'schwache Hand'}. Check fuer Pot-Kontrolle — schwaches Paar wird selten von schlechteren gecallt.${sprBetNote}`;
+      result.reasoning = `${equity.toFixed(0)}% Equity, aber nur ${eval_?.descr || eval_?.name || 'schwache Hand'}. Check für Pot-Kontrolle — schwaches Paar wird selten von schlechteren gecallt.${sprBetNote}`;
     } else if (strength >= 4) {
       // Monster hand: bet for value, but consider trap on dry board
       if (board?.isDry && activePlayers <= 2 && phase !== PHASES.RIVER) {
@@ -1212,10 +1212,10 @@ function getRecommendation(game, equity, outs, oppAnalyses) {
 
         if (hasGoodBlockers) {
           result.bestAction = `Bluff Bet $${betSize66}`;
-          result.reasoning = `River Bluff mit Blockern: ${blockerData.summary} Dein Bluff ist extra glaubwuerdig weil du Gegner-Value-Haende blockst.`;
+          result.reasoning = `River Bluff mit Blockern: ${blockerData.summary} Dein Bluff ist extra glaubwürdig weil du Gegner-Value-Hände blockst.`;
         } else if (mainVillain && (mainVillain.type === 'nit' || mainVillain.type === 'rock' || mainVillain.type === 'tag')) {
           result.bestAction = `Bluff Bet $${betSize66}`;
-          result.reasoning = `River Bluff gegen ${mainVillain.label}! ${scaryBoard ? 'Scary Board — glaubwuerdig.' : 'Fold-Rate hoch genug.'} Gross betten!`;
+          result.reasoning = `River Bluff gegen ${mainVillain.label}! ${scaryBoard ? 'Scary Board — glaubwürdig.' : 'Fold-Rate hoch genug.'} Gross betten!`;
         } else if (missedDrawBoard) {
           result.bestAction = `Bluff Bet $${betSize66}`;
           result.reasoning = `Draws auf dem Board nicht angekommen. Repp die verpassten Draws.`;
@@ -1229,7 +1229,7 @@ function getRecommendation(game, equity, outs, oppAnalyses) {
       } else if (inPosition && board?.raiserAdvantage >= 2) {
         // C-bet bluff in position on favorable board
         result.bestAction = `Bet $${betSize33} (33% Pot)`;
-        result.reasoning = `In Position auf guenstigem Board (Raiser-Advantage). Kleiner C-Bet gewinnt oft sofort.`;
+        result.reasoning = `In Position auf günstigem Board (Raiser-Advantage). Kleiner C-Bet gewinnt oft sofort.`;
       } else {
         result.bestAction = 'Check';
         result.reasoning = `${equity !== null ? equity.toFixed(0) + '% Equity — ' : ''}Schwache Hand. Check und kostenlose Karte mitnehmen.${!inPosition ? ' OOP — Check ist korrekt.' : ''}`;
@@ -1428,10 +1428,10 @@ function villainContext(villain, context) {
       return `${v.label} callt zu oft (VPIP: ${stats.vpip}%) — Value Bet breit!`;
     }
     if (v.type === 'maniac' || v.type === 'lag') {
-      return `${v.label} ist aggressiv (AF: ${stats.af}) — er koennte re-raisen. Sei bereit.`;
+      return `${v.label} ist aggressiv (AF: ${stats.af}) — er könnte re-raisen. Sei bereit.`;
     }
     if (v.type === 'nit' || v.type === 'rock') {
-      return `${v.label} callt nur mit starken Haenden. Kleinere Bet-Groesse waehlen.`;
+      return `${v.label} callt nur mit starken Händen. Kleinere Bet-Größe waehlen.`;
     }
   }
   if (context === 'call') {
@@ -1447,7 +1447,7 @@ function villainContext(villain, context) {
       return `${v.label} bettet fast nie ohne Premium — Fold ist korrekt.`;
     }
     if (v.type === 'maniac') {
-      return `Aber: ${v.label} blufft oft. Ueberlege ob ein Call doch profitabel ist.`;
+      return `Aber: ${v.label} blufft oft. Überlege ob ein Call doch profitabel ist.`;
     }
   }
   return '';
@@ -1474,9 +1474,9 @@ function describeOutsDetailed(hand, community, outs, conn) {
   }
 
   if (conn.overcards.length >= 2) {
-    parts.push(`${conn.overcards.length * 3} Outs fuer Overcards (${conn.overcards.map(r => rankName(r)).join(', ')})`);
+    parts.push(`${conn.overcards.length * 3} Outs für Overcards (${conn.overcards.map(r => rankName(r)).join(', ')})`);
   } else if (conn.overcards.length === 1) {
-    parts.push(`3 Outs fuer Overcard ${rankName(conn.overcards[0])}`);
+    parts.push(`3 Outs für Overcard ${rankName(conn.overcards[0])}`);
   }
 
   // Pair improvements
@@ -1484,7 +1484,7 @@ function describeOutsDetailed(hand, community, outs, conn) {
   const boardRanks = community.map(c => c.rank);
   const unpaired = holeRanks.filter(r => !boardRanks.includes(r));
   if (unpaired.length > 0 && parts.length === 0) {
-    parts.push(`${unpaired.length * 2} Outs fuer Pair/Set (${unpaired.map(r => rankName(r)).join(', ')})`);
+    parts.push(`${unpaired.length * 2} Outs für Pair/Set (${unpaired.map(r => rankName(r)).join(', ')})`);
   }
 
   if (parts.length === 0) return '';
@@ -1504,17 +1504,17 @@ function describeScaryHands(board, eval_) {
   if (board.flushComplete) {
     threats.push('Jeder mit 2 passenden Karten hat einen Flush');
   } else if (board.flushDraw) {
-    threats.push('Flush Draw fuer Gegner moeglich');
+    threats.push('Flush Draw für Gegner möglich');
   }
 
   if (board.straightComplete) {
-    threats.push('Straight auf dem Board — Split moeglich');
+    threats.push('Straight auf dem Board — Split möglich');
   } else if (board.straightPossible) {
-    threats.push('Straight moeglich mit den richtigen Hole Cards');
+    threats.push('Straight möglich mit den richtigen Hole Cards');
   }
 
   if (board.boardPaired && eval_ && eval_.strength < 6) {
-    threats.push('Full House moeglich (Board gepaart)');
+    threats.push('Full House möglich (Board gepaart)');
   }
 
   if (board.hasAce && eval_ && eval_.strength <= 1) {
@@ -1578,11 +1578,11 @@ export function getPreflopComment(game) {
 
   if (strength === 'premium') {
     if (h.isPair) {
-      text = `${h.name} — Top 1% aller Starthaende! `;
+      text = `${h.name} — Top 1% aller Starthände! `;
       if (h.high === 'A') text += 'Pocket Asse — die beste Hand im Poker. ';
       else if (h.high === 'K') text += 'Pocket Koenige — nur Asse schlagen dich preflop. ';
     } else {
-      text = `${h.name} — Premium Hand. ${h.suited ? 'Suited fuer extra Flush-Equity. ' : ''}`;
+      text = `${h.name} — Premium Hand. ${h.suited ? 'Suited für extra Flush-Equity. ' : ''}`;
     }
     if (facingAllIn) {
       bestMove = `BESTER MOVE: Call All-In! Premium gegen Shove = immer profitabel.`;
@@ -1616,7 +1616,7 @@ export function getPreflopComment(game) {
       return { type: 'neutral', text: text + bestMove };
     }
     if (facingRaise) {
-      bestMove = `BESTER MOVE: ${h.isPair ? 'Call fuer Set-Mining.' : '3-Bet auf ~' + (game.bigBlind * 9) + ' oder Call.'} Beides profitabel.${raiserInfo}`;
+      bestMove = `BESTER MOVE: ${h.isPair ? 'Call für Set-Mining.' : '3-Bet auf ~' + (game.bigBlind * 9) + ' oder Call.'} Beides profitabel.${raiserInfo}`;
     } else if (isLate) {
       bestMove = `BESTER MOVE: Raise ${game.bigBlind * 2.5}-${game.bigBlind * 3} aus ${position}. Du hast Position!`;
     } else {
@@ -1626,13 +1626,13 @@ export function getPreflopComment(game) {
   }
 
   if (strength === 'playable') {
-    text = `${h.name} — Spielbar, situationsabhaengig. `;
+    text = `${h.name} — Spielbar, situationsabhängig. `;
     if (h.isPair) {
       text += rankValue(h.high) <= 8 ? 'Kleines Paar — nur Set-Mining. Ohne Set am Flop: check/fold. ' : '';
     } else if (h.suited && h.connected) {
       text += 'Suited Connector — versteckte Straights/Flushs. Implied Odds! ';
     } else if (h.suited) {
-      text += `Suited — Flush-Draw = 4 extra Outs. ${h.high === 'A' ? 'Nut Flush Draw moeglich!' : ''}`;
+      text += `Suited — Flush-Draw = 4 extra Outs. ${h.high === 'A' ? 'Nut Flush Draw möglich!' : ''}`;
     }
 
     if (facingAllIn) {
@@ -1654,7 +1654,7 @@ export function getPreflopComment(game) {
       return { type: 'neutral', text: text + bestMove };
     }
     if (isBlind && facingRaise) {
-      bestMove = `BESTER MOVE: Call wenn Pot Odds stimmen. Nicht ueberbezahlen.${raiserInfo}`;
+      bestMove = `BESTER MOVE: Call wenn Pot Odds stimmen. Nicht überbezahlen.${raiserInfo}`;
       return { type: 'neutral', text: text + bestMove };
     }
     bestMove = isEarly ? 'BESTER MOVE: Fold oder kleiner Raise — Vorsicht aus frueher Position.' : 'BESTER MOVE: Call oder kleiner Raise.';
@@ -1667,7 +1667,7 @@ export function getPreflopComment(game) {
   else if (h.gap >= 4 && h.suited) text += 'Grosser Gap, aber suited — einziger Vorteil ist Flush-Draw. ';
   else if (!h.suited && !h.connected) text += 'Offsuited, nicht verbunden — kein Potential. ';
   else if (h.suited) text += 'Immerhin suited, aber Raenge zu schwach. ';
-  else if (h.connected && !h.suited) text += 'Verbunden, aber offsuited — zu schwache Raenge fuer profitables Spiel. ';
+  else if (h.connected && !h.suited) text += 'Verbunden, aber offsuited — zu schwache Raenge für profitables Spiel. ';
 
   if (facingAllIn) {
     bestMove = `BESTER MOVE: Fold! Schwache Hand gegen All-In = Chips verbrennen.`;
@@ -1789,14 +1789,14 @@ export function getSituationComment(game, solverFreqs = null) {
       const potOddsPct = potOddsData ? parseFloat(potOddsData.potOdds) : 0;
       if (bestKey === 'fold') {
         rec.reasoning = toCall > 0
-          ? `${eqStr} vs Random, aber gegen Gegner-Range deutlich weniger. Fold spart Chips fuer bessere Spots.`
-          : `Schwache Hand — Check wuerde auch gehen, aber GTO bevorzugt Fold.`;
+          ? `${eqStr} vs Random, aber gegen Gegner-Range deutlich weniger. Fold spart Chips für bessere Spots.`
+          : `Schwache Hand — Check würde auch gehen, aber GTO bevorzugt Fold.`;
       } else if (bestKey === 'call') {
         rec.reasoning = `${eqStr} Equity > ${potOddsPct.toFixed(0)}% Pot Odds — mathematisch profitabler Call.`;
       } else if (bestKey === 'raise') {
         rec.reasoning = toCall > 0
           ? `Starke Hand/Position. Raise baut den Pot und setzt Gegner unter Druck.`
-          : `${eqStr} Equity — Bet fuer Value oder als Bluff mit Fold-Equity.`;
+          : `${eqStr} Equity — Bet für Value oder als Bluff mit Fold-Equity.`;
       } else if (bestKey === 'check') {
         rec.reasoning = `Pot-Kontrolle mit ${eqStr} Equity. Keine Notwendigkeit den Pot aufzublaehen.`;
       }
@@ -1817,72 +1817,69 @@ export function getSituationComment(game, solverFreqs = null) {
   const gtoCbet = board ? getGTOCbetStrategy(board, position, wasPFR) : null;
   const riverGTO = getRiverGTOAdvice(game, handStrength, board, blockerData, equity);
 
-  // Build rich coaching text
-  let text = '';
+  // Build coaching text: SHORT primary + detail for "?" button
+  let primary = '';
+  let detail = '';
 
-  // Line 1: Best move recommendation
+  // Primary: Best move + reasoning (max 2 sentences)
   if (rec.bestAction) {
-    text += `➤ ${rec.bestAction}. `;
+    primary += `➤ ${rec.bestAction}. `;
   }
-
-  // Line 2: Reasoning
   if (rec.reasoning) {
-    text += rec.reasoning + ' ';
+    primary += rec.reasoning;
   }
 
-  // Line 3: GTO context (range advantage + c-bet on flop when checked to us)
-  // Only show C-bet context when best action is actually a bet/raise (avoid contradiction)
+  // Detail: everything else (shown on "?" tap)
+  // GTO context
   if (phase === PHASES.FLOP && game.getCallAmount() === 0 && wasPFR && gtoCbet) {
     const isBetting = rec.bestAction && !rec.bestAction.startsWith('Check');
     if (isBetting) {
-      text += `[GTO] ${gtoCbet.rangeAdvantage.explanation} C-Bet-Freq: ${gtoCbet.frequency}% bei ${gtoCbet.sizingPct}% Pot. `;
+      detail += `C-Bet-Freq: ${gtoCbet.frequency}% bei ${gtoCbet.sizingPct}% Pot. `;
     } else if (gtoCbet.rangeAdvantage && gtoCbet.rangeAdvantage.advantage < 0) {
-      text += `Caller hat Range-Advantage — Check ist korrekt. `;
+      detail += `Caller hat Range-Advantage — Check ist korrekt. `;
     }
   }
-
-  // Line 3b: River GTO
   if (riverGTO) {
-    text += `[GTO] ${riverGTO.note} `;
+    detail += `${riverGTO.note} `;
   }
 
-  // Line 4: Turn/River impact (when a new card just came)
+  // Turn/River impact
   if (turnImpact && turnImpact.description && !turnImpact.isBrick) {
-    text += `Neue Karte: ${turnImpact.description}. `;
+    detail += `Neue Karte: ${turnImpact.description}. `;
   }
 
-  // Line 5: Opponent range reading (postflop)
+  // Opponent range reading
   if (oppAnalyses.length > 0) {
     const rangeText = formatRangeAnalysis(oppAnalyses, game);
-    if (rangeText) text += rangeText;
+    if (rangeText) detail += rangeText;
   }
 
-  // Line 6: Strategic options (information bets, probe raises)
+  // Strategic options
   if (phase !== 'preflop' && phase !== 'showdown') {
     const strategies = getStrategicOptions(game, equity, handStrength, oppAnalyses);
     if (strategies.length > 0) {
       const best = strategies[0];
-      text += `💡 ${best.move}: ${best.desc} `;
+      detail += `💡 ${best.move}: ${best.desc} `;
     }
   }
 
-  // Line 7: Blocker info (when relevant for decision — marginal spots)
+  // Blocker info
   if (blockerData && blockerData.blockers.length > 0 && handStrength <= 2) {
-    text += `Blocker: ${blockerData.summary} `;
+    detail += `Blocker: ${blockerData.summary} `;
   }
 
-  // Line 8: Board + outs analysis (postflop only, and only for weak/drawing hands)
+  // Board + outs analysis
   if (game.communityCards.length >= 3 && phase !== PHASES.RIVER) {
     if (handStrength <= 2 && conn) {
       const outsDesc = describeOutsDetailed(human.hand, game.communityCards, outs, conn);
-      if (outsDesc) text += outsDesc + ' ';
+      if (outsDesc) detail += outsDesc + ' ';
     }
   }
 
-  // Line 9: Board dangers
+  // Board dangers
   if (game.communityCards.length >= 3 && board) {
     const scary = describeScaryHands(board, eval_);
-    if (scary) text += scary;
+    if (scary) detail += scary;
   }
 
   // Determine comment type based on recommendation
@@ -1891,7 +1888,7 @@ export function getSituationComment(game, solverFreqs = null) {
   else if (rec.bestAction?.includes('Raise') || rec.bestAction?.includes('Bet')) type = 'positive';
   else if (rec.bestAction?.includes('Bluff')) type = 'warning';
 
-  return { type, text: text.trim() };
+  return { type, text: primary.trim(), detail: detail.trim() || null };
 }
 
 // === Postflop Coach Comment (new street — board analysis) ===
@@ -1937,12 +1934,12 @@ export function getPostflopComment(game) {
     comment += 'MONSTER! Spiele aggressiv — maximaler Value. ';
   } else if (eval_.strength === 5) {
     const isNutFlush = human.hand.some(c => c.rank === 'A' && c.suit === board.flushSuit);
-    comment += isNutFlush ? 'Nut Flush — bestmoegliche Hand! Gross betten. ' : 'Flush, aber nicht der hoechste. Vorsicht bei starker Action. ';
-    if (board.boardPaired) comment += 'Board gepaart — Full House moeglich! ';
+    comment += isNutFlush ? 'Nut Flush — bestmögliche Hand! Gross betten. ' : 'Flush, aber nicht der höchste. Vorsicht bei starker Action. ';
+    if (board.boardPaired) comment += 'Board gepaart — Full House möglich! ';
     if (board.doublePaired) comment += 'Double-Paired — Full House dominiert! ';
   } else if (eval_.strength === 4) {
     comment += 'Straight! ';
-    if (board.flushPossible) comment += 'ABER Flush moeglich — Straight verliert gegen Flush. ';
+    if (board.flushPossible) comment += 'ABER Flush möglich — Straight verliert gegen Flush. ';
     if (board.isMonotone) comment += 'MONOTONES Board — Flush extrem wahrscheinlich beim Gegner! ';
   } else if (eval_.strength === 3) {
     const isSet = human.hand[0].rank === human.hand[1].rank;
@@ -1954,7 +1951,7 @@ export function getPostflopComment(game) {
     if (board.boardPaired) comment += 'Board gepaart — Vorsicht vor Full House. ';
     if (board.isConnected) comment += 'Connected Board — Straight-Gefahr! ';
   } else if (eval_.strength === 1) {
-    if (conn.hasOverpair) comment += 'Overpair — hoeher als alle Board-Karten. ';
+    if (conn.hasOverpair) comment += 'Overpair — höher als alle Board-Karten. ';
     else if (conn.hasTopPair) comment += 'Top Pair. ';
     else comment += 'Niedriges/mittleres Paar — Pot Control! ';
   }
@@ -1981,7 +1978,7 @@ export function getPostflopComment(game) {
 }
 
 // === Action Review (AFTER player acts — evaluate decision quality) ===
-export function getActionComment(action, game, callAmount) {
+export function getActionComment(action, game, callAmount, gtoFreqs = null) {
   const human = game.humanPlayer;
   const equity = getCurrentEquity();
   const eval_ = game.communityCards.length >= 3 ? evaluateHand(human.hand, game.communityCards) : null;
@@ -2012,26 +2009,32 @@ export function getActionComment(action, game, callAmount) {
         return { type: 'warning', text: `Fold mit ${eval_.descr || eval_.name}? Starke Hand aufgegeben. Pruefe ob der Gegner wirklich so stark war.` };
       }
       if (equity !== null && equity > foldNeeded) {
-        return { type: 'neutral', text: `Fold mit ${equity.toFixed(0)}% Equity. Knapp an der Grenze (${foldNeeded.toFixed(0)}% noetig). Vertretbar, aber grenzwertig.` };
+        return { type: 'neutral', text: `Fold mit ${equity.toFixed(0)}% Equity. Knapp an der Grenze (${foldNeeded.toFixed(0)}% nötig). Vertretbar, aber grenzwertig.` };
       }
-      return { type: 'neutral', text: `Fold. ${equity !== null ? `Equity war ${equity.toFixed(0)}% bei ${foldNeeded.toFixed(0)}% Pot Odds — ` : ''}Richtige Entscheidung. Chips gespart fuer bessere Spots.` };
+      return { type: 'neutral', text: `Fold. ${equity !== null ? `Equity war ${equity.toFixed(0)}% bei ${foldNeeded.toFixed(0)}% Pot Odds — ` : ''}Richtige Entscheidung. Chips gespart für bessere Spots.` };
     }
 
     case ACTIONS.CHECK: {
-      if (equity !== null && equity >= 65 && strength >= 2) {
+      // If GTO recommended check (>= 40%), don't criticize — it's the right play
+      const checkFreq = gtoFreqs?.check || 0;
+      const gtoSaysCheck = checkFreq >= 40;
+      if (!gtoSaysCheck && equity !== null && equity >= 65 && strength >= 2) {
         return { type: 'warning', text: `Check mit ${equity.toFixed(0)}% Equity und ${eval_.descr || eval_.name}? Du verlierst massiv Value! Bette ~66% Pot.` };
       }
-      if (strength >= 4) {
+      if (!gtoSaysCheck && strength >= 4) {
         return { type: 'warning', text: `Check mit ${eval_.descr || eval_.name}? Monster gecheckt! Nur als Trap-Play vertretbar.` };
       }
       if (strength >= 2 && eval_) {
+        if (gtoSaysCheck) {
+          return { type: 'positive', text: `Check mit ${eval_.descr || eval_.name}. Pot Control ist hier korrekt — GTO bevorzugt Check (${checkFreq}%).` };
+        }
         const board = analyzeBoard(game.communityCards);
         if (board?.isDry) {
-          return { type: 'warning', text: `Check mit ${eval_.descr || eval_.name} auf trockenem Board? Dein Gegner bezahlt dich hier haeufig.` };
+          return { type: 'warning', text: `Check mit ${eval_.descr || eval_.name} auf trockenem Board? Dein Gegner bezahlt dich hier häufig.` };
         }
         return { type: 'neutral', text: `Check mit ${eval_.descr || eval_.name}. ${equity !== null ? `Equity: ${equity.toFixed(0)}%. ` : ''}Pot Control auf nassem Board kann richtig sein.` };
       }
-      return { type: 'neutral', text: `Check. ${equity !== null ? `Equity: ${equity.toFixed(0)}%. ` : ''}Kontrolliertes Spiel — auf der naechsten Street reagieren.` };
+      return { type: 'neutral', text: `Check. ${equity !== null ? `Equity: ${equity.toFixed(0)}%. ` : ''}Kontrolliertes Spiel — auf der nächsten Street reagieren.` };
     }
 
     case ACTIONS.CALL: {
@@ -2043,14 +2046,14 @@ export function getActionComment(action, game, callAmount) {
         const isGoodCall = equity > parseFloat(potOdds);
         if (isGoodCall) {
           comment += `Equity ${equity.toFixed(0)}% > Pot Odds ${potOdds}% — profitabler Call! `;
-          if (equity >= 60) comment += 'Hast du ueber einen Raise nachgedacht? Bei so hoher Equity ist Value-Raise besser.';
+          if (equity >= 60) comment += 'Hast du über einen Raise nachgedacht? Bei so hoher Equity ist Value-Raise besser.';
         } else {
           comment += `Equity ${equity.toFixed(0)}% < Pot Odds ${potOdds}% — mathematisch unprofitabel. `;
           const outs = getCurrentOuts();
           if (outs && outs.count >= 8) {
             comment += `Aber ${outs.count} Outs + Implied Odds koennen es rechtfertigen.`;
           } else {
-            comment += 'Naechstes Mal besser folden.';
+            comment += 'Nächstes Mal besser folden.';
           }
         }
       } else {
@@ -2090,12 +2093,12 @@ export function getActionComment(action, game, callAmount) {
         if (equity >= 45) {
           return { type: 'neutral', text: `All-In mit ${equity.toFixed(0)}% Equity. Knapp — Coin-Flip oder leicht favorisiert. Hohe Varianz.` };
         }
-        return { type: 'warning', text: `All-In mit nur ${equity.toFixed(0)}% Equity (${eval_?.descr || h.name}). Riskant! ${equity < 30 ? 'Eher Fold naechstes Mal.' : 'Implied Odds muessen stimmen.'}` };
+        return { type: 'warning', text: `All-In mit nur ${equity.toFixed(0)}% Equity (${eval_?.descr || h.name}). Riskant! ${equity < 30 ? 'Eher Fold nächstes Mal.' : 'Implied Odds müssen stimmen.'}` };
       }
       if (strength >= 3) {
         return { type: 'positive', text: `All-In mit ${eval_.descr || eval_.name}! Starke Hand — wenn der Gegner callt, bist du Favorit.` };
       }
-      return { type: 'warning', text: `All-In Bluff! Maximale Varianz. Nur vertretbar wenn die Board-Story glaubwuerdig ist.` };
+      return { type: 'warning', text: `All-In Bluff! Maximale Varianz. Nur vertretbar wenn die Board-Story glaubwürdig ist.` };
     }
 
     default:
@@ -2125,12 +2128,12 @@ export function getAIActionComment(game, seatIndex, action, amount) {
       } else if (classification.key === 'maniac' || classification.key === 'lag') {
         text += `Dieser Spieler ist aggressiv (AF: ${stats.af}) — All-In kann auch ein Bluff sein. Prüfe deine Equity!`;
       } else if (classification.key === 'fish') {
-        text += 'Fish geht All-In — koennte alles sein. Calle breit mit anstaendiger Hand.';
+        text += 'Fish geht All-In — könnte alles sein. Calle breit mit anstaendiger Hand.';
       } else {
-        text += 'Ueberlege genau: Monster oder Bluff?';
+        text += 'Überlege genau: Monster oder Bluff?';
       }
     } else {
-      text += 'Ueberlege genau: hat er eine Monster-Hand oder blufft er?';
+      text += 'Überlege genau: hat er eine Monster-Hand oder blufft er?';
     }
     return { type: 'warning', text };
   }
@@ -2163,19 +2166,19 @@ export function getAIActionComment(game, seatIndex, action, amount) {
     if (classification?.stats?.reliable) {
       const cbet = stats.cbet;
       if (classification.key === 'nit' || classification.key === 'rock') {
-        text += `STARK! Dieser Spieler (VPIP: ${stats.vpip}%) bettet selten ohne gute Hand. Fold schwache Haende.`;
+        text += `STARK! Dieser Spieler (VPIP: ${stats.vpip}%) bettet selten ohne gute Hand. Fold schwache Hände.`;
       } else if (classification.key === 'maniac') {
         text += `Kann Bluff sein! AF: ${stats.af}, bettet viel zu oft. Call breit.`;
       } else if (classification.key === 'lag') {
-        text += `Aggressiver Spieler (AF: ${stats.af}). Koennte Value oder Bluff sein. Achte auf Sizing-Tells.`;
+        text += `Aggressiver Spieler (AF: ${stats.af}). Könnte Value oder Bluff sein. Achte auf Sizing-Tells.`;
       } else if (classification.key === 'fish' || classification.key === 'calling_station') {
-        text += `${classification.label} — Bet signalisiert eher Staerke (passive Spieler betten selten).`;
+        text += `${classification.label} — Bet signalisiert eher Stärke (passive Spieler betten selten).`;
       } else {
-        text += 'Achte auf Bet-Sizing und vorherige Action fuer einen Read.';
+        text += 'Achte auf Bet-Sizing und vorherige Action für einen Read.';
       }
     } else {
       if (amount > pot * 0.8) {
-        text += 'Grosser Bet — signalisiert oft Staerke oder grossen Bluff.';
+        text += 'Grosser Bet — signalisiert oft Stärke oder grossen Bluff.';
       } else if (amount < pot * 0.35) {
         text += 'Kleiner Bet — Blocker-Bet oder schwacher Value. Gute Odds zum Callen.';
       }
@@ -2202,7 +2205,7 @@ export function getHandSummary(game, result) {
     }
     return {
       type: 'neutral',
-      text: `Fold mit ${h.name}. Richtige Entscheidung — die aufgedeckten Haende zeigen dir, was die anderen hatten. Nutze das als Lern-Moment.`,
+      text: `Fold mit ${h.name}. Richtige Entscheidung — die aufgedeckten Hände zeigen dir, was die anderen hatten. Nutze das als Lern-Moment.`,
     };
   }
 
@@ -2214,7 +2217,7 @@ export function getHandSummary(game, result) {
 
     let comment = `Gewonnen! +$${potWon} mit ${h.name}. `;
     if (justCalled && potWon < game.bigBlind * 10) {
-      comment += 'Aber: haettest du mit einem Raise mehr rausholen koennen? Passives Spiel laesst oft Value liegen.';
+      comment += 'Aber: hättest du mit einem Raise mehr rausholen koennen? Passives Spiel laesst oft Value liegen.';
     } else if (raised) {
       comment += 'Gut — aggressive Spielweise hat sich ausgezahlt!';
     } else {
@@ -2260,15 +2263,15 @@ export function challengeCoachAdvice(game) {
       if (isLate) {
         const hasPlayability = h.suited || h.connected || h.oneGap || 'AKQJT'.includes(h.high);
         if (!hasPlayability) {
-          response += `Stimmt, du hast recht — ${h.name} hat KEIN Playability (nicht suited, nicht connected, kein Broadway). Auch vom Button ist ein Steal hier zu riskant. Bessere Steal-Haende: suited connectors (67s, 89s), suited aces (A2s-A9s), oder Haende mit Broadway-Karten. FOLD ist korrekt.`;
+          response += `Stimmt, du hast recht — ${h.name} hat KEIN Playability (nicht suited, nicht connected, kein Broadway). Auch vom Button ist ein Steal hier zu riskant. Bessere Steal-Hände: suited connectors (67s, 89s), suited aces (A2s-A9s), oder Hände mit Broadway-Karten. FOLD ist korrekt.`;
         } else {
           response += `${h.name} ist schwach, aber hat etwas Playability (${h.suited ? 'suited' : h.connected ? 'connected' : 'Broadway-Karte'}). Ein Steal vom Button ist vertretbar — aber nur wenn die Blinds tight sind und du bei einem 3-Bet sofort foldest.`;
         }
       } else {
-        response += `${h.name} aus ${position} ist ein klarer Fold. Keine Diskussion — aus frueher/mittlerer Position braucht man staerkere Haende.`;
+        response += `${h.name} aus ${position} ist ein klarer Fold. Keine Diskussion — aus frueher/mittlerer Position braucht man stärkere Hände.`;
       }
     } else if (strength === 'playable') {
-      response += `${h.name} ist spielbar, aber situationsabhaengig. ${isLate ? 'Von ' + position + ' ist ein Raise OK.' : 'Aus ' + position + ' nur bei guenstigen Bedingungen.'} Die Staerke haengt davon ab, was die Gegner vor dir gemacht haben.`;
+      response += `${h.name} ist spielbar, aber situationsabhängig. ${isLate ? 'Von ' + position + ' ist ein Raise OK.' : 'Aus ' + position + ' nur bei günstigen Bedingungen.'} Die Stärke haengt davon ab, was die Gegner vor dir gemacht haben.`;
     } else {
       response += `${h.name} ist ${strength === 'premium' ? 'eine Premium-Hand' : 'stark'} — hier ist ein Raise fast immer korrekt.`;
     }
@@ -2298,7 +2301,7 @@ export function challengeCoachAdvice(game) {
 
       // Key insight: equity vs random ≠ equity vs betting range
       if (handStrength <= 1 && equity >= 50 && toCall > 0) {
-        response += `WICHTIG: Die ${equity.toFixed(0)}% Equity ist gegen ZUFAELLIGE Haende. Gegen die Betting-Range des Gegners (${oppStrength}) sind es nur ~${adjEq.toFixed(0)}%. `;
+        response += `WICHTIG: Die ${equity.toFixed(0)}% Equity ist gegen ZUFAELLIGE Hände. Gegen die Betting-Range des Gegners (${oppStrength}) sind es nur ~${adjEq.toFixed(0)}%. `;
 
         if (handStrength === 1) {
           const boardRanks = community.map(c => c.rank);
@@ -2308,12 +2311,12 @@ export function challengeCoachAdvice(game) {
           if (isTopPair) {
             response += `Top Pair ist marginal. Call OK, Raise nur mit Kicker A/K. Value-Raise wird meistens nur von besseren gecallt.`;
           } else {
-            response += `Unteres/Middle Pair — zu schwach fuer Value-Raise. Check/Call oder Check/Fold.`;
+            response += `Unteres/Middle Pair — zu schwach für Value-Raise. Check/Call oder Check/Fold.`;
           }
         } else {
           response += `High Card — sehr schwach. Check/Fold.`;
           if (blockerData && blockerData.bluffValue >= 2) {
-            response += ` Allerdings: ${blockerData.summary} — als Bluff moeglich.`;
+            response += ` Allerdings: ${blockerData.summary} — als Bluff möglich.`;
           }
         }
       } else if (handStrength >= 3) {
@@ -2336,14 +2339,14 @@ export function challengeCoachAdvice(game) {
         response += ` SPR ${sprData.spr.toFixed(1)} (niedrig) — entweder committen oder folden, keine halben Sachen.`;
       }
     } else {
-      response += `Equity wird berechnet. Nur mit Two Pair+ fuer Value raisen.`;
+      response += `Equity wird berechnet. Nur mit Two Pair+ für Value raisen.`;
     }
 
     // Opponent reading
     if (mainOpp && mainOpp.rangeStrength !== 'unknown') {
       response += ` Gegner-Linie: ${mainOpp.pattern}. `;
       if (mainOpp.rangeStrength === 'very_strong') {
-        response += `Warnung: Gegner zeigt extreme Staerke. Ohne starke Hand (Set+) besser folden.`;
+        response += `Warnung: Gegner zeigt extreme Stärke. Ohne starke Hand (Set+) besser folden.`;
       }
     }
   }

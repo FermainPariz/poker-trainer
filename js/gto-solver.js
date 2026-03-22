@@ -53,7 +53,7 @@ export function initGTOSolver() {
     worker.onerror = (e) => {
       console.warn('GTO Worker error:', e.message);
       solverAvailable = false;
-      emitStatus({ state: 'error', message: 'Solver nicht verfuegbar' });
+      emitStatus({ state: 'error', message: 'Solver nicht verfügbar' });
     };
 
     emitStatus({ state: 'loading', message: 'GTO Solver wird geladen...' });
@@ -61,7 +61,7 @@ export function initGTOSolver() {
   } catch (e) {
     console.warn('GTO Solver not available:', e);
     solverAvailable = false;
-    emitStatus({ state: 'unavailable', message: 'WASM nicht unterstuetzt' });
+    emitStatus({ state: 'unavailable', message: 'WASM nicht unterstützt' });
   }
 }
 
@@ -93,7 +93,7 @@ function handleWorkerMessage(e) {
       }
       emitStatus({
         state: 'solved',
-        message: `GTO geloest (${result.iterations} iter)`,
+        message: `GTO gelöst (${result.iterations} iter)`,
         result,
       });
       break;

@@ -6,15 +6,16 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <title>Poker Pro Trainer | 6-Max Texas Hold'em</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♠</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/main.css?v=18">
-<link rel="stylesheet" href="css/table.css?v=18">
-<link rel="stylesheet" href="css/cards.css?v=18">
-<link rel="stylesheet" href="css/hud.css?v=18">
-<link rel="stylesheet" href="css/panels.css?v=18">
-<link rel="stylesheet" href="css/auth.css?v=18">
+<link rel="stylesheet" href="css/main.css?v=19">
+<link rel="stylesheet" href="css/table.css?v=19">
+<link rel="stylesheet" href="css/cards.css?v=19">
+<link rel="stylesheet" href="css/hud.css?v=19">
+<link rel="stylesheet" href="css/panels.css?v=19">
+<link rel="stylesheet" href="css/auth.css?v=19">
 <style>
   /* CSS fallback before JS runs — JS will override via inline style */
   .poker-table { width: min(88vw, calc((100dvh - 280px) * 5 / 3)); }
@@ -141,7 +142,7 @@
 
     <!-- HUD — live stats strip below table -->
     <div class="hud" id="hud">
-      <div class="hud-item" title="Deine Gewinnwahrscheinlichkeit gegen alle Gegner (Monte-Carlo-Simulation mit 1000+ Durchlaeufen)">
+      <div class="hud-item" title="Deine Gewinnwahrscheinlichkeit gegen alle Gegner (Monte-Carlo-Simulation mit 1000+ Durchläufen)">
         <span class="hud-label">Equity</span>
         <span class="hud-value" id="hudEquity">--</span>
       </div>
@@ -149,7 +150,7 @@
         <span class="hud-label">Outs</span>
         <span class="hud-value" id="hudOuts">--</span>
       </div>
-      <div class="hud-item" title="Verhaeltnis von Call-Betrag zu Pot. Deine Equity muss hoeher sein als die Pot Odds fuer einen profitablen Call">
+      <div class="hud-item" title="Verhältnis von Call-Betrag zu Pot. Deine Equity muss höher sein als die Pot Odds für einen profitablen Call">
         <span class="hud-label">Pot Odds</span>
         <span class="hud-value" id="hudPotOdds">--</span>
       </div>
@@ -157,7 +158,7 @@
         <span class="hud-label">Call EV</span>
         <span class="hud-value" id="hudEV">--</span>
       </div>
-      <div class="hud-item" title="Deine aktuelle Handstaerke (z.B. Top Pair, Flush Draw, Two Pair)">
+      <div class="hud-item" title="Deine aktuelle Handstärke (z.B. Top Pair, Flush Draw, Two Pair)">
         <span class="hud-label">Hand</span>
         <span class="hud-value" id="hudHandStrength">--</span>
       </div>
@@ -211,7 +212,7 @@
     <!-- Continue Bar -->
     <div class="continue-bar" id="continueBar" style="display:none">
       <div class="hand-result" id="handResult"></div>
-      <button class="btn btn-deal" id="btnDeal">Naechste Hand</button>
+      <button class="btn btn-deal" id="btnDeal">Nächste Hand</button>
     </div>
   </main>
 
@@ -223,7 +224,7 @@
     </div>
     <div class="stats-body" id="statsBody">
       <div style="text-align:center; color: var(--text2); font-size: 0.75em; padding: 20px;">
-        Spiele ein paar Haende um Stats zu sehen.
+        Spiele ein paar Hände um Stats zu sehen.
       </div>
     </div>
   </div>
@@ -285,7 +286,8 @@
     </div>
     <div class="leaks-body" id="leaksBody">
       <div style="text-align:center; color: var(--text2); font-size: 0.75em; padding: 20px;">
-        Spiele ein paar Haende um Leaks zu finden.
+        <p style="margin-bottom:8px">🔍 Spiele mindestens 20 Hände, damit der Leak Finder Muster erkennen kann.</p>
+        <p style="font-size:0.9em; opacity:0.7">Analysiert: Fold-Frequenz, Aggression, Position Play, Tilt-Muster und mehr.</p>
       </div>
     </div>
   </div>
@@ -480,6 +482,6 @@
   window.fitLayout = fitLayout;
 })();
 </script>
-<script type="module" src="js/app.js?v=18"></script>
+<script type="module" src="js/app.js?v=19"></script>
 </body>
 </html>

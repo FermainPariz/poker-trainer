@@ -39,7 +39,7 @@ export function renderStatsOverlay(containerEl, sessionStats, pnl) {
         <span class="stat-value" style="color: ${pnlColor}; font-size: 1.3em">${pnlSign}$${pnl}</span>
       </div>
       <div class="stat-card">
-        <span class="stat-label">Haende</span>
+        <span class="stat-label">Hände</span>
         <span class="stat-value">${sessionStats ? sessionStats.handsPlayed : 0}</span>
       </div>
       <div class="stat-card">
@@ -136,7 +136,7 @@ function renderFatigueSection() {
         ${optimalHTML}
       </div>
       <div class="pnl-chart" style="margin-top:6px;">
-        <span class="stat-label">Qualitaet ueber Zeit</span>
+        <span class="stat-label">Qualitaet über Zeit</span>
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="pnl-svg">
           <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
           <polyline points="${points}" fill="none" stroke="${lineColor}" stroke-width="2" vector-effect="non-scaling-stroke"/>

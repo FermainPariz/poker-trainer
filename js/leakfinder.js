@@ -34,12 +34,12 @@ export function findLeaks(minHands = 20) {
     return {
       ready: false,
       handsNeeded: minHands - hands.length,
-      message: `Spiele noch ${minHands - hands.length} Haende fuer eine aussagekraeftige Analyse.`,
+      message: `Spiele noch ${minHands - hands.length} Hände für eine aussagekraeftige Analyse.`,
     };
   }
 
   const stats = getAggregateStats(hands);
-  if (!stats) return { ready: false, message: 'Keine Daten verfuegbar.' };
+  if (!stats) return { ready: false, message: 'Keine Daten verfügbar.' };
 
   const leaks = [];
 
@@ -51,10 +51,10 @@ export function findLeaks(minHands = 20) {
     leaks.push({
       severity: 'critical',
       category: 'preflop',
-      title: 'Zu viele Haende gespielt',
+      title: 'Zu viele Hände gespielt',
       stat: `VPIP: ${stats.vpip}% (Optimal: ${BENCHMARKS.vpip.min}-${BENCHMARKS.vpip.max}%)`,
-      message: `Du spielst ${(vpip - BENCHMARKS.vpip.max).toFixed(0)}% zu viele Haende. Das kostet dich langfristig am meisten Geld, weil du mit schwachen Haenden in schlechte Situationen geraetst.`,
-      fix: 'Tighte dein Opening-Range. Folde offsuited Haende wie K8o, Q7o, J6o. Spiele nur Haende die in der Standard-Range fuer deine Position sind.',
+      message: `Du spielst ${(vpip - BENCHMARKS.vpip.max).toFixed(0)}% zu viele Hände. Das kostet dich langfristig am meisten Geld, weil du mit schwachen Händen in schlechte Situationen geraetst.`,
+      fix: 'Tighte dein Opening-Range. Folde offsuited Hände wie K8o, Q7o, J6o. Spiele nur Hände die in der Standard-Range für deine Position sind.',
       priority: 1,
     });
   } else if (vpip > BENCHMARKS.vpip.max) {
@@ -63,8 +63,8 @@ export function findLeaks(minHands = 20) {
       category: 'preflop',
       title: 'VPIP leicht zu hoch',
       stat: `VPIP: ${stats.vpip}% (Optimal: ${BENCHMARKS.vpip.min}-${BENCHMARKS.vpip.max}%)`,
-      message: 'Du spielst etwas zu viele Haende. Kleine Anpassung noetig.',
-      fix: 'Entferne die schwachsten Haende aus deiner Range, besonders aus frueher Position.',
+      message: 'Du spielst etwas zu viele Hände. Kleine Anpassung nötig.',
+      fix: 'Entferne die schwachsten Hände aus deiner Range, besonders aus frueher Position.',
       priority: 3,
     });
   }
@@ -74,10 +74,10 @@ export function findLeaks(minHands = 20) {
     leaks.push({
       severity: 'moderate',
       category: 'preflop',
-      title: 'Zu tight — zu wenige Haende gespielt',
+      title: 'Zu tight — zu wenige Hände gespielt',
       stat: `VPIP: ${stats.vpip}% (Optimal: ${BENCHMARKS.vpip.min}-${BENCHMARKS.vpip.max}%)`,
-      message: 'Du spielst zu wenige Haende. Dadurch verpasst du profitable Spots und bist vorhersagbar.',
-      fix: 'Oeffne mehr Haende vom Button und Cutoff: suited connectors (87s, 76s), suited aces (A5s-A2s), und broadways.',
+      message: 'Du spielst zu wenige Hände. Dadurch verpasst du profitable Spots und bist vorhersagbar.',
+      fix: 'Oeffne mehr Hände vom Button und Cutoff: suited connectors (87s, 76s), suited aces (A5s-A2s), und broadways.',
       priority: 2,
     });
   }
@@ -105,7 +105,7 @@ export function findLeaks(minHands = 20) {
       category: 'preflop',
       title: 'Open-Limping',
       stat: `Limp: ${stats.limpPct}% (Optimal: 0-3%)`,
-      message: 'Open-Limping (callen ohne vorherigen Raise) ist einer der groessten Fehler. Du baust keinen Pot auf und gibst Initiative ab.',
+      message: 'Open-Limping (callen ohne vorherigen Raise) ist einer der größten Fehler. Du baust keinen Pot auf und gibst Initiative ab.',
       fix: 'Komplett eliminieren! Jede Hand die du spielst, spielst du mit einem Raise. Wenn sie nicht gut genug zum Raisen ist, folde.',
       priority: 1,
     });
@@ -119,8 +119,8 @@ export function findLeaks(minHands = 20) {
       category: 'preflop',
       title: 'Zu selten 3-Bettet',
       stat: `3-Bet: ${stats.threeBet}% (Optimal: ${BENCHMARKS.threeBet.min}-${BENCHMARKS.threeBet.max}%)`,
-      message: 'Du 3-bettest zu selten. Dadurch lassen dich Gegner billig Flops sehen und du baust keine grossen Pots mit starken Haenden.',
-      fix: '3-Bette mit Premium-Haenden (AA-QQ, AK) fuer Value UND mit einigen Bluffs (A5s, A4s, KQs aus Position).',
+      message: 'Du 3-bettest zu selten. Dadurch lassen dich Gegner billig Flops sehen und du baust keine grossen Pots mit starken Händen.',
+      fix: '3-Bette mit Premium-Händen (AA-QQ, AK) für Value UND mit einigen Bluffs (A5s, A4s, KQs aus Position).',
       priority: 2,
     });
   }
@@ -136,7 +136,7 @@ export function findLeaks(minHands = 20) {
         category: 'postflop',
         title: 'Zu selten Continuation-Bettet',
         stat: `C-Bet: ${stats.cbetPct}% (Optimal: ${BENCHMARKS.cbetPct.min}-${BENCHMARKS.cbetPct.max}%)`,
-        message: 'Als Preflop-Aggressor hast du einen natuerlichen Vorteil auf dem Flop. Diesen Vorteil nutzt du nicht genug.',
+        message: 'Als Preflop-Aggressor hast du einen natürlichen Vorteil auf dem Flop. Diesen Vorteil nutzt du nicht genug.',
         fix: 'C-Bette auf trockenen Boards (z.B. K-7-2 rainbow) fast immer. Auf nassen Boards selektiver, aber mindestens 50% der Zeit.',
         priority: 2,
       });
@@ -148,7 +148,7 @@ export function findLeaks(minHands = 20) {
         title: 'Zu oft Continuation-Bettet',
         stat: `C-Bet: ${stats.cbetPct}% (Optimal: ${BENCHMARKS.cbetPct.min}-${BENCHMARKS.cbetPct.max}%)`,
         message: 'Du C-Bettest zu oft. Gegner koennen das exploiten indem sie dich floating oder check-raisen.',
-        fix: 'Auf nassen Boards mit Whiffs (keine Hand, keine Draws) checken. Checke auch manchmal mit starken Haenden fuer Balance.',
+        fix: 'Auf nassen Boards mit Whiffs (keine Hand, keine Draws) checken. Checke auch manchmal mit starken Händen für Balance.',
         priority: 3,
       });
     }
@@ -164,7 +164,7 @@ export function findLeaks(minHands = 20) {
         title: 'Foldest zu oft gegen C-Bets',
         stat: `Fold to C-Bet: ${stats.foldToCbetPct}% (Optimal: ${BENCHMARKS.foldToCbetPct.min}-${BENCHMARKS.foldToCbetPct.max}%)`,
         message: `${stats.foldToCbetPct}% Fold-Rate gegen C-Bets ist viel zu hoch. Gegner koennen dich mit jedem Bluff ausnutzen.`,
-        fix: 'Verteidige mehr Haende: Top Pair, mittlere Paare, Gutshots, Backdoor-Draws. Du brauchst nur ~40% Equity zum Callen.',
+        fix: 'Verteidige mehr Hände: Top Pair, mittlere Paare, Gutshots, Backdoor-Draws. Du brauchst nur ~40% Equity zum Callen.',
         priority: 1,
       });
     }
@@ -174,8 +174,8 @@ export function findLeaks(minHands = 20) {
         category: 'postflop',
         title: 'Foldest zu selten gegen C-Bets',
         stat: `Fold to C-Bet: ${stats.foldToCbetPct}% (Optimal: ${BENCHMARKS.foldToCbetPct.min}-${BENCHMARKS.foldToCbetPct.max}%)`,
-        message: 'Du callst zu viel. Das kostet Geld wenn Gegner fuer Value betten.',
-        fix: 'Folde Haende ohne Pair und ohne Draw. Nicht jeder Flop muss verteidigt werden.',
+        message: 'Du callst zu viel. Das kostet Geld wenn Gegner für Value betten.',
+        fix: 'Folde Hände ohne Pair und ohne Draw. Nicht jeder Flop muss verteidigt werden.',
         priority: 3,
       });
     }
@@ -190,7 +190,7 @@ export function findLeaks(minHands = 20) {
         category: 'postflop',
         title: 'Zu oft zum Showdown (Calling Station Tendenz)',
         stat: `WTSD: ${stats.wtsdPct}% (Optimal: ${BENCHMARKS.wtsdPct.min}-${BENCHMARKS.wtsdPct.max}%)`,
-        message: 'Du gehst zu oft zum Showdown. Das bedeutet du callst zu viele Bets mit marginalen Haenden.',
+        message: 'Du gehst zu oft zum Showdown. Das bedeutet du callst zu viele Bets mit marginalen Händen.',
         fix: 'Lerne wann du aufgeben musst. Auf dem River ohne starke Hand gegen grosse Bets: Fold ist meistens richtig.',
         priority: 2,
       });
@@ -202,7 +202,7 @@ export function findLeaks(minHands = 20) {
         title: 'Zu selten zum Showdown — zu fit-or-fold',
         stat: `WTSD: ${stats.wtsdPct}% (Optimal: ${BENCHMARKS.wtsdPct.min}-${BENCHMARKS.wtsdPct.max}%)`,
         message: 'Du gibst zu oft auf. Gegner koennen dich mit Bluffs vom Pot vertreiben.',
-        fix: 'Verteidige oefter mit mittelstarken Haenden. Nicht jeder Gegner-Bet ist Value.',
+        fix: 'Verteidige oefter mit mittelstarken Händen. Nicht jeder Gegner-Bet ist Value.',
         priority: 3,
       });
     }
@@ -222,8 +222,8 @@ export function findLeaks(minHands = 20) {
           category: 'position',
           title: `Zu loose aus ${pos}`,
           stat: `${pos} VPIP: ${data.vpip}% (Optimal: ${bench.vpip.min}-${bench.vpip.max}%)`,
-          message: `Du spielst aus ${pos} zu viele Haende. ${pos === 'UTG' || pos === 'MP' ? 'Fruehe Position braucht eine enge Range.' : ''}`,
-          fix: `Reduziere deine Range aus ${pos}. ${pos === 'UTG' ? 'UTG: Nur Premium und starke Haende (AA-77, AK-ATs, KQs).' : ''}`,
+          message: `Du spielst aus ${pos} zu viele Hände. ${pos === 'UTG' || pos === 'MP' ? 'Fruehe Position braucht eine enge Range.' : ''}`,
+          fix: `Reduziere deine Range aus ${pos}. ${pos === 'UTG' ? 'UTG: Nur Premium und starke Hände (AA-77, AK-ATs, KQs).' : ''}`,
           priority: pos === 'UTG' || pos === 'MP' ? 2 : 3,
         });
       }
@@ -300,7 +300,7 @@ export function renderLeakFinder(container) {
     <div style="text-align:center; margin-bottom:12px;">
       <div style="font-size:2em; font-weight:800; color:${gradeColor};">${overallGrade.grade}</div>
       <div style="font-size:0.65em; color:var(--text2);">${overallGrade.label}</div>
-      <div style="font-size:0.55em; color:var(--text2); margin-top:2px;">${stats.totalHands} Haende analysiert</div>
+      <div style="font-size:0.55em; color:var(--text2); margin-top:2px;">${stats.totalHands} Hände analysiert</div>
     </div>`;
 
   // Key Stats vs Benchmarks

@@ -175,7 +175,7 @@ export function getRiskOfRuin() {
     ror: Math.min(ror * 100, 100),
     bbPer100,
     bankrollInBB: Math.round(bankrollInBB),
-    recommendation: bankrollInBB < 20 ? 'STOP — Zu wenig Bankroll fuer dieses Limit!'
+    recommendation: bankrollInBB < 20 ? 'STOP — Zu wenig Bankroll für dieses Limit!'
       : bankrollInBB < 30 ? 'WARNUNG — Bankroll ist duenn. Vorsichtig spielen.'
       : bankrollInBB < 50 ? 'OK — Standard Bankroll Management.'
       : 'GUT — Komfortable Bankroll.',
@@ -263,7 +263,7 @@ export function renderBankrollPanel(container) {
           <div>Stack: <span style="color:var(--text); font-weight:700;">$${session.currentStack}</span></div>
           <div>P&L: <span style="color:${pnlColor}; font-weight:700;">${pnl >= 0 ? '+' : ''}$${pnl} (${pnlBB} BB)</span></div>
           <div>Buy-in: <span style="color:var(--text2);">$${session.buyIn}</span></div>
-          <div>Haende: <span style="color:var(--text2);">${session.handsPlayed}</span></div>
+          <div>Hände: <span style="color:var(--text2);">${session.handsPlayed}</span></div>
         </div>
       </div>`;
   }
@@ -295,7 +295,7 @@ export function renderBankrollPanel(container) {
           <div>Win Rate: <span style="font-weight:700; color:var(--text);">${lifetime.winRate}%</span></div>
           <div>Total P&L: <span style="font-weight:700; color:${ltColor};">${lifetime.totalPnL >= 0 ? '+' : ''}$${lifetime.totalPnL}</span></div>
           <div>BB/100: <span style="font-weight:700; color:var(--text);">${lifetime.bbPer100}</span></div>
-          <div>Haende: <span style="font-weight:700; color:var(--text);">${lifetime.totalHands}</span></div>
+          <div>Hände: <span style="font-weight:700; color:var(--text);">${lifetime.totalHands}</span></div>
           <div>ROI: <span style="font-weight:700; color:${ltColor};">${lifetime.roi}%</span></div>
         </div>
       </div>`;

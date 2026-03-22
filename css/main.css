@@ -159,7 +159,8 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  white-space: nowrap;
+  text-align: center;
+  min-width: clamp(54px, 10vw, 80px);
 }
 
 .btn-fold {
@@ -361,6 +362,8 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* === Mobile / Desktop Toggle === */

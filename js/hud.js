@@ -219,6 +219,14 @@ export function clearHUD() {
   if (potOddsEl) potOddsEl.textContent = '--';
   if (evEl) { evEl.textContent = '--'; evEl.style.color = ''; }
   if (handStrEl) handStrEl.textContent = '--';
+
+  // Reset GTO scoring display for new hand
+  const scoreEl = document.getElementById('hudGTOScore');
+  const lossEl = document.getElementById('hudEVLoss');
+  const accEl = document.getElementById('hudAccuracy');
+  if (scoreEl) { scoreEl.textContent = '--'; scoreEl.className = 'hud-value'; }
+  if (lossEl) { lossEl.textContent = '0.00bb'; lossEl.className = 'hud-value'; }
+  if (accEl) { accEl.textContent = '--'; accEl.className = 'hud-value'; }
 }
 
 export function isEnabled() { return hudEnabled; }

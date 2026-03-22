@@ -230,7 +230,7 @@ function translateError(msg) {
   if (msg.includes('valid email')) return 'Bitte gueltige E-Mail eingeben';
   if (msg.includes('at least')) return 'Passwort zu kurz (mind. 8 Zeichen)';
   if (msg.includes('rate limit') || msg.includes('too many')) return 'Zu viele Versuche. Bitte warte einen Moment.';
-  if (msg.includes('network') || msg.includes('fetch')) return 'Netzwerkfehler. Bitte pruefe deine Verbindung.';
+  if (msg.includes('network') || msg.includes('fetch')) return 'Netzwerkfehler. Bitte prüfe deine Verbindung.';
   // Never expose raw Supabase error messages to users
   console.warn('Auth error:', msg);
   return 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.';

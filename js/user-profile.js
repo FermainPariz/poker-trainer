@@ -101,10 +101,10 @@ function matchLeak(leak, ctx) {
   // --- PREFLOP ---
   if (ctx.phase === 'preflop') {
     if (stat === 'vpip' && direction === 'high' && ctx.handStrength <= 1) {
-      return w(`Dein VPIP ist ${value}% (GTO: ${range}). Du spielst zu viele schwache Haende — diese Hand folden.`);
+      return w(`Dein VPIP ist ${value}% (GTO: ${range}). Du spielst zu viele schwache Hände — diese Hand folden.`);
     }
     if (stat === 'vpip' && direction === 'low' && ctx.handStrength >= 2 && isLatePos(ctx.position)) {
-      return n(`Dein VPIP ist nur ${value}% (GTO: ${range}). In ${ctx.position} kannst du mehr Haende spielen.`);
+      return n(`Dein VPIP ist nur ${value}% (GTO: ${range}). In ${ctx.position} kannst du mehr Hände spielen.`);
     }
     if (stat === 'pfr' && direction === 'low' && !ctx.facingBet && ctx.handStrength >= 2) {
       return n(`Dein PFR ist ${value}% (GTO: ${range}). Raise statt limpen — nutze deine Fold Equity.`);
@@ -113,7 +113,7 @@ function matchLeak(leak, ctx) {
       return w(`Du limpst ${value}% (GTO: max ${gtoMax}%). In 6-Max: Raise oder Fold. Limpen ist fast nie korrekt.`);
     }
     if (stat === 'threeBet' && direction === 'low' && ctx.facingBet && ctx.handStrength >= 3) {
-      return n(`Deine 3-Bet Rate ist ${value}% (GTO: ${range}). Starke Haende wie diese oefter 3-betten.`);
+      return n(`Deine 3-Bet Rate ist ${value}% (GTO: ${range}). Starke Hände wie diese oefter 3-betten.`);
     }
   }
 
@@ -129,7 +129,7 @@ function matchLeak(leak, ctx) {
       return w(`Du foldest ${value}% gegen C-Bets (GTO: ${range}). Calle oder raise oefter — du gibst zu viel Equity auf.`);
     }
     if (stat === 'foldToCbetPct' && direction === 'low' && ctx.facingBet && !ctx.isAggressor && ctx.handStrength <= 1) {
-      return n(`Du callst C-Bets zu oft (${value}%, GTO: ${range}). Schwache Haende oefter aufgeben.`);
+      return n(`Du callst C-Bets zu oft (${value}%, GTO: ${range}). Schwache Hände oefter aufgeben.`);
     }
   }
 
@@ -139,7 +139,7 @@ function matchLeak(leak, ctx) {
       return w(`Dein WTSD ist ${value}% (GTO: ${range}). Du gehst zu oft zum Showdown. Hier folden.`);
     }
     if (stat === 'wtsdPct' && direction === 'low' && ctx.handStrength >= 3 && ctx.facingBet) {
-      return n(`Dein WTSD ist nur ${value}% (GTO: ${range}). Mit starken Haenden oefter callen und zum Showdown gehen.`);
+      return n(`Dein WTSD ist nur ${value}% (GTO: ${range}). Mit starken Händen oefter callen und zum Showdown gehen.`);
     }
     if (stat === 'wsdPct' && direction === 'low' && ctx.facingBet && ctx.handStrength <= 2) {
       return w(`Deine Showdown Win Rate ist nur ${value}% (GTO: ${range}). Waehle deine Showdown-Spots besser.`);
@@ -159,13 +159,13 @@ function n(text) { return { type: 'neutral', text: 'COACHING: ' + text }; }
 function buildLeakTip(stat, dir, value, bench) {
   const tips = {
     vpip_high:          `VPIP zu hoch (${value}% vs GTO ${bench.min}-${bench.max}%). Tighter spielen.`,
-    vpip_low:           `VPIP zu niedrig (${value}% vs GTO ${bench.min}-${bench.max}%). Mehr Haende in Late Position.`,
+    vpip_low:           `VPIP zu niedrig (${value}% vs GTO ${bench.min}-${bench.max}%). Mehr Hände in Late Position.`,
     pfr_low:            `PFR zu niedrig (${value}% vs GTO ${bench.min}-${bench.max}%). Raise statt limpen.`,
     pfr_high:           `PFR zu hoch (${value}% vs GTO ${bench.min}-${bench.max}%). Tighter raisen in EP.`,
     cbetPct_low:        `C-Bet zu niedrig (${value}% vs GTO ${bench.min}-${bench.max}%). Als Aggressor oefter betten.`,
     cbetPct_high:       `C-Bet zu hoch (${value}% vs GTO ${bench.min}-${bench.max}%). Mehr Check-Backs.`,
     foldToCbetPct_high: `Fold to C-Bet zu hoch (${value}% vs GTO ${bench.min}-${bench.max}%). Oefter floaten.`,
-    foldToCbetPct_low:  `Fold to C-Bet zu niedrig (${value}% vs GTO ${bench.min}-${bench.max}%). Schwache Haende folden.`,
+    foldToCbetPct_low:  `Fold to C-Bet zu niedrig (${value}% vs GTO ${bench.min}-${bench.max}%). Schwache Hände folden.`,
     wtsdPct_high:       `WTSD zu hoch (${value}% vs GTO ${bench.min}-${bench.max}%). Oefter folden wenn geschlagen.`,
     wtsdPct_low:        `WTSD zu niedrig (${value}% vs GTO ${bench.min}-${bench.max}%). Oefter zum Showdown gehen.`,
     wsdPct_low:         `W$SD niedrig (${value}%). Bessere Showdown-Spots waehlen.`,
