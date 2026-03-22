@@ -1103,19 +1103,7 @@ function setEV(el, ev) {
 
 // === GTO Score Popup (flashes after each decision) ===
 function showScorePopup(scoreResult) {
-  const formatted = formatScoreResult(scoreResult);
-  if (!formatted) return;
-
-  const popup = document.getElementById('scorePopup');
-  if (!popup) return;
-
-  popup.textContent = formatted.text;
-  popup.className = 'score-popup ' + formatted.className;
-
-  // Force reflow then add visible class to trigger animation
-  popup.classList.remove('visible');
-  void popup.offsetHeight;
-  popup.classList.add('visible');
+  // Score popup disabled — results shown in HUD only
 }
 
 // === Update scoring items in HUD ===
