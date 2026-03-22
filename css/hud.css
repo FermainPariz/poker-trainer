@@ -263,3 +263,35 @@
   color: var(--text2);
   margin-top: 2px;
 }
+
+/* === GTO Solver Status Indicator === */
+.gto-solver-status {
+  position: fixed;
+  top: 6px;
+  right: 12px;
+  font-size: 0.6em;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  z-index: 100;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  opacity: 0.7;
+}
+.gto-solver-status:empty { display: none; }
+.gto-solver-status.loading { color: var(--text2); }
+.gto-solver-status.ready { color: var(--green); opacity: 0.5; }
+.gto-solver-status.solving {
+  color: var(--gold);
+  opacity: 1;
+  animation: solverPulse 1.5s ease-in-out infinite;
+}
+.gto-solver-status.solved { color: var(--green); opacity: 0.8; }
+.gto-solver-status.cached { color: var(--green); opacity: 0.6; }
+.gto-solver-status.error { color: var(--accent); opacity: 0.7; }
+.gto-solver-status.unavailable { color: var(--text2); opacity: 0.4; }
+
+@keyframes solverPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}

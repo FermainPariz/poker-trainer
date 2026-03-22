@@ -1,3 +1,5 @@
 # Local Netlify folder
 .netlify
 supabase/.temp/
+test-*.png
+supabase/

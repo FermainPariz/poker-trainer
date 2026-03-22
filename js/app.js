@@ -22,6 +22,7 @@ import { escapeHtml, safeNum } from './utils.js';
 import { startTournament, onTournamentHandComplete, isTournament, isTournamentFinished, getTournamentInfo, renderTournamentHUD, postAntes, endTournament, getPayoutTable, getCurrentBlinds } from './tournament.js';
 import { playCardDeal, playCardFlip, playChipBet, playChipPot, playCheck, playFold, playAllIn, playWinPot, playLosePot, playYourTurn, ensureResumed, setSoundEnabled, isSoundEnabled } from './sound.js';
 import * as UI from './ui.js';
+import { initGTOSolver, solvePostflop, getGTOForHand, gtoToCoachFreqs, isSolverAvailable, isSolverReady, getLastSolveResult, onSolverStatus, cancelSolve, loadCachedSolutions } from './gto-solver.js';
 
 // === Game Modes ===
 const MODES = { CASH_6: 'cash6', CASH_9: 'cash9', SNG_6: 'sng6', SNG_9: 'sng9' };
@@ -63,6 +64,9 @@ function init() {
   startSession(game.bigBlind);
   initSession(game.startingStack);
   loadRanges(); // preload range data
+  initGTOSolver(); // initialize WASM postflop solver
+  loadCachedSolutions(); // load cached GTO solutions from IndexedDB
+  onSolverStatus(handleSolverStatus); // UI updates for solver state
   bindEvents();
   UI.updateBlindsInfo(game.smallBlind, game.bigBlind);
   UI.updateTopBar(game);
@@ -332,6 +336,11 @@ async function gameLoop() {
       updateGTOFrequencies();
       if (isMatrixVisible()) renderMatrix(game);
 
+      // Trigger WASM GTO solver for postflop spots
+      if (game.phase !== 'preflop') {
+        triggerGTOSolve();
+      }
+
       // Coach: preflop comment (range-based), then situation comment (equity-based)
       if (game.phase === 'preflop') {
         const preflopCoach = getPreflopComment(game);
@@ -420,7 +429,8 @@ async function playerAction(action, amount = 0) {
   const allInAmount = game.humanPlayer.stack;
 
   // Score the decision BEFORE performing it (need current game state)
-  const gtoFreqs = getGTOFrequencies(game);
+  // Prefer WASM solver frequencies if available
+  const gtoFreqs = getSolverFrequencies() || getGTOFrequencies(game);
   const pot = game.pot + game.getCurrentBetsTotal();
   const scoreResult = scoreDecision(gtoFreqs, action, pot, game.bigBlind);
   if (scoreResult) {
@@ -974,7 +984,8 @@ function showTiltWarning(tiltFeedback) {
 // === Coach Bubble ===
 // === GTO Frequency + EV Display on Action Buttons ===
 function updateGTOFrequencies() {
-  const freq = getGTOFrequencies(game);
+  // Use WASM solver result if available, otherwise heuristic
+  const freq = getSolverFrequencies() || getGTOFrequencies(game);
   const elFold = document.getElementById('freqFold');
   const elCheck = document.getElementById('freqCheck');
   const elCall = document.getElementById('freqCall');
@@ -1099,6 +1110,75 @@ function setEV(el, ev) {
   const sign = rounded >= 0 ? '+' : '';
   el.textContent = `EV ${sign}$${rounded}`;
   el.className = 'ev-label ' + (rounded > 0 ? 'ev-pos' : rounded < 0 ? 'ev-neg' : 'ev-zero');
+}
+
+// === GTO Solver Integration ===
+let activeSolveResult = null; // current solver result for this spot
+
+function handleSolverStatus(status) {
+  const el = document.getElementById('gtoSolverStatus');
+  if (!el) return;
+  const labels = {
+    loading: '⏳ GTO Solver...',
+    ready: '✓ GTO Solver',
+    solving: '🔄 ' + (status.message || 'Solving...'),
+    solved: '✓ GTO Solver',
+    cached: '✓ GTO (Cache)',
+    error: '✗ ' + (status.message || 'Error'),
+    unavailable: '— GTO offline',
+    cancelled: '— Cancelled',
+  };
+  el.textContent = labels[status.state] || '';
+  el.className = 'gto-solver-status ' + (status.state || '');
+
+  // When solve completes, update frequencies and coach
+  if (status.state === 'solved' || status.state === 'cached') {
+    activeSolveResult = status.result || getLastSolveResult();
+    if (isPlayerTurn) {
+      updateGTOFrequencies(); // refresh with solver data
+      updateActionEVs();
+    }
+  }
+}
+
+function triggerGTOSolve() {
+  if (!isSolverReady() || !game || game.phase === 'preflop') return;
+  if (game.communityCards.length < 3) return;
+
+  const human = game.humanPlayer;
+  if (!human || human.folded) return;
+
+  // Find the main villain position
+  const heroPos = game.getPosition(game.humanSeat);
+  const activeOpps = game.players.filter(p => !p.folded && !p.sittingOut && p.id !== game.humanSeat);
+  const villainSeat = activeOpps.length > 0 ? activeOpps[0].id : (game.humanSeat === 0 ? 1 : 0);
+  const villainPos = game.getPosition(villainSeat);
+
+  activeSolveResult = null;
+
+  solvePostflop({
+    board: game.communityCards,
+    heroCards: human.hand,
+    heroPosition: heroPos,
+    villainPosition: villainPos,
+    startingPot: game.pot + game.getCurrentBetsTotal(),
+    effectiveStack: Math.min(human.stack, ...activeOpps.map(p => p.stack)),
+    maxIterations: 150, // balance speed vs accuracy
+  }).catch(e => {
+    console.warn('GTO solve failed:', e.message);
+  });
+}
+
+// Override GTO frequencies with solver result when available
+function getSolverFrequencies() {
+  if (!activeSolveResult || !game) return null;
+  const human = game.humanPlayer;
+  if (!human || human.folded) return null;
+
+  const gtoResult = getGTOForHand(activeSolveResult, human.hand[0], human.hand[1]);
+  if (!gtoResult) return null;
+
+  return gtoToCoachFreqs(gtoResult);
 }
 
 // === GTO Score Popup (flashes after each decision) ===
