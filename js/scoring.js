@@ -146,10 +146,10 @@ export function formatScoreResult(result) {
 
   const labels = {
     best: { text: 'Best Move', icon: '✓', cls: 'score-best' },
-    correct: { text: 'Correct', icon: '~', cls: 'score-correct' },
-    inaccuracy: { text: 'Inaccuracy', icon: '?', cls: 'score-inaccuracy' },
+    correct: { text: 'Correct', icon: '✓', cls: 'score-correct' },
+    inaccuracy: { text: 'Inaccuracy', icon: '△', cls: 'score-inaccuracy' },
     mistake: { text: 'Mistake', icon: '✗', cls: 'score-mistake' },
-    blunder: { text: 'Blunder', icon: '!!', cls: 'score-blunder' },
+    blunder: { text: 'Blunder', icon: '✗✗', cls: 'score-blunder' },
   };
 
   const label = labels[result.classification] || labels.correct;

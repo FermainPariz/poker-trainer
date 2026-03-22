@@ -141,36 +141,36 @@
 
     <!-- HUD — live stats strip below table -->
     <div class="hud" id="hud">
-      <div class="hud-item">
+      <div class="hud-item" title="Deine Gewinnwahrscheinlichkeit gegen alle Gegner (Monte-Carlo-Simulation mit 1000+ Durchlaeufen)">
         <span class="hud-label">Equity</span>
         <span class="hud-value" id="hudEquity">--</span>
       </div>
-      <div class="hud-item">
+      <div class="hud-item" title="Anzahl Karten die deine Hand verbessern (z.B. Flush-Draw = 9 Outs)">
         <span class="hud-label">Outs</span>
         <span class="hud-value" id="hudOuts">--</span>
       </div>
-      <div class="hud-item">
+      <div class="hud-item" title="Verhaeltnis von Call-Betrag zu Pot. Deine Equity muss hoeher sein als die Pot Odds fuer einen profitablen Call">
         <span class="hud-label">Pot Odds</span>
         <span class="hud-value" id="hudPotOdds">--</span>
       </div>
-      <div class="hud-item">
+      <div class="hud-item" title="Expected Value eines Calls in Dollar. Positiv = langfristig profitabel, Negativ = Geld verlieren">
         <span class="hud-label">Call EV</span>
         <span class="hud-value" id="hudEV">--</span>
       </div>
-      <div class="hud-item">
+      <div class="hud-item" title="Deine aktuelle Handstaerke (z.B. Top Pair, Flush Draw, Two Pair)">
         <span class="hud-label">Hand</span>
         <span class="hud-value" id="hudHandStrength">--</span>
       </div>
       <div class="hud-divider"></div>
-      <div class="hud-item">
+      <div class="hud-item" title="Bewertung deiner letzten Entscheidung: Best = perfekt, OK = akzeptabel, Fehler = EV verloren, Blunder = grober Fehler">
         <span class="hud-label">GTO Score</span>
         <span class="hud-value" id="hudGTOScore">--</span>
       </div>
-      <div class="hud-item">
+      <div class="hud-item" title="Wie viel EV (in Big Blinds) du durch suboptimale Entscheidungen insgesamt verloren hast. 0 = perfektes Spiel">
         <span class="hud-label">EV Loss</span>
         <span class="hud-value" id="hudEVLoss">0.00bb</span>
       </div>
-      <div class="hud-item">
+      <div class="hud-item" title="Prozentsatz deiner Entscheidungen die optimal oder akzeptabel waren. 100% = alle Entscheidungen korrekt">
         <span class="hud-label">Accuracy</span>
         <span class="hud-value" id="hudAccuracy">100%</span>
       </div>

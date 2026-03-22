@@ -1830,8 +1830,14 @@ export function getSituationComment(game) {
   }
 
   // Line 3: GTO context (range advantage + c-bet on flop when checked to us)
+  // Only show C-bet context when best action is actually a bet/raise (avoid contradiction)
   if (phase === PHASES.FLOP && game.getCallAmount() === 0 && wasPFR && gtoCbet) {
-    text += `[GTO] ${gtoCbet.rangeAdvantage.explanation} C-Bet-Freq: ${gtoCbet.frequency}% bei ${gtoCbet.sizingPct}% Pot. `;
+    const isBetting = rec.bestAction && !rec.bestAction.startsWith('Check');
+    if (isBetting) {
+      text += `[GTO] ${gtoCbet.rangeAdvantage.explanation} C-Bet-Freq: ${gtoCbet.frequency}% bei ${gtoCbet.sizingPct}% Pot. `;
+    } else if (gtoCbet.rangeAdvantage && gtoCbet.rangeAdvantage.advantage < 0) {
+      text += `Caller hat Range-Advantage — Check ist korrekt. `;
+    }
   }
 
   // Line 3b: River GTO

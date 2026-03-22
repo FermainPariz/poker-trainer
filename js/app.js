@@ -519,8 +519,7 @@ async function handleHumanFold(engineResult) {
       winnerHands.forEach(w => { w.player.stack += share; });
 
       const winnerNames = winnerHands.map(w => w.player.name).join(', ');
-      const handDescs = handResults.map(h => `${h.player.name}: ${h.solved.descr || h.solved.name}`).join(' | ');
-      resultText = `${winnerNames} gewinnt $${game.pot} — ${handDescs}`;
+      resultText = `${winnerNames} gewinnt $${game.pot}`;
       winnerHands.forEach(w => UI.highlightWinnerCards(w.player.id));
     } catch (e) {
       console.warn('Hand evaluation failed in fold handler:', e);
@@ -693,14 +692,7 @@ async function handleHandEnd(result) {
   const streetReview = generateStreetReview(game, game.handHistory, result);
   showAnalysisFeedback(feedback, streetReview);
 
-  // Auto-open analysis panel if there are warnings or errors
-  if (feedback.some(f => f.type === 'warning' || f.type === 'error') || (streetReview && streetReview.overallGrade === 'bad')) {
-    const panel = document.getElementById('analysisPanel');
-    if (!panel.classList.contains('visible')) {
-      panel.classList.add('visible');
-      showPanelBackdrop();
-    }
-  }
+  // Analysis panel available via "Analyse" button — not auto-opened
 
   // Psychology: record hand and check for tilt
   const humanActions = game.handHistory.filter(h => h.player === game.humanSeat);
@@ -1138,7 +1130,7 @@ function updateScoringHUD() {
   // Last decision score — show just classification + EV loss
   const last = data.decisions[data.decisions.length - 1];
   if (last) {
-    const labels = { best: '✓ Best', correct: '~ OK', inaccuracy: '? Inacc.', mistake: '✗ Mistake', blunder: '!! Blunder' };
+    const labels = { best: '✓ Best', correct: '✓ OK', inaccuracy: '△ Inacc.', mistake: '✗ Mistake', blunder: '✗✗ Blunder' };
     const cls = { best: 'score-best', correct: 'score-correct', inaccuracy: 'score-inaccuracy', mistake: 'score-mistake', blunder: 'score-blunder' };
     const evText = last.evLossBB > 0 ? ` −${last.evLossBB.toFixed(1)}bb` : '';
     elScore.textContent = (labels[last.classification] || '--') + evText;
