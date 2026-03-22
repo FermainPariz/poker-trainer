@@ -229,12 +229,76 @@ function extractResults(game, id) {
       : 0;
   }
 
+  // === Also extract IP strategy (navigate to each OOP child node) ===
+  // At the root, OOP acts. After each OOP action, it's IP's turn.
+  // This lets us return strategy for BOTH players.
+  const ipStrategies = {}; // keyed by OOP action name: { "Check": { combo_strategy }, "Bet": { ... } }
+  if (currentPlayer === 'oop') {
+    for (let a = 0; a < numActions; a++) {
+      try {
+        // Navigate to this child node (after OOP takes action a)
+        game.apply_history(new Uint32Array([a]));
+        const childActionsStr = game.actions_after(new Uint32Array([a]));
+        if (childActionsStr === 'terminal' || childActionsStr === 'chance') {
+          game.apply_history(new Uint32Array([])); // back to root
+          continue;
+        }
+        const childActions = childActionsStr.split('/').map(x => {
+          const [n, amt] = x.split(':');
+          return { name: n, amount: parseInt(amt) };
+        });
+        const ipNumActions = childActions.length;
+        const ipPlayer = game.current_player(); // should be "ip"
+        if (ipPlayer !== 'ip') {
+          game.apply_history(new Uint32Array([]));
+          continue;
+        }
+        const ipPrivateCards = game.private_cards(1);
+        const ipNumHands = ipPrivateCards.length;
+        const ipResults = game.get_results();
+        const ipEmpty = ipResults[2];
+        if (ipEmpty > 0) {
+          game.apply_history(new Uint32Array([]));
+          continue;
+        }
+        const ipOopHands = game.private_cards(0).length;
+        const ipIpHands = ipNumHands;
+        const ipHeaderSize = 3 + (ipOopHands + ipIpHands) * 5;
+        const ipStratStart = ipHeaderSize;
+
+        const childStrategy = {};
+        for (let h = 0; h < ipNumHands; h++) {
+          const packed = ipPrivateCards[h];
+          const c1 = packed & 0xFF;
+          const c2 = (packed >> 8) & 0xFF;
+          const key = `${Math.min(c1, c2)}_${Math.max(c1, c2)}`;
+          const hs = {};
+          for (let ca = 0; ca < ipNumActions; ca++) {
+            const freq = ipResults[ipStratStart + ca * ipNumHands + h];
+            hs[childActions[ca].name] = Math.round(freq * 10000) / 10000;
+          }
+          childStrategy[key] = hs;
+        }
+        ipStrategies[actions[a].name] = {
+          actions: childActions.map(x => x.name),
+          strategy: childStrategy,
+        };
+        // Navigate back to root
+        game.apply_history(new Uint32Array([]));
+      } catch (e) {
+        // Navigation failed — skip this child
+        try { game.apply_history(new Uint32Array([])); } catch (_) {}
+      }
+    }
+  }
+
   return {
     actions: actions.map(a => a.name),
     actionAmounts: actions.reduce((o, a) => { o[a.name] = a.amount; return o; }, {}),
-    strategy,      // per-combo: { "0_4": { "Check": 0.65, "Bet": 0.35 } }
+    strategy,      // per-combo OOP strategy: { "0_4": { "Check": 0.65, "Bet": 0.35 } }
     evDetail,      // per-combo EV: { "0_4": { "Check": 12.5, "Bet": 14.2 } }
-    overallStrategy, // range-averaged: { "Check": 55.3, "Bet": 44.7 }
+    overallStrategy, // range-averaged OOP: { "Check": 55.3, "Bet": 44.7 }
+    ipStrategies,  // IP strategy after each OOP action: { "Check": { strategy: {...} }, "Bet": { ... } }
     currentPlayer,
     numHands,
   };

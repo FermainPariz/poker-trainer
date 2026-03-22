@@ -392,7 +392,8 @@ function threeOfAKindLabel(type) {
 }
 
 // === Main analysis function ===
-export function analyzeHand(game, handHistory, result) {
+// solverData: optional array of { phase, action, gtoFreqs, isSolverBased, score } per decision
+export function analyzeHand(game, handHistory, result, solverData = []) {
   const feedback = [];
   const humanSeat = game.humanSeat;
   const humanActions = handHistory.filter(h => h.player === humanSeat);
@@ -440,10 +441,15 @@ export function analyzeHand(game, handHistory, result) {
   // Is human in position? (acted last preflop = later position vs remaining opponents)
   const humanHasPosition = isLatePosition && !isBlind;
 
+  let solverIdx = 0;
   for (const action of humanActions) {
+    // Match solver data by index (each human action has corresponding solver entry)
+    const solverEntry = solverData[solverIdx] || null;
+    solverIdx++;
     const analysis = analyzeAction(action, game, handHistory, result, {
       handStrength, position, isLatePosition, isBlind, human, handKey,
       opponents, raiserInfo, callersBefore, humanWasPFR, playersInHand, humanHasPosition,
+      solverEntry,
     });
     if (analysis) feedback.push(analysis);
   }
@@ -474,10 +480,28 @@ function findFirstRaiser(preflopHistory, humanSeat, game) {
 
 // === Route to phase-specific analysis ===
 function analyzeAction(action, game, history, result, ctx) {
+  let analysis;
   if (action.phase === PHASES.PREFLOP) {
-    return analyzePreflopAction(action, game, history, ctx);
+    analysis = analyzePreflopAction(action, game, history, ctx);
+  } else {
+    analysis = analyzePostflopAction(action, game, history, result, ctx);
   }
-  return analyzePostflopAction(action, game, history, result, ctx);
+
+  // Append solver context to postflop analysis when available
+  if (analysis && ctx.solverEntry && ctx.solverEntry.isSolverBased && ctx.solverEntry.gtoFreqs) {
+    const freqs = ctx.solverEntry.gtoFreqs;
+    const entries = Object.entries(freqs).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+    if (entries.length > 0) {
+      const freqStr = entries.map(([k, v]) => `${k[0].toUpperCase() + k.slice(1)} ${v}%`).join(', ');
+      analysis.message += ` [Solver: ${freqStr}]`;
+      // Upgrade analysis if solver confirms it was a mistake
+      if (ctx.solverEntry.score && ctx.solverEntry.score.classification === 'blunder') {
+        analysis.type = 'error';
+      }
+    }
+  }
+
+  return analysis;
 }
 
 // ================================================================
@@ -865,7 +889,7 @@ function analyzePreflopAction(action, game, history, ctx) {
 // ================================================================
 function analyzePostflopAction(action, game, history, result, ctx) {
   const { phase, action: act, amount } = action;
-  const { human, opponents, humanWasPFR, playersInHand, humanHasPosition } = ctx;
+  const { human, opponents, humanWasPFR, playersInHand, humanHasPosition, solverEntry } = ctx;
 
   // Use only the community cards visible on THIS street (not the full final board)
   const cardsForStreet = phase === PHASES.FLOP ? game.communityCards.slice(0, 3)

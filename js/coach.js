@@ -1697,7 +1697,8 @@ export function getPreflopComment(game) {
 }
 
 // === Situation Comment (human's turn to act — MAIN COACHING MOMENT) ===
-export function getSituationComment(game) {
+// solverFreqs: optional { fold, check, call, raise } from WASM solver (overrides heuristic)
+export function getSituationComment(game, solverFreqs = null) {
   const human = game.humanPlayer;
   if (human.folded) return null;
 
@@ -1724,9 +1725,9 @@ export function getSituationComment(game) {
   // Pass range info to recommendation engine (keeps reasoning text)
   const rec = getRecommendation(game, equity, outs, oppAnalyses);
 
-  // Override best action with GTO frequencies — same source as button percentages
+  // Override best action with GTO frequencies — prefer WASM solver, fallback to heuristic
   // This ensures coach recommendation and button labels never contradict
-  const gtoFreqs = getGTOFrequencies(game);
+  const gtoFreqs = solverFreqs || getGTOFrequencies(game);
   if (gtoFreqs) {
     const actionLabels = { fold: 'Fold', check: 'Check', call: 'Call', raise: toCall > 0 ? 'Raise' : 'Bet' };
     let bestKey = 'check';

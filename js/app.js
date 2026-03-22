@@ -32,6 +32,7 @@ let currentMode = MODES.CASH_6;
 let game = new Game({ numPlayers: 6, smallBlind: 5, bigBlind: 10, startingStack: 1000, humanSeat: 0 });
 let aiPlayers = {}; // seatIndex -> AIPlayer
 let streetSnapshots = {}; // captured at each phase transition
+let solverFreqsPerAction = []; // solver frequencies at each player decision
 
 function createAIPlayers() {
   aiPlayers = {};
@@ -257,6 +258,8 @@ async function startNewHand() {
   clearHUD();
   hideCoachBubble();
   streetSnapshots = {};
+  solverFreqsPerAction = [];
+  activeSolveResult = null;
 
   const info = game.startHand();
   if (!info) {
@@ -346,7 +349,8 @@ async function gameLoop() {
         const preflopCoach = getPreflopComment(game);
         if (preflopCoach) showCoachComment(preflopCoach);
       }
-      const sitComment = getSituationComment(game);
+      const solverFreqsForCoach = getSolverFrequencies();
+      const sitComment = getSituationComment(game, solverFreqsForCoach || null);
       if (sitComment) showCoachComment(sitComment);
 
       // Exploit recommendations for opponents still in the hand
@@ -360,7 +364,9 @@ async function gameLoop() {
         if (!isPlayerTurn) return; // player already acted
         updateFullHUD(game);
         updateGTOFrequencies();
-        const updated = getSituationComment(game);
+        // Pass solver frequencies if available so coach matches buttons
+        const solverFreqs = getSolverFrequencies();
+        const updated = getSituationComment(game, solverFreqs || null);
         if (updated) showCoachComment(updated);
       });
       return;
@@ -437,6 +443,15 @@ async function playerAction(action, amount = 0) {
     showScorePopup(scoreResult);
     updateScoringHUD();
   }
+  // Save solver data for post-hand analyzer
+  const isSolverBased = !!getSolverFrequencies();
+  solverFreqsPerAction.push({
+    phase: game.phase,
+    action,
+    gtoFreqs: gtoFreqs ? { ...gtoFreqs } : null,
+    isSolverBased,
+    score: scoreResult,
+  });
 
   const result = game.performAction(action, amount);
 
@@ -450,8 +465,24 @@ async function playerAction(action, amount = 0) {
   if (action === ACTIONS.ALLIN) labelAmount = allInAmount;
   UI.showActionLabel(game.humanSeat, action, labelAmount);
 
-  // Coach: action review
+  // Coach: action review — append solver-based feedback if available
   const actionCoach = getActionComment(action, game, callAmount);
+  if (actionCoach && gtoFreqs && game.phase !== 'preflop') {
+    // Add solver annotation showing what GTO preferred
+    const actionKey = action === ACTIONS.FOLD ? 'fold'
+      : action === ACTIONS.CHECK ? 'check'
+      : action === ACTIONS.CALL ? 'call' : 'raise';
+    const playerFreq = gtoFreqs[actionKey] || 0;
+    const entries = Object.entries(gtoFreqs).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+    const best = entries[0];
+    const solverTag = getSolverFrequencies() ? ' (Solver)' : '';
+    if (best && playerFreq >= best[1] - 5) {
+      actionCoach.text += ` [GTO${solverTag}: ${playerFreq}% — optimale Wahl]`;
+    } else if (best && best[1] > 0) {
+      const bestLabel = { fold: 'Fold', check: 'Check', call: 'Call', raise: 'Bet/Raise' }[best[0]] || best[0];
+      actionCoach.text += ` [GTO${solverTag}: Solver bevorzugt ${bestLabel} ${best[1]}%]`;
+    }
+  }
   if (actionCoach) showCoachComment(actionCoach);
 
   // Update matrix if visible
@@ -554,8 +585,8 @@ async function handleHumanFold(engineResult) {
   const foldSummary = getHandSummary(game, { winners: [], potWon: 0 });
   if (foldSummary) showCoachComment(foldSummary);
 
-  // Run analysis on the fold
-  const feedback = analyzeHand(game, game.handHistory, { winners: [], potWon: 0 });
+  // Run analysis on the fold — pass solver data for GTO-aware feedback
+  const feedback = analyzeHand(game, game.handHistory, { winners: [], potWon: 0 }, solverFreqsPerAction);
   const streetReview = generateStreetReview(game, game.handHistory, { winners: [], potWon: 0 });
   showAnalysisFeedback(feedback, streetReview);
 
@@ -697,8 +728,8 @@ async function handleHandEnd(result) {
   const summaryCoach = getHandSummary(game, result);
   if (summaryCoach) showCoachComment(summaryCoach);
 
-  // Run post-hand analysis
-  const feedback = analyzeHand(game, game.handHistory, result);
+  // Run post-hand analysis — pass solver data for GTO-aware feedback
+  const feedback = analyzeHand(game, game.handHistory, result, solverFreqsPerAction);
   const streetReview = generateStreetReview(game, game.handHistory, result);
   showAnalysisFeedback(feedback, streetReview);
 
@@ -1131,12 +1162,18 @@ function handleSolverStatus(status) {
   el.textContent = labels[status.state] || '';
   el.className = 'gto-solver-status ' + (status.state || '');
 
-  // When solve completes, update frequencies and coach
+  // When solve completes, update frequencies, EVs, AND coach recommendation
   if (status.state === 'solved' || status.state === 'cached') {
     activeSolveResult = status.result || getLastSolveResult();
-    if (isPlayerTurn) {
-      updateGTOFrequencies(); // refresh with solver data
+    if (isPlayerTurn && game) {
+      updateGTOFrequencies(); // refresh button frequencies with solver data
       updateActionEVs();
+      // Re-run coach with solver-based frequencies so recommendation matches buttons
+      const solverFreqs = getSolverFrequencies();
+      if (solverFreqs) {
+        const updated = getSituationComment(game, solverFreqs);
+        if (updated) showCoachComment(updated);
+      }
     }
   }
 }
@@ -1175,7 +1212,20 @@ function getSolverFrequencies() {
   const human = game.humanPlayer;
   if (!human || human.folded) return null;
 
-  const gtoResult = getGTOForHand(activeSolveResult, human.hand[0], human.hand[1]);
+  // Determine which OOP action hero faces (for IP strategy lookup)
+  let facingAction = null;
+  if (activeSolveResult.heroIsIP) {
+    const callAmt = game.getCallAmount();
+    // If hero faces a bet/raise, OOP bet. Otherwise OOP checked.
+    facingAction = callAmt > 0 ? null : 'Check'; // null = auto-detect (bet action)
+    // Try to match the actual bet action name from solver
+    if (callAmt > 0 && activeSolveResult.ipStrategies) {
+      const betActions = Object.keys(activeSolveResult.ipStrategies).filter(a => a !== 'Check');
+      if (betActions.length > 0) facingAction = betActions[0];
+    }
+  }
+
+  const gtoResult = getGTOForHand(activeSolveResult, human.hand[0], human.hand[1], facingAction);
   if (!gtoResult) return null;
 
   return gtoToCoachFreqs(gtoResult);

@@ -164,6 +164,8 @@ export function solvePostflop({
     // Send solve request to worker
     const id = ++currentSolveId;
     pendingSolves.set(id, { resolve: (result) => {
+      // Tag result with hero position info
+      result.heroIsIP = heroIsIP;
       // Cache the result
       solveCache.set(cacheKey, result);
       if (solveCache.size > MAX_CACHE_SIZE) {
@@ -195,7 +197,8 @@ export function solvePostflop({
 
 // === Query GTO strategy for a specific hand ===
 // Returns { actions, frequencies, bestAction, ev } or null
-export function getGTOForHand(solveResult, card1, card2) {
+// facingAction: optional string — when hero is IP, which OOP action they face (e.g. "Check", "Bet")
+export function getGTOForHand(solveResult, card1, card2, facingAction = null) {
   if (!solveResult || !solveResult.strategy) return null;
 
   const c1 = engineCardToSolverId(card1);
@@ -204,8 +207,29 @@ export function getGTOForHand(solveResult, card1, card2) {
   const hi = Math.max(c1, c2);
   const comboKey = `${lo}_${hi}`;
 
-  const handStrategy = solveResult.strategy[comboKey];
-  const handEV = solveResult.evDetail?.[comboKey];
+  let handStrategy = null;
+  let handEV = null;
+  let actionsList = solveResult.actions;
+
+  // If hero is IP, use IP strategy after OOP's action
+  if (solveResult.heroIsIP && solveResult.ipStrategies) {
+    // Find which OOP action matches what hero is facing
+    const oopAction = facingAction || findMatchingOOPAction(solveResult, comboKey);
+    if (oopAction && solveResult.ipStrategies[oopAction]) {
+      const ipData = solveResult.ipStrategies[oopAction];
+      handStrategy = ipData.strategy?.[comboKey];
+      actionsList = ipData.actions || actionsList;
+    }
+    // Fallback: try OOP strategy (might work if hero is actually OOP)
+    if (!handStrategy) {
+      handStrategy = solveResult.strategy[comboKey];
+    }
+  } else {
+    // Hero is OOP — use root strategy
+    handStrategy = solveResult.strategy[comboKey];
+  }
+
+  handEV = solveResult.evDetail?.[comboKey];
 
   if (!handStrategy) return null;
 
@@ -224,7 +248,7 @@ export function getGTOForHand(solveResult, card1, card2) {
   }
 
   return {
-    actions: solveResult.actions,
+    actions: actionsList,
     frequencies,       // { "Check": 65, "Bet": 35 }
     bestAction,        // "Check"
     bestFreq: Math.round(bestFreq * 100), // 65
@@ -234,6 +258,21 @@ export function getGTOForHand(solveResult, card1, card2) {
     iterations: solveResult.iterations,
     exploitability: solveResult.exploitability,
   };
+}
+
+// Find which OOP action to look up based on game state
+function findMatchingOOPAction(solveResult, comboKey) {
+  if (!solveResult.ipStrategies) return null;
+  const oopActions = Object.keys(solveResult.ipStrategies);
+  // If OOP only has one action path available, use it
+  if (oopActions.length === 1) return oopActions[0];
+  // Prefer "Check" as default (most common — IP acts after OOP checks)
+  if (oopActions.includes('Check')) return 'Check';
+  // Try bet actions
+  for (const a of oopActions) {
+    if (a.startsWith('Bet') || a.startsWith('Raise')) return a;
+  }
+  return oopActions[0];
 }
 
 // === Map solver action names to engine action types ===
